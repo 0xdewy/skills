@@ -1,0 +1,69 @@
+[
+  {
+    "id": 1,
+    "prompt": "Write a revm Inspector in Rust that logs every SSTORE opcode with its slot and value",
+    "expected_output": "Rust struct implementing the Inspector trait, using the step() method to detect SSTORE (opcode 0x55), reading slot and value from the interpreter stack, and printing or storing them.",
+    "expectations": [
+      "Implements Inspector trait with correct generic bounds",
+      "Uses step() method to intercept opcodes",
+      "Checks for opcode 0x55 (SSTORE)",
+      "Reads stack items to get slot and value",
+      "Compiles without errors (no undefined types)"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "Write an optimized Yul assembly function in Solidity that reads a packed uint128 from a storage slot at byte offset 16",
+    "expected_output": "Solidity function with inline assembly using sload(), shr(), and and() to extract the upper 128 bits of a storage slot.",
+    "expectations": [
+      "Uses assembly { } block",
+      "Uses sload() to read storage",
+      "Uses shr(128, ...) to shift right by 128 bits",
+      "Uses and() to mask to 128 bits",
+      "Correct bitmask: 0xffffffffffffffffffffffffffffffff"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "Use evmole in Python to extract all function selectors and their argument types from a bytecode hex string",
+    "expected_output": "Python code using evmole.contract_info() with ContractInfoArgs, iterating info.functions, printing selector hex and arguments.",
+    "expectations": [
+      "Imports contract_info and ContractInfoArgs from evmole",
+      "Calls with_selectors() and with_arguments()",
+      "Iterates info.functions",
+      "Accesses func.selector and func.arguments"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "What forge command do I use to replay a mainnet transaction locally with full opcode traces?",
+    "expected_output": "cast run <txhash> --rpc-url $RPC (or with --debug for interactive debugger)",
+    "expectations": [
+      "Mentions cast run",
+      "Includes --rpc-url flag",
+      "Optionally mentions --debug for interactive mode"
+    ]
+  },
+  {
+    "id": 5,
+    "prompt": "What is the gas cost of a cold SLOAD vs warm SLOAD and why does it matter?",
+    "expected_output": "Cold SLOAD = 2100 gas (EIP-2929), warm = 100 gas. Matters for access lists and contract design — pre-warming slots with access lists or touch-patterns saves significant gas.",
+    "expectations": [
+      "States cold SLOAD = 2100",
+      "States warm SLOAD = 100",
+      "Mentions EIP-2929",
+      "Mentions access lists as mitigation"
+    ]
+  },
+  {
+    "id": 6,
+    "prompt": "Write the Yul equivalent of: mapping(address => uint256) private balances; and compute the storage slot for balances[msg.sender]",
+    "expected_output": "Assembly that mstores(0x00, caller()) and mstores(0x20, mappingSlotIndex), then keccak256(0x00, 0x40) to get the slot.",
+    "expectations": [
+      "Uses caller() to get msg.sender",
+      "Stores key at 0x00 and slot index at 0x20",
+      "Calls keccak256(0x00, 0x40)",
+      "Uses sload() to read the resulting slot"
+    ]
+  }
+]
