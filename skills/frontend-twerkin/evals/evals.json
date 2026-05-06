@@ -1,0 +1,46 @@
+{
+  "skill_name": "frontend-adversarial-tester",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a React + Vite task management app running at localhost:5173. It has routes for / (home), /tasks, /tasks/new, /tasks/:id, and /profile. Users can create, edit, delete, and complete tasks. Run adversarial tests on it.",
+      "expected_output": "Detects React + Vite stack, generates Playwright test files for happy path flows (CRUD tasks), CSS visual audit at 3 viewports, and adversarial attacks (double-submit, input boundary, XSS probes, rapid toggle, etc.). Produces a structured markdown report with screenshots and severity classifications.",
+      "files": [],
+      "expectations": [
+        "Detects the stack as React with Vite",
+        "Writes Playwright test files to the project",
+        "Tests happy path flows for task CRUD operations",
+        "Runs adversarial attacks including XSS/SQL injection probes",
+        "Produces a structured markdown report with severity classifications",
+        "Captures screenshots during testing"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My SvelteKit e-commerce site at localhost:5173 has some weird layout issues on mobile. The checkout flow at /checkout has a multi-step form. Can you check the CSS and try to break the checkout?",
+      "expected_output": "Detects SvelteKit stack, runs CSS audit at mobile/tablet/desktop viewports with focus on mobile layout issues, tests the checkout flow as a happy path, runs adversarial attacks targeting the multi-step form (mid-action navigation, session expiry, input boundary). Produces report focused on mobile visual issues and checkout vulnerabilities.",
+      "files": [],
+      "expectations": [
+        "Detects the stack as Svelte/SvelteKit",
+        "Runs CSS visual audit at 375px, 768px, 1280px viewports",
+        "Tests the checkout flow as a happy path",
+        "Runs adversarial attacks targeting the multi-step checkout form",
+        "Flags mobile-specific layout issues",
+        "Produces a structured markdown report"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I just finished an Expo React Native app for tracking habits. It's running on iOS simulator. Run adversarial QA on it — I'm especially worried about the habit streak counter and the settings screen.",
+      "expected_output": "Detects Expo/React Native native app, reads native-testing.md reference, sets up Detox, runs mobile-specific adversarial attacks (device rotation, background/foreground, touch stress) with focus on the habit streak counter and settings screen. Produces a report with mobile-specific severity classifications.",
+      "files": [],
+      "expectations": [
+        "Detects the stack as React Native / Expo",
+        "Reads the native-testing.md reference file",
+        "Tests mobile-specific adversarial attacks like device rotation and background/foreground",
+        "Focuses testing on habit streak counter and settings screen",
+        "Produces a structured markdown report with native-specific findings"
+      ]
+    }
+  ]
+}

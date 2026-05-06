@@ -1,0 +1,23 @@
+# Build artifacts
+*.tgz
+*.tar.gz
+*.zip
+
+# Logs
+*.log
+
+# Editor files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Skill scripts that might be compiled
+skills/*/node_modules/
+skills/*/__pycache__/
+skills/*/*.pyc

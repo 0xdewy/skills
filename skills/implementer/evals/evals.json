@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "prompt": "implement this plan: a CLI tool that fetches weather for a city and prints the temperature",
+    "expected_output": "A working weather CLI that runs without error and produces temperature output",
+    "expectations": [
+      "LOOP_COUNT reaches at most 3 (implementer gets it right quickly for simple task)",
+      "Final verdict is DONE",
+      "Files exist in /tmp/implementer-loop/implementer/",
+      "README.md explains how to run the tool"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "implement this plan: a Python HTTP server with one GET endpoint /health that returns {\"status\": \"ok\"}",
+    "expected_output": "A runnable HTTP server where curl localhost:PORT/health returns {\"status\": \"ok\"}",
+    "expectations": [
+      "Reviewer verifies the server starts and /health responds correctly",
+      "Final verdict is DONE",
+      "Tested with actual HTTP request, not just code inspection"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "implement this plan: a broken implementation that crashes on startup",
+    "expected_output": "Reviewer catches the crash, Fixer identifies the problem, Implementer fixes it, final verdict is DONE",
+    "expectations": [
+      "LOOP_COUNT >= 2 (first loop fails, second succeeds)",
+      "First reviewer verdict is NEEDS_WORK with specific crash issue documented",
+      "Fixer fix-plan.md identifies exact problem",
+      "Second reviewer verdict is DONE"
+    ]
+  }
+]

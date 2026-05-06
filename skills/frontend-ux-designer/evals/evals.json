@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "prompt": "review the design of my app at http://localhost:3000",
+    "expected_output": "Skill triggers, runs audit.py, produces ux-audit/report.json and ux-audit/design-critique.md with specific findings",
+    "expectations": [
+      "audit.py is run against localhost:3000",
+      "screenshots taken at 375, 768, 1280px",
+      "report.json written to ux-audit/",
+      "design-critique.md produced with Critical/Moderate/Minor sections",
+      "each finding references a screenshot path or CSS value",
+      "fixes applied for Critical and Moderate issues (unless report-only requested)"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "make my UI more beautiful and consistent",
+    "expected_output": "Skill triggers, discovers running dev server, runs full audit, applies design improvements",
+    "expectations": [
+      "skill triggers on 'beautiful' and 'consistent'",
+      "dev server auto-detected if not provided",
+      "design token analysis performed",
+      "specific CSS fixes applied to target inconsistencies"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "audit the UX of the dashboard page at http://localhost:5173/dashboard",
+    "expected_output": "Skill audits only the /dashboard route, produces targeted critique",
+    "expectations": [
+      "--routes /dashboard passed to audit.py",
+      "screenshots at 3 viewports for /dashboard",
+      "design critique focused on the dashboard page"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "report only — give me a design critique of http://localhost:3000 but don't change anything",
+    "expected_output": "Audit runs and report is produced, but no file edits are made to the project",
+    "expectations": [
+      "design-critique.md written",
+      "no CSS or component files modified",
+      "report clearly distinguishes what would be fixed if fixes were enabled"
+    ]
+  },
+  {
+    "id": 5,
+    "prompt": "how do I center a div?",
+    "expected_output": "Direct answer, skill NOT invoked",
+    "expectations": [
+      "skill does not trigger on a casual CSS question",
+      "no playwright audit run",
+      "direct answer given inline"
+    ]
+  },
+  {
+    "id": 6,
+    "prompt": "find all the bugs in my app",
+    "expected_output": "User directed to frontend-adversarial-tester, skill NOT invoked",
+    "expectations": [
+      "frontend-ux-designer skill does not trigger on bug-finding requests",
+      "user informed that frontend-adversarial-tester is the right skill for bugs"
+    ]
+  }
+]
