@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "prompt": "oracle-skeptic: Is it safe to store API keys in environment variables?",
+    "expected_output": "A refined answer about API key storage that survives adversarial critique. Should acknowledge nuance: env vars are better than hardcoding but not the gold standard (process lists, /proc exposure, etc.). Final answer should mention alternatives like secrets managers.",
+    "expectations": [
+      "Output contains ORACLE-SKEPTIC RESULT header",
+      "Output contains final answer text",
+      "Output contains DONE: line",
+      "Answer does not make uncaveated claims (e.g., 'env vars are safe' with no nuance)",
+      "At least 1 iteration ran (Skeptic found something to improve)"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "oracle-skeptic: Should a startup build its own auth system or use a third-party provider?",
+    "expected_output": "A nuanced answer that survives critique. Should acknowledge tradeoffs on both sides: control vs. expertise gap, cost, compliance, speed. Should not make a blanket recommendation without context.",
+    "expectations": [
+      "Output contains ORACLE-SKEPTIC RESULT header",
+      "Output contains DONE: line",
+      "Answer acknowledges tradeoffs rather than giving a one-sided recommendation",
+      "Iteration count >= 1"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "oracle-skeptic max_iterations=2: What is 2+2?",
+    "expected_output": "Should complete in 1 iteration (Skeptic finds no flaw in '4'). Demonstrates the loop halts early when the answer is already correct and simple.",
+    "expectations": [
+      "Output contains ORACLE-SKEPTIC RESULT header",
+      "Halt reason is 'Skeptic found no remaining flaw'",
+      "Iteration count is 1",
+      "Final answer contains '4'"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "What is the capital of France?",
+    "expected_output": "Direct answer: Paris. Skill NOT invoked — this is a simple factual lookup that doesn't warrant the loop.",
+    "expectations": [
+      "No ORACLE-SKEPTIC RESULT header in output",
+      "No DONE: oracle-skeptic line",
+      "Response is a direct short answer"
+    ]
+  }
+]
