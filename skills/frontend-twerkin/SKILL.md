@@ -253,3 +253,11 @@ Server: stopped  |  was already running, left running
 - **Prefer existing test data.** If the app has seed scripts or fixtures, run them rather than inventing test data.
 - **Don't stop on the first failure.** Keep collecting. Fix in batch.
 - **Leave the project clean.** The test files you write in `tests/ftest/` stay in the project. Everything else (screenshots, tmp files) goes to `/tmp`.
+
+## Completion
+
+End your final message with a parseable completion line:
+
+```
+DONE: tests/ftest/ — <N> features verified, <M> fixed, server stopped
+```

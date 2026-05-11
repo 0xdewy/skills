@@ -3,6 +3,7 @@ set -euo pipefail
 
 CENTRAL_STORE="${XDG_DATA_HOME:-$HOME/.local/share}/skills"
 DRY_RUN=false
+FORCE=false
 NON_INTERACTIVE=false
 USE_SYMLINKS=true
 
@@ -19,14 +20,26 @@ Usage: $(basename "$0") [OPTIONS]
 Interactive CLI to install AI coding skills locally.
 
 OPTIONS:
-    --non-interactive    Run without prompts (use with --install)
-    --dry-run            Show what would be done without doing it
-    -h, --help           Show this help message
+    --dry-run              Show what would be done without doing it
+    --force                Overwrite existing real-directory installs
+    -h, --help             Show this help message
+
+NON-INTERACTIVE OPTIONS:
+    --install <path|URL>   Install a single skill by path or GitHub URL
+    --install-all          Install all local skills from this repo
+    --remove <name>        Remove a single installed skill
+    --remove-all           Remove all skills installed from this repo's central store
+    --reinstall-all        Remove all repo skills then reinstall all of them
+    --list                 List all installed skills
 
 EXAMPLES:
-    $(basename "$0")                        # Interactive mode
-    $(basename "$0") --dry-run              # Preview changes
-    $(basename "$0") --install skill-creator  # Non-interactive install
+    $(basename "$0")                          # Interactive mode
+    $(basename "$0") --dry-run                # Preview changes
+    $(basename "$0") --install skill-creator  # Install one skill
+    $(basename "$0") --install-all            # Install all skills
+    $(basename "$0") --remove skill-creator   # Remove one skill
+    $(basename "$0") --remove-all             # Remove all repo skills
+    $(basename "$0") --reinstall-all          # Fresh reinstall of all skills
 
 EOF
 }
@@ -60,7 +73,7 @@ get_installed_skills() {
     if [[ ! -d "$CENTRAL_STORE" ]]; then
         return
     fi
-    find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' dir; do
+    find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | while IFS= read -r -d '' dir; do
         basename "$dir"
     done
 }
@@ -69,22 +82,33 @@ install_to_central() {
     local source="$1"
     local skill_name="$2"
 
-    if [[ -L "$CENTRAL_STORE/$skill_name" ]]; then
-        warn "Skill '$skill_name' already exists in central store (symlink), skipping"
+    # Validate that source has a SKILL.md before installing
+    if [[ -d "$source" ]] && [[ ! -f "$source/SKILL.md" ]]; then
+        warn "No SKILL.md found in $source — not a valid skill, skipping"
         return 1
     fi
 
-    if [[ -d "$CENTRAL_STORE/$skill_name" ]]; then
-        warn "Skill '$skill_name' already exists in central store (directory), skipping"
-        return 1
+    if [[ -L "$CENTRAL_STORE/$skill_name" ]]; then
+        log "Updating '$skill_name' in central store..."
+        [[ "$DRY_RUN" == "true" ]] || rm "$CENTRAL_STORE/$skill_name"
+    elif [[ -d "$CENTRAL_STORE/$skill_name" ]]; then
+        if [[ "$FORCE" == "true" ]]; then
+            warn "Removing existing directory for '$skill_name' (--force)"
+            [[ "$DRY_RUN" == "true" ]] || rm -rf "$CENTRAL_STORE/$skill_name"
+        else
+            warn "Central store entry for '$skill_name' is a real directory (git-cloned skill). Skipping to avoid data loss. Use --force to override."
+            return 1
+        fi
     fi
 
     if [[ -d "$source" ]]; then
-        log "Copying $source to $CENTRAL_STORE/$skill_name"
-        [[ "$DRY_RUN" == "true" ]] || cp -r "$source" "$CENTRAL_STORE/$skill_name"
+        local abs_source
+        abs_source="$(realpath "$source")"
+        log "Symlinking $abs_source -> $CENTRAL_STORE/$skill_name"
+        [[ "$DRY_RUN" == "true" ]] || ln -s "$abs_source" "$CENTRAL_STORE/$skill_name"
     elif [[ "$source" =~ ^https?:// ]]; then
         log "Cloning $source to $CENTRAL_STORE/$skill_name"
-        [[ "$DRY_RUN" == "true" ]] || git clone "$source" "$CENTRAL_STORE/$skill_name"
+        [[ "$DRY_RUN" == "true" ]] || git clone "$source" "$CENTRAL_STORE/$skill_name" || { rm -rf "$CENTRAL_STORE/$skill_name"; error "Clone failed for $skill_name"; }
     else
         error "Invalid source: $source"
         return 1
@@ -106,18 +130,25 @@ create_symlinks() {
             local existing_target
             existing_target=$(readlink "$link_path" 2>/dev/null || echo "")
             if [[ -z "$existing_target" ]]; then
-                warn "Skill '$skill_name' has broken symlink for $tool, removing"
-                rm "$link_path"
+                [[ "$DRY_RUN" == "true" ]] || ln -sfn "$central_path" "$link_path"
+                created+=("$tool")
+                continue
             elif [[ "$existing_target" == "$central_path" ]]; then
-                warn "Skill '$skill_name' already symlinked for $tool"
+                continue
             else
-                warn "Skill '$skill_name' has existing symlink for $tool (points to $existing_target), skipping"
+                log "Updating symlink for $tool (was $existing_target)"
+                [[ "$DRY_RUN" == "true" ]] || ln -sfn "$central_path" "$link_path"
+                created+=("$tool")
+                continue
             fi
         elif [[ -d "$link_path" ]]; then
-            warn "Skill '$skill_name' already exists as directory for $tool, skipping"
-        else
+            warn "Skipping $tool: $link_path is a real directory. To override: rm -rf \"$link_path\" then re-run."
+            continue
+        fi
+
+        if [[ ! -e "$link_path" ]]; then
             log "Symlinking $skill_name -> $link_path"
-            [[ "$DRY_RUN" == "true" ]] || ln -s "$central_path" "$link_path"
+            [[ "$DRY_RUN" == "true" ]] || ln -sfn "$central_path" "$link_path"
             created+=("$tool")
         fi
     done
@@ -145,10 +176,13 @@ remove_skill() {
     done
 
     if [[ -d "$CENTRAL_STORE/$skill_name" ]] || [[ -L "$CENTRAL_STORE/$skill_name" ]]; then
-        if [[ "$force" == "true" ]]; then
+        if [[ -L "$CENTRAL_STORE/$skill_name" ]]; then
+            log "Removing from central store: $CENTRAL_STORE/$skill_name"
+            [[ "$DRY_RUN" == "true" ]] || rm "$CENTRAL_STORE/$skill_name"
+        elif [[ "$force" == "true" ]]; then
             log "Removing from central store: $CENTRAL_STORE/$skill_name"
             [[ "$DRY_RUN" == "true" ]] || rm -rf "$CENTRAL_STORE/$skill_name"
-        elif [[ -d "$CENTRAL_STORE/$skill_name" ]] && [[ ! -L "$CENTRAL_STORE/$skill_name" ]]; then
+        else
             warn "Skill '$skill_name' is a directory in central store, not removing (use --force to override)"
         fi
     fi
@@ -188,7 +222,7 @@ interactive_menu() {
 
 install_local_menu() {
     local repo_skills_dir
-    repo_skills_dir="$(dirname "$(dirname "$0")")/skills"
+    repo_skills_dir="$(realpath "$(dirname "$(realpath "$0")")")/skills"
 
     if [[ ! -d "$repo_skills_dir" ]]; then
         error "No local skills directory found at $repo_skills_dir"
@@ -309,8 +343,8 @@ list_installed() {
         local skill_name
         skill_name=$(basename "$skill_dir")
         echo "  - $skill_name"
-        ((count++))
-    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+        (( ++count ))
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
 
     if [[ $count -eq 0 ]]; then
         warn "No skills installed"
@@ -325,7 +359,7 @@ remove_skill_menu() {
     local -a installed=()
     while IFS= read -r -d '' skill_dir; do
         installed+=("$(basename "$skill_dir")")
-    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
 
     if [[ ${#installed[@]} -eq 0 ]]; then
         warn "No skills installed"
@@ -368,7 +402,7 @@ show_symlinks() {
             fi
         done
         echo ""
-    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
 
     if [[ $found -eq 0 ]]; then
         warn "No skills installed"
@@ -385,6 +419,46 @@ install_skill() {
     create_symlinks "$skill_name"
 }
 
+install_all_local() {
+    local repo_skills_dir
+    repo_skills_dir="$(realpath "$(dirname "$(realpath "$0")")")/skills"
+
+    if [[ ! -d "$repo_skills_dir" ]]; then
+        error "No local skills directory found at $repo_skills_dir"
+    fi
+
+    mkdir -p "$CENTRAL_STORE" || { error "Failed to create $CENTRAL_STORE"; return 1; }
+
+    local count=0
+    while IFS= read -r -d '' skill_dir; do
+        local skill_name
+        skill_name=$(basename "$skill_dir")
+        log "Installing '$skill_name'..."
+        install_to_central "$skill_dir" "$skill_name" || continue
+        create_symlinks "$skill_name" > /dev/null
+        (( ++count ))
+    done < <(find "$repo_skills_dir" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+
+    log "Installed $count skills."
+}
+
+remove_all_central() {
+    if [[ ! -d "$CENTRAL_STORE" ]]; then
+        log "Nothing installed — central store does not exist."
+        return
+    fi
+
+    local count=0
+    while IFS= read -r -d '' skill_dir; do
+        local skill_name
+        skill_name=$(basename "$skill_dir")
+        remove_skill "$skill_name"
+        (( ++count ))
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
+
+    log "Removed $count skills."
+}
+
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -392,8 +466,12 @@ parse_args() {
                 DRY_RUN=true
                 shift
                 ;;
+            --force)
+                FORCE=true
+                shift
+                ;;
             --non-interactive)
-                NON_INTERACTIVE=true
+                # kept for backwards compatibility, no longer needed
                 shift
                 ;;
             --install)
@@ -402,6 +480,34 @@ parse_args() {
                     error "--install requires a skill path or URL"
                 fi
                 install_skill "$1"
+                exit 0
+                ;;
+            --install-all)
+                install_all_local
+                exit 0
+                ;;
+            --remove)
+                shift
+                if [[ $# -eq 0 ]]; then
+                    error "--remove requires a skill name"
+                fi
+                remove_skill "$1"
+                log "Removed '$1'."
+                exit 0
+                ;;
+            --remove-all)
+                remove_all_central
+                exit 0
+                ;;
+            --reinstall-all)
+                log "Removing all installed skills..."
+                remove_all_central
+                log "Reinstalling all local skills..."
+                install_all_local
+                exit 0
+                ;;
+            --list)
+                list_installed
                 exit 0
                 ;;
             -h|--help)
@@ -418,12 +524,8 @@ parse_args() {
 main() {
     mkdir -p "$CENTRAL_STORE" || { error "Failed to create $CENTRAL_STORE"; exit 1; }
 
-    if [[ "$NON_INTERACTIVE" == "true" ]]; then
-        error "Non-interactive mode requires --install <path>"
-    fi
-
     if [[ ! -t 0 ]]; then
-        error "Not running in terminal. Use --non-interactive --install <path>"
+        error "Not running in a terminal. Use a flag like --install-all or --help."
     fi
 
     interactive_menu
