@@ -16,7 +16,6 @@ Use the right visualization for the concept you're explaining. A well-chosen dia
 | **"State changes"** | State Diagram | Sequence Diagram |
 | **"Conditional logic"** | Decision Tree | Flowchart |
 | **"Layered structure"** | Layer Diagram | Architecture Diagram |
-| **"Codebase spatial view"** | 3D Code Map | Treemap |
 | **"Timeline of events"** | Sequence Diagram | Timeline |
 
 ## Detailed Guide
@@ -119,23 +118,6 @@ sequenceDiagram
 
 **Example trigger:** "How does a raw API request become a stored database record?"
 
-### 3D Code Map
-**Use when:** You want an intuitive, spatial understanding of a large codebase.
-
-**What it shows:**
-- Relative size of modules
-- Clustering of related code
-- "Peaks" of complexity
-- "Valleys" of simple glue code
-
-**How to build in Blender:**
-1. Each module = a block
-2. Height = lines of code / complexity
-3. Position = clustering by dependency
-4. Color = category (blue=core, green=utils, red=tests)
-
-**MCP:** Use `blender-mcp` or `manim-mcp` for generation
-
 ### Flowchart
 **Use when:** You want to understand conditional logic — what branches happen based on input.
 
@@ -155,7 +137,7 @@ sequenceDiagram
 | **Debugging a specific flow** | Sequence Diagram |
 | **Understanding dependencies** | Dependency Graph |
 | **OOP design discussion** | Class Diagram |
-| **Big picture overview** | 3D Code Map or Architecture |
+| **Big picture overview** | Architecture Diagram |
 | **Data transformation logic** | Data Flow Diagram |
 
 ## Combining Diagrams
@@ -182,10 +164,7 @@ Example: Understanding a web request
 
 | Tool | Good For | Limitations |
 |------|----------|-------------|
-| **Mermaid** | Flowcharts, sequences, class, Gantt | Complex layouts can be messy |
+| **Mermaid** | Flowcharts, sequences, class diagrams — renders inline in Claude Code | Complex layouts can be messy |
 | **Graphviz DOT** | Large dependency graphs | Less control over aesthetics |
-| **Excalidraw** | Architecture, hand-drawn feel | Manual layout |
 | **PlantUML** | UML diagrams | Syntax-heavy |
-| **Blender/Manim** | 3D, animations | Requires 3D expertise |
-| **D3.js** | Interactive web charts | Requires JS setup |
 | **ASCII** | Quick, no rendering needed | Poor for complex diagrams |

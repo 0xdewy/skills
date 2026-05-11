@@ -308,11 +308,19 @@ skill-name/
 | `security` | Audits, vulnerability research, pen testing |
 | `meta` | Skills about skills, agent tooling, Claude config |
 | `productivity` | Personal workflow, task management, automation |
+| `testing` | QA, end-to-end testing, eval frameworks, test generation |
+| `education` | Teaching, visualization, Socratic/interactive learning |
+| `finance` | Market data, financial reports, investment analysis |
 | `other` | Doesn't fit the above categories |
 
 **Skill discovery:** Claude reads `name` + `description` to decide when to use
 a skill. Everything else (body + resources) only loads when the skill is
 invoked. Keep descriptions specific, with explicit TRIGGER and SKIP clauses.
+
+**references/ directory:** Create a `references/` directory if your skill needs
+lookup tables, checklists, or prompt templates that would clutter the main
+SKILL.md. Always tell the skill when to load a reference file — never load
+references unconditionally at the top.
 
 **Composition checklist:**
 - [ ] Accepts inputs as parameters (not just interactive prompts)
@@ -320,3 +328,13 @@ invoked. Keep descriptions specific, with explicit TRIGGER and SKIP clauses.
 - [ ] Ends with a parseable completion signal
 - [ ] Names any skills it chains with
 - [ ] Phases are resumable (detects and skips completed work)
+
+---
+
+## Completion
+
+End your final message with a parseable completion line:
+
+```
+DONE: <skill-name>/SKILL.md — <brief summary of what was created or improved>
+```

@@ -23,6 +23,7 @@ from pathlib import Path
 
 WORKING_DIR = Path(os.environ.get("IMPLEMENTER_DIR", "/tmp/implementer-loop"))
 MAX_LOOPS_DEFAULT = 8
+MAX_RESPAWNS = 2
 
 
 def parse_args():
@@ -74,16 +75,21 @@ def write_summary(summary):
         json.dump(summary, f, indent=2)
 
 
-def spawn_implementer(task, loop_count, fixer_feedback=None):
+def spawn_implementer(task, loop_count, fixer_feedback=None, _respawn_count=0):
     print(f"\n[{loop_count}] IMPLEMENTER: Starting implementation...")
     prompt = build_implementer_prompt(task, loop_count, fixer_feedback)
     result = subprocess.run(["claude", "--print", prompt],
                           capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[{loop_count}] IMPLEMENTER: WARNING — subprocess exited with code {result.returncode}")
     output = result.stdout + result.stderr
     print(f"[{loop_count}] IMPLEMENTER: Done")
     if "IMPLEMENTER_DONE" not in output:
-        print(f"[{loop_count}] IMPLEMENTER: WARNING — completion signal missing, respawning")
-        return spawn_implementer(task, loop_count, fixer_feedback)
+        if _respawn_count >= MAX_RESPAWNS:
+            print(f"[{loop_count}] IMPLEMENTER: ERROR — max respawns ({MAX_RESPAWNS}) reached, continuing anyway")
+            return output
+        print(f"[{loop_count}] IMPLEMENTER: WARNING — completion signal missing, respawning ({_respawn_count + 1}/{MAX_RESPAWNS})")
+        return spawn_implementer(task, loop_count, fixer_feedback, _respawn_count + 1)
     return output
 
 
@@ -125,6 +131,8 @@ def spawn_reviewer(task, loop_count):
     prompt = build_reviewer_prompt(task, loop_count)
     result = subprocess.run(["claude", "--print", prompt],
                           capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[{loop_count}] REVIEWER: WARNING — subprocess exited with code {result.returncode}")
     output = result.stdout + result.stderr
     print(f"[{loop_count}] REVIEWER: Done")
     return output
@@ -169,22 +177,31 @@ REVIEWER_DONE: VERDICT={{DONE|NEEDS_WORK}} SCORE={{X}}/10"""
 
 
 def parse_verdict(output):
-    match = re.search(r"REVIEWER_DONE: VERDICT=(DONE|NEEDS_WORK) SCORE=(\d+)/10", output)
+    match = re.search(
+        r"reviewer_done:.*?verdict\s*=\s*(done|needs_work).*?score\s*=\s*(\d+)",
+        output,
+        re.IGNORECASE | re.DOTALL,
+    )
     if match:
-        return match.group(1), int(match.group(2))
+        return match.group(1).upper(), int(match.group(2))
     return None, None
 
 
-def spawn_fixer(task, loop_count):
+def spawn_fixer(task, loop_count, _respawn_count=0):
     print(f"\n[{loop_count}] FIXER: Planning fixes...")
     prompt = build_fixer_prompt(task, loop_count)
     result = subprocess.run(["claude", "--print", prompt],
                           capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"[{loop_count}] FIXER: WARNING — subprocess exited with code {result.returncode}")
     output = result.stdout + result.stderr
     print(f"[{loop_count}] FIXER: Done")
     if "FIXER_DONE" not in output:
-        print(f"[{loop_count}] FIXER: WARNING — completion signal missing, respawning")
-        return spawn_fixer(task, loop_count)
+        if _respawn_count >= MAX_RESPAWNS:
+            print(f"[{loop_count}] FIXER: ERROR — max respawns ({MAX_RESPAWNS}) reached, continuing anyway")
+            return output
+        print(f"[{loop_count}] FIXER: WARNING — completion signal missing, respawning ({_respawn_count + 1}/{MAX_RESPAWNS})")
+        return spawn_fixer(task, loop_count, _respawn_count + 1)
     return output
 
 

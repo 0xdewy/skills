@@ -46,8 +46,17 @@ def grade(evals_path, results_dir):
 
             elif "README.md explains" in assertion:
                 readme = f"{results_dir}/implementer/README.md"
-                passed = os.path.exists(readme)
-                result["checks"].append({"assertion": assertion, "passed": passed, "detail": "README exists" if passed else "missing"})
+                if not os.path.exists(readme):
+                    passed = False
+                    detail = "README.md missing"
+                else:
+                    content = open(readme).read()
+                    lines = [l for l in content.splitlines() if l.strip()]
+                    has_min_lines = len(lines) >= 5
+                    has_heading = any(l.startswith("#") for l in lines)
+                    passed = has_min_lines and has_heading
+                    detail = f"lines={len(lines)}, has_heading={has_heading}"
+                result["checks"].append({"assertion": assertion, "passed": passed, "detail": detail})
 
             elif "Reviewer verifies" in assertion:
                 verdict_file = find_last_loop_file(results_dir)

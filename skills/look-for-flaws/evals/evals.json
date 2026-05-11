@@ -1,0 +1,87 @@
+{
+  "skill_name": "look-for-flaws",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/platonic-beauty rewrite this error handling strategy to be its ideal form",
+      "expected_output": "Skill triggers, student contemplates code beauty criteria, produces complete rewritten error handling, dialectic evaluates proportion and necessity of error paths, final output includes Form summary.",
+      "files": ["src/errors.ts", "src/handlers.ts"],
+      "domain": "Code",
+      "expectations": [
+        "Output contains a complete, self-contained body of code — not an outline, not bullet points, not a plan",
+        "Error handling treats error cases with the same care as the happy path — no error path is an afterthought",
+        "Function and variable names are specific and truthful: a reader encountering any name knows what it handles without looking elsewhere",
+        "Final output includes a north star sentence ('The Form of this work would be...') and a summary of the dialectic's resolution",
+        "The work knows what it is: a single unified error handling strategy, not a collection of loosely related suggestions"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make this README beautiful",
+      "expected_output": "Skill triggers on beauty phrasing, student applies writing beauty criteria, produces complete refined README, dialectic evaluates prose rhythm, economy, and specificity.",
+      "files": ["README.md"],
+      "domain": "Writing",
+      "expectations": [
+        "Output is a complete, rewritten README — not a list of suggested edits",
+        "Prose demonstrates rhythmic variation: short sentences land key points, longer sentences build context and flow",
+        "The revised text uses specific, concrete language — no vague placeholder terms like 'various things' or 'many features'",
+        "A reader can scan only the headings and understand the full shape of the document's argument",
+        "Final output includes a north star sentence and the dialectic's Form-oriented summary"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/platonic-beauty design a CLI interface for a task runner",
+      "expected_output": "Skill triggers, student applies design beauty criteria, produces concrete and implementable CLI design, dialectic evaluates visual hierarchy and necessity of elements.",
+      "files": [],
+      "domain": "Design",
+      "expectations": [
+        "Output is a concrete, implementable design specification — not abstract philosophy about design",
+        "Every command, flag, and output element in the design justifies its existence: nothing is present merely because it seemed nice to include",
+        "The design establishes a clear visual/information hierarchy — primary commands, secondary options, and tertiary help are distinct and consistently ordered",
+        "The simplest possible interface that achieves the stated purpose — a reader should not find an element they would remove",
+        "Final output includes a north star sentence and the dialectic's Form-oriented summary"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need a plan for migrating from PostgreSQL to SQLite — do it beautifully",
+      "expected_output": "Skill triggers, student applies plan beauty criteria, produces complete migration plan with explicit dependencies and named assumptions, dialectic assesses necessity of steps.",
+      "files": [],
+      "domain": "Plans",
+      "expectations": [
+        "Output is a complete, step-by-step plan — not a discussion of considerations, not general advice",
+        "Every step in the plan is necessary: if a step were removed, the plan would break or the reader would be lost",
+        "Dependencies between steps are explicit — the plan does not hide sequencing, and a reader can see at a glance what must happen before what",
+        "Assumptions are named upfront: tools required, expected environment, preconditions the reader must verify",
+        "Final output includes a north star sentence and the dialectic's Form-oriented summary"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What does git status do?",
+      "expected_output": "Skill does NOT trigger — this is a factual question with no beauty-seeking intent. Answered directly and concisely.",
+      "files": [],
+      "domain": "Non-trigger",
+      "expectations": [
+        "No north star sentence or 'Form of this work' language appears in any output",
+        "No dialectic directory is created in the workspace",
+        "Answer is direct and concise — a short factual response without philosophical framing",
+        "No mention of Socrates, Aristotle, Plotinus, Diotima, or the dialectic appears in the response"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Fix the null pointer in src/auth.ts — it's urgent, production is down",
+      "expected_output": "Skill does NOT trigger — speed is the explicit priority. Bug is fixed directly and immediately.",
+      "files": ["src/auth.ts"],
+      "domain": "Non-trigger",
+      "expectations": [
+        "No north star sentence or 'Form of this work' language appears in any output",
+        "No dialectic directory is created in the workspace",
+        "Bug is addressed directly with minimal ceremony — the fix itself is the entire response",
+        "No dialectic transcript exists — the skill stayed silent because beauty was not sought"
+      ]
+    }
+  ]
+}

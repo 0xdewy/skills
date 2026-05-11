@@ -40,6 +40,19 @@
         "Author names are present (e.g., 'Marilyn Monroe', 'Albert Einstein')",
         "Quotes include content beyond just the first page (multiple pages scraped)"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to scrape data from a Cloudflare-protected website at https://nowsecure.nl/ (a known CF-protected test page). Write a Python script that uses curl_cffi with browser impersonation to bypass the Cloudflare challenge and extract the page title and any visible text content. Save the results as a JSON file. Include retry logic that refreshes the approach if the first attempt gets blocked (403/503). Also include a FlareSolverr fallback function (even if FlareSolverr is not running, the function should be defined and documented).",
+      "expected_output": "A Python script using curl_cffi with impersonate='chrome', retry logic for 403/503, a FlareSolverr fallback function, and a JSON output file with extracted content",
+      "files": [],
+      "expectations": [
+        "Script uses curl_cffi (not requests/httpx) as the primary HTTP client",
+        "curl_cffi requests use impersonate parameter (e.g., 'chrome')",
+        "Script includes retry logic for 403/503 status codes",
+        "Script defines a FlareSolverr fallback function for solving CF challenges",
+        "Output is a valid JSON file with extracted page content"
+      ]
     }
   ]
 }

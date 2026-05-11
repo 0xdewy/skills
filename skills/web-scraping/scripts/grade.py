@@ -146,13 +146,20 @@ def grade_eval2(outputs_dir):
                 "passed": True,
                 "evidence": f"CSV file: {csv_file}"
             })
-            # Count data rows (exclude header)
+            # Count data rows (exclude header); also explicitly fail on 0 rows
             data_rows = len(rows) - 1 if len(rows) > 0 else 0
-            results.append({
-                "text": assertions[2],
-                "passed": data_rows >= 15,
-                "evidence": f"CSV has {data_rows} data rows"
-            })
+            if data_rows == 0:
+                results.append({
+                    "text": assertions[2],
+                    "passed": False,
+                    "evidence": "CSV has 0 data rows (empty file or header only)"
+                })
+            else:
+                results.append({
+                    "text": assertions[2],
+                    "passed": data_rows >= 15,
+                    "evidence": f"CSV has {data_rows} data rows"
+                })
             # Check columns
             headers = [h.lower().strip() for h in rows[0]] if rows else []
             has_title = any('title' in h for h in headers)
@@ -284,6 +291,97 @@ def grade_eval3(outputs_dir):
     return results
 
 
+def grade_eval4(outputs_dir):
+    """CF-protected site: curl_cffi with impersonation, retry logic, FlareSolverr fallback."""
+    assertions = [
+        "Script uses curl_cffi (not requests/httpx) as the primary HTTP client",
+        "curl_cffi requests use impersonate parameter (e.g., 'chrome')",
+        "Script includes retry logic for 403/503 status codes",
+        "Script defines a FlareSolverr fallback function for solving CF challenges",
+        "Output is a valid JSON file with extracted page content"
+    ]
+    results = []
+
+    py_files = [f for f in os.listdir(outputs_dir) if f.endswith('.py')]
+    used_curl_cffi = False
+    used_httpx_as_primary = False
+    used_requests_as_primary = False
+    has_impersonate = False
+    has_retry_403 = False
+    has_flaresolverr_fn = False
+
+    for pyf in py_files:
+        with open(os.path.join(outputs_dir, pyf)) as f:
+            content = f.read()
+            lower = content.lower()
+
+            if 'curl_cffi' in lower or 'from curl_cffi' in lower:
+                used_curl_cffi = True
+            if ('httpx' in lower) and 'flaresolverr' not in lower:
+                lines_with_httpx = [l for l in content.split('\n') if 'httpx' in l.lower()]
+                main_request_lines = [l for l in lines_with_httpx if 'flaresolverr' not in l.lower() and 'def ' not in l.lower()]
+                if main_request_lines and not used_curl_cffi:
+                    used_httpx_as_primary = True
+            if ('import requests' in lower or 'from requests' in lower) and 'curl_cffi' not in lower:
+                used_requests_as_primary = True
+
+            if 'impersonate' in lower:
+                has_impersonate = True
+
+            if ('403' in content or '503' in content) and ('retry' in lower or 'refresh' in lower or 'while' in lower or 'if ' in lower):
+                has_retry_403 = True
+
+            if ('flaresolverr' in lower or 'flare_solverr' in lower) and ('def ' in content):
+                has_flaresolverr_fn = True
+
+    results.append({
+        "text": assertions[0],
+        "passed": used_curl_cffi and not (used_httpx_as_primary or used_requests_as_primary),
+        "evidence": f"curl_cffi: {used_curl_cffi}, httpx primary: {used_httpx_as_primary}, requests primary: {used_requests_as_primary}"
+    })
+
+    results.append({
+        "text": assertions[1],
+        "passed": has_impersonate,
+        "evidence": f"impersonate parameter found: {has_impersonate}"
+    })
+
+    results.append({
+        "text": assertions[2],
+        "passed": has_retry_403,
+        "evidence": f"Retry logic for 403/503 found: {has_retry_403}"
+    })
+
+    results.append({
+        "text": assertions[3],
+        "passed": has_flaresolverr_fn,
+        "evidence": f"FlareSolverr function defined: {has_flaresolverr_fn}"
+    })
+
+    json_file = check_file_exists(outputs_dir, r'.*\.json$')
+    if json_file and json_file != os.path.join(outputs_dir, 'metrics.json'):
+        data_loaded = False
+        try:
+            with open(json_file) as f:
+                data = json.load(f)
+            data_loaded = True
+        except:
+            pass
+        results.append({
+            "text": assertions[4],
+            "passed": data_loaded,
+            "evidence": f"JSON file: {json_file}, valid: {data_loaded}"
+        })
+    else:
+        results.append({
+            "text": assertions[4],
+            "passed": False,
+            "evidence": "No JSON output file found"
+        })
+
+    return results
+
+
 def main():
     base = "/home/user/code/skills/web-scraping-workspace/iteration-1"
 
@@ -291,6 +389,7 @@ def main():
         ("eval-1-wikipedia-scrape", grade_eval1),
         ("eval-2-books-scrape", grade_eval2),
         ("eval-3-quotes-js", grade_eval3),
+        ("eval-4-cf-bypass", grade_eval4),
     ]
 
     for eval_name, grader_fn in evals:
