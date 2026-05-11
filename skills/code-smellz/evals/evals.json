@@ -1,0 +1,48 @@
+{
+  "skill_name": "code-smellz",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run code-smellz on this codebase",
+      "expected_output": "Three subagents dispatched in parallel, findings merged and triaged, changes applied, test suite run, final report with LOC delta emitted.",
+      "files": ["src/", "tests/"],
+      "expectations": [
+        "stinky-output/ directory created before any subagents are launched",
+        "detect_runner.py and measure_loc.py are called in Phase 0",
+        "All three subagents (bugs, simplify, arch) are launched simultaneously in Phase 1",
+        "stinky-output/findings-bugs.json exists and contains valid JSON after Phase 1",
+        "stinky-output/findings-simplify.json exists and contains valid JSON after Phase 1",
+        "stinky-output/findings-arch.json exists and contains valid JSON after Phase 1",
+        "Triage summary is printed before Phase 3 changes are applied",
+        "Test suite is run in Phase 4 and result is recorded",
+        "DONE: signal emitted with iteration count and LOC delta"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "This code is getting pretty stinky, can you clean it up?",
+      "expected_output": "Skill triggered by casual 'stinky' + 'clean up' language; full workflow runs including at least one iteration with changes applied.",
+      "files": ["src/"],
+      "expectations": [
+        "Skill triggers on informal 'stinky' phrasing",
+        "Codebase goal is read from README or project manifest before spawning agents",
+        "stinky-output/session.json is created with baseline_loc populated",
+        "At least one change is applied and the final LOC is measured",
+        "Final report shows starting vs ending LOC and changes-applied count"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Explain what this code does",
+      "expected_output": "Skill does NOT trigger — code is explained without spawning subagents or modifying anything.",
+      "files": ["src/"],
+      "expectations": [
+        "Skill is NOT triggered",
+        "No stinky-output/ directory is created",
+        "No subagents are spawned",
+        "No file edits are made",
+        "Response is a plain explanation of the code's purpose and structure"
+      ]
+    }
+  ]
+}

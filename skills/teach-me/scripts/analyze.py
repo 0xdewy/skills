@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-context-infer.py — Auto-detect what to teach about from a directory.
+analyze.py — Gather structured facts about a codebase for the teach-me skill.
 
 Outputs JSON to stdout:
-  topic          — human-readable project description
-  hook_sentence  — the single most surprising/interesting fact
+  topic            — human-readable project description
+  hook_sentence    — single most surprising/interesting fact
   interesting_facts — list of 3-5 noteworthy things
-  entry_points   — key files to start exploring
-  language       — dominant programming language
-  readme_summary — first 400 chars of README if present
-  git_activity   — recent commit summary if .git present
-  file_count     — total source files found
-  total_lines    — approximate total lines of code
+  entry_points     — key files to start exploring
+  language         — dominant programming language
+  readme_summary   — first 500 chars of README if present
+  git_activity     — recent commit summary if .git present
+  file_count       — total source files found
+  total_lines      — approximate total lines of code
+  lang_breakdown   — lines per language
+  files            — top 20 files by lines of code
+  largest_file     — {path, lines, pct_of_total}
+  module_structure — top directories grouped with file count, lines, dominant lang
+  has_tests        — whether any test/spec files exist
 """
 
 import json
@@ -19,7 +24,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 
 
 MANIFEST_FILES = {
@@ -39,7 +44,7 @@ MANIFEST_FILES = {
     "Package.swift": "Swift",
     "*.csproj": "C#",
     "CMakeLists.txt": "C/C++",
-    "Makefile": None,  # generic
+    "Makefile": None,
 }
 
 LANG_EXTENSIONS = {
@@ -129,7 +134,7 @@ def read_manifest(root: Path):
                         description = line.split("=")[1].strip().strip('"\'')
         except Exception:
             pass
-        break  # use first manifest found
+        break
 
     return name, description, manifest_lang
 
@@ -140,7 +145,6 @@ def read_readme(root: Path) -> str:
         if fpath.exists():
             try:
                 text = fpath.read_text(errors="ignore")
-                # strip markdown headers/badges for cleaner summary
                 lines = [l for l in text.splitlines() if l.strip() and not l.startswith("![")]
                 return " ".join(" ".join(lines[:15]).split())[:500]
             except Exception:
@@ -167,7 +171,6 @@ def find_entry_points(files: list, root: Path) -> list:
     for f in files:
         if Path(f["path"]).name in ENTRY_POINT_NAMES or f["path"] in ENTRY_POINT_NAMES:
             found.append(f["path"])
-    # also look for files with "main" in name
     if not found:
         for f in files:
             if "main" in Path(f["path"]).stem.lower():
@@ -185,7 +188,6 @@ def build_hook_sentence(name: str, lang: str, files: list, lang_lines: Counter, 
     if file_count == 1:
         return f"The entire {name or 'project'} fits in a single {files[0]['lines']}-line file."
 
-    # find the largest file
     largest = max(files, key=lambda f: f["lines"])
     largest_pct = int(largest["lines"] / total_lines * 100) if total_lines else 0
 
@@ -195,14 +197,12 @@ def build_hook_sentence(name: str, lang: str, files: list, lang_lines: Counter, 
             f"Everything else is scaffolding around it."
         )
 
-    # find the most central file (most imports — heuristic via name)
     if lang in ("Python", "JavaScript", "TypeScript"):
         hub_candidates = [f for f in files if "util" in f["path"].lower() or "core" in f["path"].lower() or "base" in f["path"].lower()]
         if hub_candidates:
             hub = hub_candidates[0]
             return f"The file {hub['path']} appears to be the hidden backbone — most things flow through it."
 
-    # git-based hook
     if git:
         lines = git.strip().splitlines()
         if len(lines) >= 5:
@@ -211,12 +211,10 @@ def build_hook_sentence(name: str, lang: str, files: list, lang_lines: Counter, 
                 f"The latest: \"{lines[0].split(' ', 1)[-1]}\"."
             )
 
-    # language diversity hook
     if len(lang_lines) > 2:
         langs = [f"{k} ({v:,} lines)" for k, v in lang_lines.most_common(3)]
         return f"This isn't a single-language project — it spans {', '.join(langs)}."
 
-    # size-based hook
     if total_lines > 10_000:
         return (
             f"At {total_lines:,} lines across {file_count} files, this is a substantial system. "
@@ -230,24 +228,19 @@ def build_interesting_facts(name: str, lang: str, files: list, lang_lines: Count
     facts = []
     total_lines = sum(lang_lines.values())
 
-    # size fact
     facts.append(f"{total_lines:,} total lines of code across {len(files)} source files")
 
-    # largest file
     if files:
         largest = max(files, key=lambda f: f["lines"])
         facts.append(f"Largest file: {largest['path']} ({largest['lines']:,} lines)")
 
-    # entry points
     if entry_points:
         facts.append(f"Entry point{'s' if len(entry_points) > 1 else ''}: {', '.join(entry_points)}")
 
-    # language breakdown
     if len(lang_lines) > 1:
         breakdown = ", ".join(f"{k} ({v:,} lines)" for k, v in lang_lines.most_common(3))
         facts.append(f"Language breakdown: {breakdown}")
 
-    # test coverage signal
     test_files = [f for f in files if "test" in f["path"].lower() or "spec" in f["path"].lower()]
     if test_files:
         facts.append(f"{len(test_files)} test file{'s' if len(test_files) != 1 else ''} found")
@@ -255,6 +248,27 @@ def build_interesting_facts(name: str, lang: str, files: list, lang_lines: Count
         facts.append("No test files found — good thing to ask about!")
 
     return facts[:5]
+
+
+def build_module_structure(files: list, lang_lines: Counter) -> list:
+    dir_map: dict = defaultdict(lambda: {"file_count": 0, "total_lines": 0, "langs": Counter()})
+    for f in files:
+        parent = str(Path(f["path"]).parent)
+        dir_map[parent]["file_count"] += 1
+        dir_map[parent]["total_lines"] += f["lines"]
+        dir_map[parent]["langs"][f["lang"]] += 1
+
+    result = []
+    for dir_path, info in sorted(dir_map.items(), key=lambda x: -x[1]["total_lines"])[:10]:
+        dominant = info["langs"].most_common(1)[0][0] if info["langs"] else "Unknown"
+        label = dir_path if dir_path == "." else dir_path + "/"
+        result.append({
+            "dir": label,
+            "file_count": info["file_count"],
+            "total_lines": info["total_lines"],
+            "dominant_lang": dominant,
+        })
+    return result
 
 
 def infer(root_str: str) -> dict:
@@ -265,7 +279,6 @@ def infer(root_str: str) -> dict:
     git = read_git_activity(root)
     entry_points = find_entry_points(files, root)
 
-    # dominant language
     if manifest_lang:
         lang = manifest_lang
     elif lang_lines:
@@ -273,17 +286,31 @@ def infer(root_str: str) -> dict:
     else:
         lang = "Unknown"
 
-    # project name fallback
     if not proj_name:
         proj_name = root.name
 
-    # build outputs
     topic = f"{proj_name} — a {lang} project"
     if proj_desc:
         topic = f"{proj_name}: {proj_desc}"
 
     hook = build_hook_sentence(proj_name, lang, files, lang_lines, git)
     facts = build_interesting_facts(proj_name, lang, files, lang_lines, entry_points)
+
+    total_lines = sum(lang_lines.values())
+
+    sorted_files = sorted(files, key=lambda x: -x["lines"])
+    largest_file = None
+    if sorted_files:
+        lf = sorted_files[0]
+        pct = int(lf["lines"] / total_lines * 100) if total_lines else 0
+        largest_file = {"path": lf["path"], "lines": lf["lines"], "pct_of_total": pct}
+
+    has_tests = any(
+        "test" in f["path"].lower() or "spec" in f["path"].lower()
+        for f in files
+    )
+
+    module_structure = build_module_structure(files, lang_lines)
 
     return {
         "topic": topic,
@@ -294,9 +321,12 @@ def infer(root_str: str) -> dict:
         "readme_summary": readme,
         "git_activity": git,
         "file_count": len(files),
-        "total_lines": sum(lang_lines.values()),
+        "total_lines": total_lines,
         "lang_breakdown": dict(lang_lines.most_common()),
-        "files": [f["path"] for f in sorted(files, key=lambda x: -x["lines"])[:20]],
+        "files": [f["path"] for f in sorted_files[:20]],
+        "largest_file": largest_file,
+        "module_structure": module_structure,
+        "has_tests": has_tests,
     }
 
 

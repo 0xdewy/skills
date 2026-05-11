@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CENTRAL_STORE="${XDG_DATA_HOME:-$HOME/.local/share}/skills"
+TOOL_PATHS=(
+    "$HOME/.claude/skills"
+    "$HOME/.config/agents/skills"
+    "$HOME/.local/share/hermes/skills"
+)
+
+_green()  { printf '\033[32m%s\033[0m\n' "$*"; }
+_yellow() { printf '\033[33m%s\033[0m\n' "$*"; }
+_red()    { printf '\033[31m%s\033[0m\n' "$*" >&2; }
+
+usage() {
+    cat <<EOF
+skill — install AI coding skills from any directory
+
+Usage:
+  skill install <path|git-url>   Install a skill by local path or git URL
+  skill remove  <name>           Remove an installed skill
+  skill list                     List all installed skills
+  skill update  <name>           Pull latest (git-cloned skills) or no-op (symlinked)
+
+Examples:
+  skill install ./my-skill
+  skill install https://github.com/user/my-skill
+  skill install git@github.com:user/my-skill.git
+  skill remove  my-skill
+  skill list
+  skill update  my-skill
+EOF
+}
+
+_is_git_url() {
+    [[ "$1" =~ ^https?:// ]] || [[ "$1" =~ ^git@ ]]
+}
+
+_skill_name_from_url() {
+    local url="$1"
+    basename "$url" .git
+}
+
+_link_to_tools() {
+    local name="$1"
+    local central="$CENTRAL_STORE/$name"
+    local linked=()
+    for tool_dir in "${TOOL_PATHS[@]}"; do
+        local link="$tool_dir/$name"
+        mkdir -p "$tool_dir"
+        if [[ -L "$link" ]]; then
+            local existing
+            existing=$(readlink "$link")
+            if [[ "$existing" == "$central" ]]; then
+                continue   # already correct
+            fi
+            rm "$link"
+        elif [[ -d "$link" ]]; then
+            _yellow "WARNING: $link is a real directory (not managed by skill). Skipping to avoid data loss."
+            _yellow "  Remove it manually first if you want to link $name there."
+            continue
+        elif [[ -e "$link" ]]; then
+            rm "$link"
+        fi
+        ln -s "$central" "$link"
+        linked+=("$tool_dir")
+    done
+    printf '%s\n' "${linked[@]:-}"
+}
+
+_unlink_from_tools() {
+    local name="$1"
+    local central="$CENTRAL_STORE/$name"
+    for tool_dir in "${TOOL_PATHS[@]}"; do
+        local link="$tool_dir/$name"
+        if [[ -L "$link" ]]; then
+            local target
+            target=$(readlink "$link" 2>/dev/null || true)
+            if [[ "$target" == "$central" || -z "$target" ]]; then
+                rm "$link"
+            fi
+        fi
+    done
+}
+
+cmd_install() {
+    local source="${1:-}"
+    if [[ -z "$source" ]]; then
+        _red "Usage: skill install <path|git-url>"
+        exit 1
+    fi
+
+    local name
+    local is_git=false
+
+    if _is_git_url "$source"; then
+        is_git=true
+        name=$(_skill_name_from_url "$source")
+    else
+        if [[ ! -e "$source" ]]; then
+            _red "Path not found: $source"
+            exit 1
+        fi
+        source=$(realpath "$source")
+        name=$(basename "$source")
+        if [[ ! -f "$source/SKILL.md" ]]; then
+            _yellow "Warning: no SKILL.md found in $source — installing anyway"
+        fi
+    fi
+
+    mkdir -p "$CENTRAL_STORE"
+    local central="$CENTRAL_STORE/$name"
+
+    # Handle already-installed
+    if [[ -e "$central" || -L "$central" ]]; then
+        local is_real_dir=false
+        [[ -d "$central" && ! -L "$central" ]] && is_real_dir=true
+
+        if [[ "$is_real_dir" == true ]]; then
+            _red "WARNING: \"$name\" is a git-cloned skill with real files at $central"
+            _red "Overwriting will PERMANENTLY DELETE all those files."
+            printf 'Type "yes" to permanently delete and overwrite: '
+            read -r answer
+            [[ "$answer" == "yes" ]] || { echo "Aborted."; exit 0; }
+        else
+            printf 'Skill "%s" is already installed. Overwrite? [y/N] ' "$name"
+            read -r answer
+            [[ "$answer" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
+        fi
+
+        _unlink_from_tools "$name"
+        if [[ -L "$central" ]]; then
+            rm "$central"
+        elif [[ -d "$central" ]]; then
+            rm -rf "$central"
+        fi
+    fi
+
+    if [[ "$is_git" == true ]]; then
+        echo "Cloning $source ..."
+        git clone "$source" "$central"
+    else
+        ln -s "$source" "$central"
+    fi
+
+    _link_to_tools "$name" > /dev/null
+    _green "✓ Installed $name"
+    echo "  central : $central"
+    for tool_dir in "${TOOL_PATHS[@]}"; do
+        [[ -L "$tool_dir/$name" ]] && echo "  $(basename "$tool_dir") : $tool_dir/$name"
+    done
+}
+
+cmd_remove() {
+    local name="${1:-}"
+    if [[ -z "$name" ]]; then
+        _red "Usage: skill remove <name>"
+        exit 1
+    fi
+
+    local central="$CENTRAL_STORE/$name"
+    if [[ ! -e "$central" && ! -L "$central" ]]; then
+        _red "Skill not found: $name"
+        exit 1
+    fi
+
+    _unlink_from_tools "$name"
+
+    if [[ -L "$central" ]]; then
+        rm "$central"
+        _green "✓ Removed $name"
+    elif [[ -d "$central" ]]; then
+        _yellow "\"$name\" unlinked from all tools."
+        _yellow "Original files at $central were NOT deleted."
+        _yellow "To fully purge: rm -rf \"$central\""
+    fi
+}
+
+cmd_list() {
+    if [[ ! -d "$CENTRAL_STORE" ]]; then
+        echo "(no skills installed)"
+        return
+    fi
+
+    local found=false
+    while IFS= read -r -d '' entry; do
+        found=true
+        local name
+        name=$(basename "$entry")
+        if [[ -L "$entry" ]]; then
+            local target
+            target=$(readlink "$entry")
+            printf '%-30s [symlink → %s]\n' "$name" "$target"
+        else
+            local branch=""
+            branch=$(git -C "$entry" branch --show-current 2>/dev/null || true)
+            local tag="${branch:+$branch}"
+            printf '%-30s [git clone%s]\n' "$name" "${tag:+ @ $tag}"
+        fi
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
+
+    [[ "$found" == false ]] && echo "(no skills installed)"
+}
+
+cmd_update() {
+    local name="${1:-}"
+    if [[ -z "$name" ]]; then
+        _red "Usage: skill update <name>"
+        exit 1
+    fi
+
+    local central="$CENTRAL_STORE/$name"
+    if [[ ! -e "$central" && ! -L "$central" ]]; then
+        _red "Skill not found: $name"
+        exit 1
+    fi
+
+    if [[ -L "$central" ]]; then
+        _yellow "\"$name\" is a symlink to a local path — it updates automatically."
+        echo "  → $(readlink "$central")"
+    else
+        echo "Pulling latest for $name ..."
+        git -C "$central" pull
+        _green "✓ Updated $name"
+    fi
+}
+
+# ── dispatch ──────────────────────────────────────────────────────────────────
+
+case "${1:-}" in
+    install) shift; cmd_install "$@" ;;
+    remove)  shift; cmd_remove  "$@" ;;
+    list)    cmd_list ;;
+    update)  shift; cmd_update  "$@" ;;
+    -h|--help|help|"") usage ;;
+    *) _red "Unknown command: $1"; echo; usage; exit 1 ;;
+esac

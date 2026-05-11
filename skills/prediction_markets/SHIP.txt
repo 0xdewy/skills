@@ -1,0 +1,54 @@
+SHIP.txt — prediction-markets skill improvement
+===============================================
+
+What was built:
+  - Added a comprehensive "Commonly Confused Facts" section to SKILL.md
+  - Expanded the platform comparison cheat sheet with Post-Only and Orderbook rows
+  - Replaced eval 0 (Polymarket maker fees) with a deeper auth/CLOB eval
+  - Fixed eval 2 assertions to test post-only knowledge correctly
+
+What was changed:
+  - SKILL.md: Added ~70 lines covering the 5 most commonly confused facts
+    (post-only polarity, Kalshi V2 endpoint path, V2 field names, bids-only
+    orderbook, Polymarket signature types + heartbeat details)
+  - SKILL.md: Platform comparison table got "Post-Only" and "Orderbook" rows
+    to make the Polymarket-has-post-only / Kalshi-does-not distinction explicit
+  - evals/evals.json: Eval 0 changed from Polymarket maker fees (which scored
+    equally with/without skill because fee info is common knowledge) to a
+    comprehensive auth+heartbeat+CLOB eval that tests specific Polymarket
+    knowledge not widely available in training data
+  - evals/evals.json: Eval 2 expected_output now includes explicit post-only
+    assertions:
+
+    * "HAS post_only with postOnly:true / INVALID_POST_ONLY_ORDER"
+    * "DOES NOT have post-only — no post_only flag available"
+    * "bids-only orderbook with implied asks via $1.00 complement"
+
+   - Moved workspace from skills dir to /tmp/prediction_markets-workspace
+   - Loop 2 refinements: clarified V1->V2 side field decomposition with concrete
+     examples, strengthened Commonly Confused Facts directive with bold formatting,
+     defined BASE_URL in Quick Kalshi Code Patterns for self-contained snippets
+
+Test results from iteration-1:
+  - Eval 0 (old prompt): Both configs scored 83% — non-discriminating
+  - Eval 1 (Kalshi Auth): With-skill 100%, without-skill 80% (+0.20 delta)
+    Without-skill got wrong V2 endpoint path (/portfolio/events/orders)
+    and wrong V2 field names (side, price, count instead of book_side,
+    outcome_side, count_fp, price_dollars)
+  - Eval 2 (Platform Comparison): Both scored 83% quantitatively but
+    without-skill had critical errors: claimed Kalshi has post_only and
+    Polymarket does not — the exact opposite of reality. The grading
+    assertion crashed on this.
+
+Key decisions:
+  - Chose auth/CLOB prompt for new eval 0 because it tests knowledge
+    (signature types, heartbeat interval/buffer, GTD buffer, L1 vs L2)
+    that is NOT in common training data, creating a real with/without skill
+    delta
+  - Put the Commonly Confused Facts section at the top of SKILL.md (after
+    frontmatter) so it's read first, before any reference files
+  - Made Post-Only the FIRST item in Commonly Confused Facts because it was
+    the most damaging error found in testing (both platforms reversed)
+  - Added both "Post-Only" and "Orderbook" rows to the cheat sheet table
+    since the combination of post-only support AND bids-only orderbook is
+    what makes Kalshi orderbook mechanics unique

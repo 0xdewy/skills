@@ -1,0 +1,23 @@
+{
+  "skill_name": "prediction-markets",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm setting up a Polymarket market-making bot from scratch. Walk me through the complete authentication flow — I want to use a deposit wallet (POLY_1271). Explain L1 vs L2 auth, how to derive API credentials, what signature types exist, and exactly which headers I need for authenticated trading requests. Also explain the heartbeat requirement — the interval, what happens if I miss it, and the GTD expiration security buffer.",
+      "expected_output": "Should explain L1 (EIP-712) to derive L2 credentials (API key/secret/passphrase), then L2 (HMAC-SHA256) for trading. Must list all 4 signature types (0=EOA, 1=POLY_PROXY, 2=GNOSIS_SAFE, 3=POLY_1271) and recommend type 3 for new users. Must list all 5 L2 headers (POLY_ADDRESS, POLY_SIGNATURE, POLY_TIMESTAMP, POLY_API_KEY, POLY_PASSPHRASE). Must explain heartbeat: post every 5 seconds with previous heartbeat_id, if no valid heartbeat within 10 seconds (5s buffer) all open orders are cancelled. Must explain GTD 60-second security threshold buffer: for N-second effective lifetime use now + 60 + N.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need to authenticate with the Kalshi API and place a limit order to buy 5 YES contracts at 42 cents on a market with ticker KXHIGHLOW-26MAY09. Write me the Python code that handles the RSA-PSS signing correctly, including how to strip query parameters from the path before signing. Also explain the V2 vs V1 order format and which I should use.",
+      "expected_output": "Should include RSA-PSS signing code with timestamp+method+path (stripping query params), correct headers (KALSHI-ACCESS-KEY, KALSHI-ACCESS-SIGNATURE, KALSHI-ACCESS-TIMESTAMP), V2 order format with book_side/outcome_side/count_fp/price_dollars, recommendation to use V2, client_order_id for dedup.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Compare how Polymarket and Kalshi handle the maker vs taker distinction. For each platform: who pays fees, how fees are calculated, whether there are maker incentives, how orderbooks differ, and how to guarantee you're always the maker. I'm deciding between the two platforms for running a market making strategy.",
+      "expected_output": "Should compare: Polymarket (makers 0 fee + rebates, takers pay C*feeRate*p*(1-p), HAS post_only with postOnly:true / INVALID_POST_ONLY_ORDER, standard bid/ask orderbook) vs Kalshi (no explicit maker/taker labels but limit orders = maker, market = taker, DOES NOT have post-only — no post_only flag available, bids-only orderbook with implied asks via $1.00 complement, RFQ adds pre-trade layer, fee rounding mechanism, order groups for risk management). CRITICAL: Must correctly state that Polymarket has post-only and Kalshi does not.",
+      "files": []
+    }
+  ]
+}

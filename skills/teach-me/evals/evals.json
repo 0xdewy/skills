@@ -1,0 +1,99 @@
+[
+  {
+    "id": 1,
+    "prompt": "teach me about this codebase",
+    "context": "A Python project with a README, tests, and 5-10 source files",
+    "expected_output": "Hook in 2-3 sentences, Mermaid diagram inline as fenced code block, ends with a Prediction question, waits for response",
+    "expectations": [
+      "analyze.py is run before first response",
+      "First response contains a specific hook sentence (not a generic file listing)",
+      "A Mermaid diagram appears inline as a fenced code block (not as a file path)",
+      "No HTML files are created or opened",
+      "No xdg-open, open, or cmd start commands are run",
+      "A Socratic question is asked at end of first response",
+      "Response does not dump analyze.py JSON output"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "how does the authentication flow work?",
+    "context": "A web application with an auth module",
+    "expected_output": "Skill triggers, generates a sequence diagram inline in Mermaid, explains WHY not just WHAT, asks a Prediction or Application question",
+    "expectations": [
+      "Skill triggers on 'how does X work' pattern with learning intent",
+      "A sequence diagram appears inline as a Mermaid code block",
+      "Explanation includes why the code is structured this way, not just what it does",
+      "Code is quoted with file:line references",
+      "A question is asked before the full explanation is delivered",
+      "No HTML file is created"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "what does process_user() return?",
+    "context": "Any Python project with a process_user function",
+    "expected_output": "Skill does NOT trigger — this is a single factual function query without learning intent",
+    "expectations": [
+      "Skill does not trigger",
+      "analyze.py is not run",
+      "Response is a direct answer to the question",
+      "No Socratic questioning in the response",
+      "No Mermaid diagrams generated",
+      "No DONE: completion signal"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "walk me through how the data pipeline works",
+    "context": "An ETL project with multiple pipeline stages",
+    "expected_output": "Full learning arc: hook, calibration question, structural diagram, core walkthrough, threads offered",
+    "expectations": [
+      "Skill triggers on 'walk me through' pattern",
+      "analyze.py runs first",
+      "Calibration question is asked in Phase 2",
+      "Learner's answer to calibration changes depth and vocabulary of subsequent explanations",
+      "At least one Mermaid diagram appears inline in the session",
+      "Code lines quoted with file:line references"
+    ]
+  },
+  {
+    "id": 5,
+    "prompt": "fix the bug in user_validator.py",
+    "context": "Any project",
+    "expected_output": "Skill does NOT trigger — direct edit/fix request",
+    "expectations": [
+      "Skill does not trigger",
+      "No analyze.py run",
+      "No Socratic questions asked",
+      "Response addresses the bug directly"
+    ]
+  },
+  {
+    "id": 6,
+    "prompt": "teach me",
+    "context": "An empty directory with no code files",
+    "expected_output": "analyze.py runs, finds no code, skill asks one focused question: 'What are we diving into today?'",
+    "expectations": [
+      "analyze.py is run",
+      "No crash or error on empty directory",
+      "A single focused question is asked",
+      "No assumptions made about what to teach",
+      "No HTML files created"
+    ]
+  },
+  {
+    "id": 7,
+    "prompt": "show me the dependency graph",
+    "context": "A multi-module project",
+    "expected_output": "code-graph.py runs with --type dep --format mermaid, output pasted inline as Mermaid, explanation of what the graph reveals about module coupling",
+    "expectations": [
+      "Skill triggers on 'dependency graph' phrase",
+      "code-graph.py is called with --type dep --format mermaid",
+      "Mermaid output is pasted inline as a fenced code block",
+      "If output >25 nodes, graph is distilled to most connected modules",
+      "Explanation follows the diagram about what the dependencies reveal",
+      "No HTML file is created",
+      "No browser command is run"
+    ]
+  }
+]
