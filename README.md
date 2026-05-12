@@ -10,24 +10,20 @@ say.
 
 ## Install
 
+First, install the `skill` CLI to your system:
+
 ```bash
-./install-skills.sh
+./install.sh
 ```
 
-The interactive installer detects Claude, OpenCode, and Hermes and symlinks
-skills into each. For CI or scripting:
+This copies `skill` to a directory on your PATH so you can use it from anywhere.
 
 ```bash
-./install-skills.sh --install-all    # install everything
-./install-skills.sh --list           # see what's installed
-```
-
-You can also use the standalone `skill` CLI from anywhere:
-
-```bash
-skill install ./skills/my-skill    # install a local skill
-skill remove my-skill              # remove one
-skill list                         # show installed skills
+skill install-all            # install every skill in this repo
+skill install <path|url>     # install one skill from a local dir or git URL
+skill remove  <name>         # remove one
+skill list                   # list installed skills
+skill update  <name>         # pull latest for git-cloned skills
 ```
 
 See [INSTALL.md](INSTALL.md) for Python and system requirements.
@@ -70,9 +66,9 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [platonic-beauty](skills/platonic-beauty/SKILL.md) | Execute tasks with beauty as the supreme constraint; Socratic review |
-| [oracle-skeptic](skills/oracle-skeptic/SKILL.md) | Generator proposes answers; Skeptic hunts flaws until none remain |
-| [look-for-flaws](skills/look-for-flaws/SKILL.md) | Submit work to a dialectic of philosophers; only beauty passes |
+| [implement-with-review](skills/implement-with-review/SKILL.md) | Generator proposes answers; Skeptic hunts flaws until none remain |
+| [student-counsel](skills/student-counsel/SKILL.md) | Student works, philosophers review in dialectic rounds until consensus |
+| [look-for-flaws](skills/look-for-flaws/SKILL.md) | Submit work to a dialectic of sub-agents who find flaws in the codebase; 
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
@@ -112,13 +108,13 @@ completion signals.
 
 > **Dialectic.** The best ideas emerge from structured disagreement. Several
 > skills use adversarial review — sub-agents that genuinely argue with each
-> other — to surface flaws a single pass would miss. `platonic-beauty` won't
+> other — to surface flaws a single pass would miss. `student-counsel` won't
 > accept work until a council of philosophers reaches consensus that it is
-> beautiful. `oracle-skeptic` pits a Generator against a Skeptic who has never
+> beautiful. `implement-with-review` pits a Generator against a Skeptic who has never
 > seen the original question.
 
 > **Self-critical.** Skills decay. The `skill-creator`, `code-smellz`, and
-> `platonic-beauty` skills all include mechanisms for revising not just the
+> `student-counsel` skills all include mechanisms for revising not just the
 > output but the process itself. A skill that can't improve itself is already
 > obsolete.
 

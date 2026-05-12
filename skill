@@ -17,16 +17,22 @@ usage() {
 skill — install AI coding skills from any directory
 
 Usage:
-  skill install <path|git-url>   Install a skill by local path or git URL
-  skill remove  <name>           Remove an installed skill
-  skill list                     List all installed skills
-  skill update  <name>           Pull latest (git-cloned skills) or no-op (symlinked)
+  skill install      <path|git-url>   Install a skill by local path or git URL
+  skill install-all  [repo-path]      Install all skills from a repo (default: ./skills/)
+  skill remove       <name>           Remove an installed skill
+  skill remove-all                    Remove all installed skills
+  skill reinstall-all [repo-path]     Remove all then reinstall from repo
+  skill list                          List all installed skills
+  skill update       <name>           Pull latest (git-cloned skills) or no-op (symlinked)
 
 Examples:
   skill install ./my-skill
   skill install https://github.com/user/my-skill
   skill install git@github.com:user/my-skill.git
+  skill install-all
+  skill install-all /path/to/repo
   skill remove  my-skill
+  skill remove-all
   skill list
   skill update  my-skill
 EOF
@@ -225,13 +231,127 @@ cmd_update() {
     fi
 }
 
+cmd_install_all() {
+    local repo_path="${1:-./skills}"
+
+    if [[ ! -d "$repo_path" ]]; then
+        _red "Skills directory not found: $repo_path"
+        exit 1
+    fi
+
+    local -a skills=()
+    while IFS= read -r -d '' dir; do
+        skills+=("$dir")
+    done < <(find "$repo_path" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+
+    if [[ ${#skills[@]} -eq 0 ]]; then
+        _red "No skill directories found in $repo_path"
+        exit 1
+    fi
+
+    echo "Found ${#skills[@]} skills in $repo_path"
+    echo ""
+    printf 'Install all of them? [y/N] '
+    read -r answer
+    if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 0
+    fi
+
+    mkdir -p "$CENTRAL_STORE"
+
+    local count=0 failed=0
+    for dir in "${skills[@]}"; do
+        local name
+        name=$(basename "$dir")
+        if [[ ! -f "$dir/SKILL.md" ]]; then
+            _yellow "Skipping $name — no SKILL.md found"
+            (( ++failed )) || true
+            continue
+        fi
+        _install_one "$dir" "$name"
+        (( ++count )) || true
+    done
+
+    echo ""
+    _green "Installed $count skills."
+    [[ $failed -gt 0 ]] && _yellow "Skipped $failed directories (no SKILL.md)."
+}
+
+cmd_remove_all() {
+    if [[ ! -d "$CENTRAL_STORE" ]]; then
+        echo "No skills installed."
+        return
+    fi
+
+    local -a installed=()
+    while IFS= read -r -d '' entry; do
+        installed+=("$(basename "$entry")")
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
+
+    if [[ ${#installed[@]} -eq 0 ]]; then
+        echo "No skills installed."
+        return
+    fi
+
+    echo "This will permanently remove ${#installed[@]} installed skills."
+    printf 'Type "yes" to confirm: '
+    read -r answer
+    if [[ "$answer" != "yes" ]]; then
+        echo "Aborted."
+        exit 0
+    fi
+
+    local count=0
+    for name in "${installed[@]}"; do
+        _unlink_from_tools "$name"
+        local central="$CENTRAL_STORE/$name"
+        if [[ -L "$central" ]]; then
+            rm "$central"
+        elif [[ -d "$central" ]]; then
+            rm -rf "$central"
+        fi
+        (( ++count )) || true
+    done
+
+    _green "Removed $count skills."
+}
+
+cmd_reinstall_all() {
+    if [[ -d "$CENTRAL_STORE" ]]; then
+        cmd_remove_all
+    fi
+    echo ""
+    cmd_install_all "$@"
+}
+
+_install_one() {
+    local source="$1"
+    local name="$2"
+
+    local central="$CENTRAL_STORE/$name"
+
+    if [[ -L "$central" ]] || [[ -e "$central" ]]; then
+        _unlink_from_tools "$name"
+        [[ -L "$central" ]] && rm "$central"
+        [[ -d "$central" ]] && rm -rf "$central"
+    fi
+
+    ln -s "$(realpath "$source")" "$central"
+    _link_to_tools "$name" > /dev/null
+    _green "  ✓ $name"
+}
+
 # ── dispatch ──────────────────────────────────────────────────────────────────
 
 case "${1:-}" in
-    install) shift; cmd_install "$@" ;;
-    remove)  shift; cmd_remove  "$@" ;;
-    list)    cmd_list ;;
-    update)  shift; cmd_update  "$@" ;;
+    install)   shift; cmd_install "$@" ;;
+    install-all) shift; cmd_install_all "$@" ;;
+    remove)    shift; cmd_remove  "$@" ;;
+    remove-all) cmd_remove_all ;;
+    reinstall-all) shift; cmd_reinstall_all "$@" ;;
+    list)      cmd_list ;;
+    update)    shift; cmd_update  "$@" ;;
     -h|--help|help|"") usage ;;
     *) _red "Unknown command: $1"; echo; usage; exit 1 ;;
 esac
