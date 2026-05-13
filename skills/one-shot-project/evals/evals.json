@@ -1,0 +1,51 @@
+{
+  "skill_name": "one-shot-project",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "build a CLI todo app in Python from scratch — it should support add, list, complete, and delete",
+      "expected_output": "Architect phase defines modules and contracts, PM dispatches 3 parallel implementers (minimal/robust/feature-complete), each reviewed, tester validates, PM iterates up to 5 rounds.",
+      "expectations": [
+        "Architect phase produces module definitions with input/output contracts",
+        "3 implementer agents are spawned in parallel, each with a distinct philosophy",
+        "Each implementer's output is reviewed before tester validation",
+        "Tester runs the project and reports pass/fail status",
+        "PM loop iterates if tests fail — targeted revisions, not full rewrite",
+        "DONE: signal includes output path to the final project"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "create a complete web scraper service that extracts product prices from e-commerce sites and stores them in SQLite",
+      "expected_output": "Full project with modules defined (scraper, database, CLI/API), built by parallel implementers, tested, and validated.",
+      "expectations": [
+        "Architect identifies distinct modules: HTTP fetching, HTML parsing, database storage, CLI interface",
+        "Implementers receive contracts specifying exact function signatures and data types",
+        "Reviewers flag issues before tester runs — at least one revision per implementer",
+        "Tester verifies against acceptance criteria from the original prompt",
+        "Final output includes a working project that builds and runs"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "fix the typo in README.md line 42 — change 'recieve' to 'receive'",
+      "expected_output": "Does NOT trigger one-shot-project. This is a single-file, single-line edit — one obvious solution.",
+      "expectations": [
+        "One-shot-project is NOT triggered",
+        "No architect, PM, or implementer agents are spawned",
+        "Fix is applied directly without orchestration",
+        "Response is minimal: confirms the fix or shows the diff"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "explain what this existing Express.js middleware does",
+      "expected_output": "Does NOT trigger one-shot-project. This is a code explanation question about existing code, not a build-from-scratch request.",
+      "expectations": [
+        "One-shot-project is NOT triggered",
+        "No project is generated — this is read-only explanation",
+        "Response is a direct explanation of the middleware's purpose and behavior"
+      ]
+    }
+  ]
+}

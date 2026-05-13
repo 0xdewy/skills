@@ -1,10 +1,10 @@
 # Skills
 
-AI behavior packs that transform coding agents into specialized roles. Spawn a
-dialectic council that debates your implementation, or a Playwright tester that
-exercises every feature of your app without writing a single assertion. Skills
-are not prompt templates — they teach agents *how* to work, not just what to
-say.
+AI behavior packs that coding agents can load for specialized roles — spawning a
+dialectic council to debate an implementation, or a Playwright tester that
+exercises every feature of an app without writing a single assertion. Skills
+are closer to workflows than prompt templates: they define phases, roles, and
+completion signals, not just what to say.
 
 ---
 
@@ -30,7 +30,6 @@ See [INSTALL.md](INSTALL.md) for Python and system requirements.
 
 ---
 
-## How Skills Work
 
 Every skill declares when it activates and when it stays silent:
 
@@ -40,7 +39,7 @@ description: Does X. TRIGGER on: "audit my design", "fix the UI".
 ```
 
 When your message matches a TRIGGER phrase, the agent loads that skill.
-When it matches a SKIP phrase, the agent ignores it. That's the contract.
+When it matches a SKIP phrase, the agent ignores it. That's the idea.
 
 ```
 You: "audit my app's design"
@@ -56,7 +55,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [implementer](skills/implementer/SKILL.md) | Implement → Review → Fix loop until 10/10 quality |
+| [implementer](skills/implementer/SKILL.md) | Implement → blind Skeptic pass + scored Review → Fix loop until 10/10 quality |
 | [one-shot-project](skills/one-shot-project/SKILL.md) | Full project builder: Architect, PM, parallel implementers, tester |
 | [code-smellz](skills/code-smellz/SKILL.md) | Parallel bug-hunter, simplifier, optimizer, and security auditor |
 | [brainstormers](skills/brainstormers/SKILL.md) | Dialectical thinker sub-agents debate ideas until convergence |
@@ -66,9 +65,8 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [implement-with-review](skills/implement-with-review/SKILL.md) | Generator proposes answers; Skeptic hunts flaws until none remain |
 | [student-counsel](skills/student-counsel/SKILL.md) | Student works, philosophers review in dialectic rounds until consensus |
-| [look-for-flaws](skills/look-for-flaws/SKILL.md) | Submit work to a dialectic of sub-agents who find flaws in the codebase; 
+| [look-for-flaws](skills/look-for-flaws/SKILL.md) | Submit work to a dialectic of sub-agents who find flaws in the codebase |
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
@@ -81,7 +79,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [teach-me](skills/teach-me/SKILL.md) | Socratic masterclass on any codebase with Mermaid diagrams |
+| [teach-me](skills/teach-me/SKILL.md) | Learn any codebase with Mermaid diagrams |
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
 | [prediction_markets](skills/prediction_markets/SKILL.md) | Polymarket and Kalshi: APIs, CLOB trading, auth, order types |
 | [web-scraping](skills/web-scraping/SKILL.md) | Playwright, httpx, anti-bot evasion, pagination, structured extraction |
@@ -95,28 +93,27 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 ---
 
-## Philosophy
+## Design Principles
 
-Skills are not prompt templates. A prompt template says *what to say*. A skill
-says *how to think* — it defines phases, roles, convergence criteria, and
-completion signals.
+A few things I've found useful when building skills:
 
-> **Composable.** Skills call skills. Every skill emits a `DONE:` completion
+> **Composable.** Skills can call skills. Every skill emits a `DONE:` completion
 > signal so orchestrators know when a sub-agent has finished and what it
 > produced. One skill can spawn another — `code-smellz` dispatches four parallel
 > auditors, each of which is itself a skill-like role.
 
-> **Dialectic.** The best ideas emerge from structured disagreement. Several
+> **Dialectic.** Structured disagreement often surfaces what agreement misses. Several
 > skills use adversarial review — sub-agents that genuinely argue with each
 > other — to surface flaws a single pass would miss. `student-counsel` won't
 > accept work until a council of philosophers reaches consensus that it is
-> beautiful. `implement-with-review` pits a Generator against a Skeptic who has never
-> seen the original question.
+> beautiful. `implementer` includes a blind Skeptic pass that reviews the
+> output without seeing the original question — flaws that survive context
+> collapse under it.
 
-> **Self-critical.** Skills decay. The `skill-creator`, `code-smellz`, and
-> `student-counsel` skills all include mechanisms for revising not just the
-> output but the process itself. A skill that can't improve itself is already
-> obsolete.
+> **Self-critical.** Several skills — `skill-creator`, `code-smellz`,
+> `student-counsel` — include mechanisms for revising not just the output
+> but the process itself. A skill that can't improve itself misses its own
+> potential.
 
 ---
 

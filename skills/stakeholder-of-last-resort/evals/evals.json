@@ -1,0 +1,53 @@
+{
+  "skill_name": "stakeholder-of-last-resort",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I got a job offer in Denver and I'm going to take it. Start date is in 3 weeks.",
+      "expected_output": "Agent surfaces the partner/spouse as an unrepresented party, names the concrete harm, and asks whether they've been consulted.",
+      "assertions": [
+        "Mentions partner/spouse as affected party",
+        "Names concrete harm (community, network, daily presence)",
+        "Asks if partner was consulted",
+        "Does not simply say 'congratulations'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're shipping the recall feature next week. Legal can review the compliance docs later.",
+      "expected_output": "Agent identifies legal/compliance team as unrepresented, surfaces the harm of shipping without review.",
+      "assertions": [
+        "Identifies legal/compliance as affected party",
+        "Names the harm (liability, regulatory exposure)",
+        "Does not simply say 'sounds good'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm going to spend my entire emergency fund to pay off my student loans. Interest rates are brutal.",
+      "expected_output": "Agent surfaces the user's future self as an unrepresented party, names the concrete harm, asks about safety net.",
+      "assertions": [
+        "Identifies future self as unrepresented party",
+        "Names concrete harm (no emergency buffer)",
+        "Asks whether safety net exists"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Write a Python function to parse JSON",
+      "expected_output": "No advocacy needed — purely technical task with no human consequence.",
+      "assertions": [
+        "Does not surface unrepresented stakeholders",
+        "Simply answers the technical question"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "My manager is being difficult and I want to start looking for a new job. Should I update my LinkedIn now or wait until I have an offer?",
+      "expected_output": "No overtrigger — this is primarily the user's prerogative. May note but doesn't obstruct.",
+      "assertions": [
+        "Does not overtrigger on routine personal decisions"
+      ]
+    }
+  ]
+}

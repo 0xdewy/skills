@@ -23,3 +23,6 @@ Thumbs.db
 skills/*/node_modules/
 skills/*/__pycache__/
 skills/*/*.pyc
+
+# Episodic memory — per-installation runtime observations
+skills/*/learnings/

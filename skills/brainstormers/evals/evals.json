@@ -1,0 +1,49 @@
+{
+  "skill_name": "brainstormers",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "brainstorm ideas for a developer tool that makes CI/CD pipelines 10x faster",
+      "expected_output": "Spawns 3-5 thinker sub-agents (Einstein, Tesla, Socrates, etc.), runs debate rounds until convergence, writes IDEAS.md. Moderation does not contribute ideas.",
+      "expectations": [
+        "3-5 sub-agents are spawned simultaneously in round 1",
+        "Each thinker produces a clearly attributed argument (not merged into moderator's voice)",
+        "Thinkers respond to each other — at least one cross-examination per round after round 1",
+        "IDEAS.md is written to the working directory with debate summary and final synthesis",
+        "Moderator never contributes original ideas — only facilitates and synthesizes"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "explore this together: what would a truly decentralized social network look like?",
+      "expected_output": "Triggered by 'explore this together'. Thinkers debate across multiple rounds, IDEAS.md captures evolved thinking.",
+      "expectations": [
+        "Triggers on 'explore this together' phrasing",
+        "At least 2 rounds of debate occur (positions evolve between rounds)",
+        "IDEAS.md captures the evolution of ideas across rounds, not just final positions",
+        "DONE: signal includes path to IDEAS.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "write a Python function to sort a list in reverse",
+      "expected_output": "Does NOT trigger brainstormers. This is a direct code request with a known answer — single-solution, not creative exploration.",
+      "expectations": [
+        "Brainstormers is NOT triggered",
+        "No thinker sub-agents are spawned",
+        "No IDEAS.md is created",
+        "Response is a direct code solution without debate or ideation"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "what is 2+2?",
+      "expected_output": "Does NOT trigger. Factual lookup with known answer — no creative exploration needed.",
+      "expectations": [
+        "Brainstormers is NOT triggered",
+        "Response is '4' or equivalent direct answer",
+        "No sub-agents or debate rounds"
+      ]
+    }
+  ]
+}

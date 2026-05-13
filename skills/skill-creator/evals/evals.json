@@ -1,0 +1,61 @@
+{
+  "skill_name": "skill-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "make a skill for summarizing git diffs",
+      "expected_output": "Creates a new SKILL.md with proper frontmatter (name, description with TRIGGER/SKIP, license, metadata), phased structure, and DONE: completion signal. Produces references/ if needed.",
+      "expectations": [
+        "New SKILL.md file is created with YAML frontmatter delimited by ---",
+        "description field contains TRIGGER on: and SKIP on: clauses",
+        "Skill body uses phased architecture (Phase 0, Phase 1, etc.)",
+        "Skill ends with a DONE: completion signal",
+        "Name is hyphenated-lowercase, description is a single sentence"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "improve my skill — the frontend-twerkin skill triggers too often on casual conversation",
+      "expected_output": "Loads the target skill, analyzes its description for trigger/skip pattern quality, proposes specific description refinements to tighten activation.",
+      "expectations": [
+        "Reads the target skill's SKILL.md before proposing changes",
+        "Proposes specific, word-level changes to description field",
+        "Preserves existing skill functionality while narrowing triggers",
+        "Adds or sharpens SKIP on: clauses to exclude false positives"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "run evals on the code-smellz skill",
+      "expected_output": "Reads the skill's evals/evals.json, dispatches evals, measures pass rate, reports failures with specific expectations that weren't met.",
+      "expectations": [
+        "Reads evals/evals.json from the target skill's directory",
+        "Reports pass/fail count with specific expectation mismatch details",
+        "Identifies which test cases passed and which failed",
+        "Does not modify the target skill's SKILL.md unless user requests"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I have a useful skill for debugging Python imports — can you help me share it as a skill?",
+      "expected_output": "Recognizes this as a publishing request, validates the skill structure, guides through packaging steps.",
+      "expectations": [
+        "Recognizes 'share it as a skill' as a publishing trigger",
+        "Validates SKILL.md frontmatter completeness before publishing guidance",
+        "Guides through versioning, testing, and distribution steps",
+        "Does NOT trigger on 'useful skill' as a casual phrase"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "that's a useful skill you have there — can you explain what a skill is?",
+      "expected_output": "Does NOT trigger skill-creator. 'useful skill' is casual language, not a creation request. Explains skills conceptually without launching the creation workflow.",
+      "expectations": [
+        "Skill-creator is NOT triggered",
+        "Response explains what skills are without entering a creation phase",
+        "No SKILL.md file is generated",
+        "No TRIGGER/SKIP analysis is performed"
+      ]
+    }
+  ]
+}

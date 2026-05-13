@@ -1,0 +1,53 @@
+{
+  "skill_name": "student-counsel",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "make this error handling code beautiful",
+      "expected_output": "Student executes the task (rewrites error handling), then Socrates convenes a dialectic of philosophers who review in rounds. Work only passes when philosophers reach consensus. Dialectic transcripts written to ./dialectic/.",
+      "expectations": [
+        "Student produces a complete rewrite of the error handling — not bullet points or suggestions",
+        "Socrates is spawned as a subagent to convene the dialectic after student work is complete",
+        "At least Socrates and Aristotle (both philosopher subagents) are spawned for review",
+        "Dialectic transcripts are written to ./dialectic/dialectic-round-N.md",
+        "Final output includes the north star sentence ('The Form sought: ...') and round count",
+        "DONE: The work is beautiful or DONE: AS CLOSE TO THE FORM AS MORTAL HANDS CAN ACHIEVE"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "student-counsel: design a CLI interface for a task runner — make it perfect",
+      "expected_output": "Student designs the CLI, dialectic reviews with design-specific beauty criteria (necessity, visual hierarchy, element justification).",
+      "expectations": [
+        "Triggers on 'student-counsel' and 'perfect' phrasing",
+        "Student reads beauty-criteria.md before beginning work",
+        "Student states a north star sentence before producing work",
+        "Dialectic evaluates against the stated Form — not generic quality",
+        "Revision requests from philosophers are specific and actionable"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "fix the null pointer in src/auth.ts — it's urgent, production is down right now",
+      "expected_output": "Does NOT trigger student-counsel. Speed is the explicit priority — bug is fixed directly without dialectic.",
+      "expectations": [
+        "Student-counsel is NOT triggered",
+        "No north star sentence or Form language appears",
+        "No dialectic directory is created in the workspace",
+        "No philosopher subagents are spawned",
+        "Bug is fixed directly with minimal ceremony"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "what does git status do?",
+      "expected_output": "Does NOT trigger. Factual question with no beauty-seeking or refinement intent.",
+      "expectations": [
+        "Student-counsel is NOT triggered",
+        "No philosopher subagents or dialectic rounds",
+        "Response is a short factual answer",
+        "No reference to Socrates, Aristotle, Plotinus, or Diotima"
+      ]
+    }
+  ]
+}
