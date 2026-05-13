@@ -27,6 +27,11 @@ metadata:
 
 ## What This Does
 
+Read `$SKILL_DIR/learnings/episodic.md` (≤10 lines, compacted). Load
+`skills/common/patterns/orchestration.md` and
+`skills/common/patterns/activation.md` for cross-skill patterns.
+See `skills/common/episodic-memory-guide.md` for the full memory design.
+
 Four subagents run in parallel, each with a specific mandate:
 
 | Agent | Finds |

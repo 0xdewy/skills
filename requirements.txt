@@ -1,0 +1,38 @@
+# requirements.txt — Python dependencies for all skills in this repo.
+# Grouped by skill. Install with: pip install -r requirements.txt
+#
+# Note: 'peewee' is NOT listed here directly. It is a transitive dependency of
+# yfinance and is installed automatically when yfinance is installed. It has no
+# direct imports in this codebase — do not remove it from your virtualenv.
+
+# ── evm-hack-scraper ─────────────────────────────────────────────────────────
+# scripts: hack_scraper.py, verify_hacks.py, fetch_abis.py, analyze_tx.py,
+#          enrich_approved.py, capture_traces.py
+requests>=2.31.0
+python-dotenv>=1.0.0
+playwright>=1.44.0       # enrich_approved.py (Twitter/X fetch)
+evmole>=0.3.0            # fetch_abis.py (bytecode ABI extraction)
+
+# ── energy-rules-everything-around-me ────────────────────────────────────────
+# scripts: fetch_data.py, fetch_chart_data.py, fetch_historical.py
+yfinance>=0.2.40
+
+# ── get-me-a-job ─────────────────────────────────────────────────────────────
+# scripts: discover_jobs.py, scrape_job.py, scan_boards.py, export_pdf.py
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+# playwright already listed above (shared)
+weasyprint>=61.0         # export_pdf.py
+markdown>=3.6            # export_pdf.py
+
+# ── smartcontract-poc ────────────────────────────────────────────────────────
+# scripts: scrape_immunefi.py
+# requests already listed above
+# playwright already listed above
+# beautifulsoup4 already listed above
+
+# ── web-scraping (skill patterns / examples) ─────────────────────────────────
+# referenced in SKILL.md examples and grade.py tests
+curl-cffi>=0.7.0         # CF-bypass pattern (curl_cffi)
+playwright-stealth>=1.0.6  # stealth mode for anti-bot evasion

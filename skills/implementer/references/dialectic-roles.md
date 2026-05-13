@@ -1,7 +1,7 @@
 # Dialectic Roles
 
-This file defines the philosopher roles used in the platonic-beauty skill's
-dialectic process. It is referenced by the platonic-beauty skill at
+This file defines the philosopher roles used in the student-counsel skill's
+dialectic process. It is referenced by the student-counsel skill at
 `$SKILL_DIR/references/dialectic-roles.md`.
 
 ## Socrates

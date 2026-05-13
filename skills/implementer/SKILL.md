@@ -1,55 +1,80 @@
 ---
 name: implementer
 description: >-
-  Iteratively implements a plan and validates the result through an
-  Implementer → Reviewer → Fixer loop until the work reaches 10/10 quality.
-  TRIGGER on: "implement this plan", "build it", "write the code", "start
-  implementation", "implement the feature", "implement it", "begin build",
-  "start building", "carry out the plan", "execute the plan".
+  Iteratively implements and refines work through an adversarial quality loop.
+  Runs Implementer → Reviewer → Fixer until the work passes. The Reviewer does
+  two passes: a blind Skeptic pass (sees only the output, finds the single
+  strongest flaw — adapted from implement-with-review) and, for code tasks, a
+  scored 0–10 pass against the original plan. Halted when the Reviewer can find
+  no remaining flaws or the loop cap is reached. TRIGGER on: "implement this
+  plan", "build it", "write the code", "start implementation", "implement the
+  feature", "implement it", "begin build", "start building", "carry out the
+  plan", "execute the plan", "stress-test this answer", "find flaws until none
+  remain", "adversarial refinement", "refine until right", "best possible
+  answer", "make this bulletproof", "keep iterating until solid",
+  "implement-with-review", "oracle-skeptic", "oracle skeptic".
   SKIP on: casual mentions of implementation, questions about how to implement
-  without a plan to execute, single-line code generation requests.
+  without a plan to execute, single-line code generation requests, simple
+  factual lookups, direct code edits, formatting tasks, file reads, or anything
+  where one-shot answers are clearly sufficient.
 license: MIT
 metadata:
-  author: opencode
-  version: 1.1.0
+  author: opencode (Skeptic pass adapted from iamky1e's implement-with-review)
+  version: 2.0.0
   category: productivity
   tags:
     - implementation
     - iterative
     - review
     - quality
+    - adversarial
+    - refinement
     - subagent
     - orchestration
+    - multi-agent
 ---
 
 # Implementer Skill
 
-An iterative, subagent-driven implementation skill. The loop runs until a
-reviewer confirms the work is 10/10 ready for the user.
+An iterative, subagent-driven refinement loop. Work is produced, reviewed
+(including a blind adversarial pass), fixed, and re-reviewed — repeating until
+the reviewer finds nothing left to fix.
 
 ## Loop Architecture
 
 ```
-IMPLEMENTER → REVIEWER → [if not 10/10] → FIXER → IMPLEMENTER → REVIEWER → ...
-                                                              ↑
-                                              (loop until verdict = DONE or MAX_LOOPS)
+              ┌─────────────────────────────────────────────┐
+              │                                             │
+              v                                             │
+IMPLEMENTER → REVIEWER → [if not 10/10] → FIXER → IMPLEMENTER → ...
+                    ↑                                   │
+                    └── (loop until verdict = DONE or MAX_LOOPS)
 ```
 
-- **Implementer**: Executes the plan, writes code, produces artifacts
-- **Reviewer**: Analyzes, runs tests, runs code, renders verdict
+- **Implementer**: Executes the plan, writes code or produces the answer
+- **Reviewer**: Runs two passes — a blind Skeptic pass (sees only the output) to
+  find the strongest flaw, then a scored pass against the original plan (for
+  code tasks). Renders verdict.
 - **Fixer** (only spawned on non-DONE verdict): Analyzes failures, produces a
   targeted fix plan, then yields back to Implementer
+
+The blind Skeptic pass is adapted from implement-with-review: the reviewer sees
+only the output, not the original question. A truly robust answer should be
+defensible on its own terms. This catches unsupported claims, internal
+contradictions, and hidden assumptions that context-aware review would excuse.
 
 ---
 
 ## Phase 1: Understand the Ask
 
 Read whatever the user has provided. Capture:
-- The plan or task description
+- The plan, question, or task description
 - Any existing files, specs, or context
-- Output location expectations
+- Whether this is a code task (produces files, has a build/run step) or a text
+  task (produces an answer/argument/plan)
 
-If no plan exists, ask the user to provide one before proceeding.
+If no plan or question exists, ask the user to provide one before proceeding.
+Set `MAX_LOOPS=8` for code tasks, `MAX_LOOPS=6` for text tasks.
 
 ---
 
@@ -61,7 +86,7 @@ Create working directory and set loop state:
 mkdir -p /tmp/implementer-loop/{implementer,reviewer,fixer,outputs}
 ```
 
-Set `LOOP_COUNT=1`, `MAX_LOOPS=8`.
+Set `LOOP_COUNT=1`.
 
 Initialize `outputs/summary.json`:
 ```json
@@ -78,7 +103,7 @@ Initialize `outputs/summary.json`:
 
 ---
 
-## Phase 3: Implementer
+## Phase 3: Implementation
 
 Spawn a subagent:
 
@@ -92,23 +117,30 @@ WORKING DIRECTORY: /tmp/implementer-loop/
 
 Read any existing context files in /tmp/implementer-loop/ before starting.
 
-Your job is to implement the plan fully. Produce:
+Your job is to produce the best possible version of what was asked for.
 
+FOR CODE TASKS — produce:
 1. All source code, scripts, configs needed
 2. A README.md explaining how to build and run
-3. TEST_RESULTS.md documenting what you tested manually
+3. A TEST_RESULTS.md documenting what was tested manually
 4. An IMPLEMENTATION_NOTES.md covering key decisions and why
+
+FOR TEXT TASKS — produce:
+1. The answer, argument, or plan — thorough, well-structured, no hedging
+2. Make claims only when you can support them. Acknowledge genuine uncertainty.
+3. Avoid unstated assumptions.
 
 If this is loop > 1, also read /tmp/implementer-loop/fixer/fix-plan.md to
 understand what the fixer identified and address those specific issues.
-Do NOT re-implement from scratch — fix only what was broken.
+Do NOT rewrite from scratch — fix only what was identified as broken.
 
 Output everything to /tmp/implementer-loop/implementer/
 
 IMPORTANT: Before declaring done, verify:
-- The code compiles or runs without errors
-- README instructions are accurate and complete
-- All promised features are present
+- For code: the code compiles or runs without errors, all promised features are
+  present, README instructions are accurate
+- For text: the answer is consistent, non-circular, and addresses the core
+  question directly
 
 End your final message with exactly: IMPLEMENTER_DONE
 ```
@@ -119,7 +151,7 @@ If the subagent returns without `IMPLEMENTER_DONE`, re-spawn it with:
 
 ---
 
-## Phase 4: Reviewer
+## Phase 4: Review
 
 Spawn a subagent:
 
@@ -133,10 +165,19 @@ WORKING DIRECTORY: /tmp/implementer-loop/
 
 Read everything in /tmp/implementer-loop/implementer/ thoroughly.
 
-Your job is to critically analyze the implementation and determine if it is
-10/10 ready for the user.
+MANDATORY CHECKS — execute all applicable ones:
 
-MANDATORY CHECKS — execute all of these, not just code inspection:
+SKEPTIC PASS (always run first — read only the implementation, not the
+original task above):
+0. Find the single strongest flaw, gap, internal contradiction, unsupported
+   claim, or dangerous unstated assumption in this output. Quote the exact
+   phrase. Explain why it is flawed in one sentence. If — after genuinely
+   trying — you cannot find a remaining flaw worth raising, output exactly:
+   Skeptic: I cannot find a remaining flaw.
+   If you do find a flaw, output as:
+   Skeptic: FLAW: "[exact quote]" REASON: [one sentence]
+
+CONTEXT-AWARE PASS (for code tasks with a spec):
 1. CORRECTNESS — Does it actually solve the stated task?
 2. COMPLETENESS — Are all features from the plan present?
 3. RUNS WITHOUT ERROR — Execute the code. Does it start and run without crashes?
@@ -145,23 +186,30 @@ MANDATORY CHECKS — execute all of these, not just code inspection:
 6. CODE QUALITY — Are there bugs, anti-patterns, or security issues?
 7. DOCUMENTATION — Is it clear how to run and use?
 
-For each check: rate 0–10 with a one-sentence justification.
-Compute overall score as the weighted average (correctness 30%, completeness 20%,
-runs without error 20%, tests pass 10%, edge cases 10%, code quality 5%, docs 5%).
+For text tasks, skip checks 3-4 (no code to execute). Instead add:
+3T. COHERENCE — Do the claims connect logically? Any contradictions?
+4T. COMPLETENESS — Does it address the full scope of the question?
+
+For each applicable check: rate 0–10 with a one-sentence justification.
+Compute overall score as weighted average (correctness 30%, completeness 20%,
+runs 20%, tests 10%, edge cases 10%, code quality 5%, docs 5%).
+For text tasks use: coherence 30%, completeness 20%, correctness 25%,
+edge cases 10%, quality 15%.
 
 Write your full assessment to:
 /tmp/implementer-loop/reviewer/assessment-loop{LOOP_COUNT}.md
 
 Format requirements:
-- Rate every dimension explicitly
+- Skeptic pass result first
+- Rate every applicable dimension explicitly
 - For any dimension rated below 7, explain why
 - If overall score < 10, list specific gaps in order of severity
 
 End your final message with exactly:
-REVIEWER_DONE: VERDICT={DONE|NEEDS_WORK} SCORE={X}/10
+REVIEWER_DONE: SKEPTIC={FLAW|CLEAN} VERDICT={DONE|NEEDS_WORK} SCORE={X}/10
 ```
 
-If the subagent returns without `REVIEWER_DONE: VERDICT=... SCORE=...`,
+If the subagent returns without `REVIEWER_DONE: ... VERDICT=... SCORE=...`,
 re-spawn it with the same prompt.
 
 ---
@@ -170,19 +218,23 @@ re-spawn it with the same prompt.
 
 Read `/tmp/implementer-loop/reviewer/assessment-loop{LOOP_COUNT}.md`.
 
-Extract the VERDICT and SCORE lines.
+Extract the SKEPTIC, VERDICT, and SCORE fields.
+
+**The Skeptic result overrides:** if the Skeptic pass found a flaw (SKEPTIC=FLAW),
+the Reviewer MUST report VERDICT=NEEDS_WORK regardless of other scores. Only
+when SKEPTIC=CLEAN AND all dimensions score ≥ 7 can VERDICT=DONE.
 
 ### If VERDICT = DONE
 
 Write to `outputs/summary.json`:
 - Set `verdict` to "DONE"
 - Set `score` to the reported score
-- Set `summary` to a one-paragraph description of what was built
+- Set `summary` to a one-paragraph description of what was built/produced
 - Set `files` to the list of files in /tmp/implementer-loop/implementer/
 
 Print:
 ```
-Implementation complete. Loops: {LOOP_COUNT}. Score: {X}/10.
+Implementation complete. Loops: {LOOP_COUNT}. Score: {X}/10. Skeptic: {CLEAN|FLAW}.
 Files at: /tmp/implementer-loop/implementer/
 ```
 
@@ -190,6 +242,10 @@ Output the parseable completion signal:
 ```
 DONE: implementer delivered after {LOOP_COUNT} loop(s), score {X}/10, files at /tmp/implementer-loop/implementer/
 ```
+
+For text tasks without files, print the final answer from
+`/tmp/implementer-loop/implementer/` directly to the conversation and include
+it in the DONE signal payload.
 
 ### If VERDICT = NEEDS_WORK
 
@@ -242,7 +298,7 @@ guesswork. If a problem is "function X doesn't handle null", the fix is not
 End your final message with exactly: FIXER_DONE
 ```
 
-After Fixer completes, loop back to **Phase 3: Implementer**.
+After Fixer completes, loop back to **Phase 3: Implementation**.
 
 ---
 
@@ -252,17 +308,11 @@ This skill orchestrates subagents. It composes naturally with:
 
 **Before Review** (optional pre-flight quality pass):
 Invoke `code-smellz` to catch bugs, dead code, and security issues before the
-reviewer runs. Call it like:
-```
-Before spawning the reviewer, run code-smellz on /tmp/implementer-loop/implementer/
-```
+reviewer runs.
 
 **After DONE** (optional post-delivery validation):
 For UI work, invoke `frontend-twerkin` to exhaustively test every feature with
-Playwright, auto-fixing any failures:
-```
-After delivery, run frontend-twerkin on the delivered UI
-```
+Playwright, auto-fixing any failures.
 
 These are optional enhancements. The core loop works without them.
 
@@ -294,6 +344,11 @@ All loop artifacts live under `/tmp/implementer-loop/`:
 
 **The reviewer is the gate.** No implementation is delivered until the reviewer
 explicitly returns DONE. "Mostly works" is not done.
+
+**Blind pass catches what context excuses.** The Skeptic pass sees only the
+output — not the original question. A flaw that only context-aware review
+catches is a good catch. A flaw that blind review catches is an *necessary*
+catch. The output must stand on its own.
 
 **Fixer writes actionable plans.** "Improve error handling" is not a fix.
 "In handle_user_input() at line 47, add try/catch that returns 'Invalid input'
