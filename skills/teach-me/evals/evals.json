@@ -95,5 +95,49 @@
       "No HTML file is created",
       "No browser command is run"
     ]
+  },
+  {
+    "id": 8,
+    "prompt": "teach me about this codebase",
+    "context": "A multi-module web application with routes, services, models, and DB layers",
+    "expected_output": "Phase 1 opens with a hook sentence, then 2-3 Mermaid diagrams in order: system topology (graph TD), module dependency map (graph LR), optionally a request lifecycle (sequenceDiagram). A bridging sentence appears between diagrams. The prediction question ends Phase 1. No more than 3 diagrams appear before the prediction question.",
+    "expectations": [
+      "At least two Mermaid diagrams appear before the prediction question in Phase 1",
+      "First diagram is a system topology (graph TD or graph LR showing user → API → services → DB structure)",
+      "Second diagram shows module dependencies (graph LR), generated from code-graph.py output",
+      "A bridging sentence appears between the first and second diagram",
+      "Prediction question ends Phase 1, not a diagram",
+      "No more than 3 diagrams appear in Phase 1",
+      "No HTML file is created"
+    ]
+  },
+  {
+    "id": 9,
+    "prompt": "explore this project",
+    "context": "A Go CLI tool with cmd/, config/, and output/ directories — no significant concurrency",
+    "expected_output": "Phase 4 presents threads specific to the CLI archetype: command parsing/dispatch, configuration loading, output formatting. The generic 'concurrency model' thread does not appear because the project has no meaningful concurrency.",
+    "expectations": [
+      "Skill triggers on 'explore this project' phrase",
+      "Phase 4 threads are derived from adaptive_threads (CLI archetype), not the fixed three",
+      "At least one thread mentions command parsing, dispatch, or CLI argument handling",
+      "At least one thread mentions configuration loading or flag merging",
+      "At least one thread mentions output formatting or exit codes",
+      "The generic 'concurrency model' thread does not appear",
+      "Threads are presented as a menu before the learner chooses"
+    ]
+  },
+  {
+    "id": 10,
+    "prompt": "teach me",
+    "context": "A Python project with 8 source modules where only 2 have been discussed in the session",
+    "expected_output": "Before Phase 5, the skill identifies that >30% of L1 modules are untouched and asks exactly one gap-filling question naming the single most important untouched module. The learner can decline and the skill proceeds to Phase 5 immediately.",
+    "expectations": [
+      "A gap-filling question is asked before Phase 5 when >30% of L1 modules are untouched",
+      "Exactly one untouched module is named in the question (not a list)",
+      "The question includes a brief reason why that module matters",
+      "Learner can say 'proceed' or 'skip' and skill moves directly to Phase 5",
+      "If learner accepts, skill delivers a brief L1 orientation (2-3 sentences + at most one diagram) then continues to Phase 5",
+      "The skill does not refuse to proceed to Phase 5 if the learner declines"
+    ]
   }
 ]

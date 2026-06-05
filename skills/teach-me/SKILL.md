@@ -14,7 +14,7 @@ description: >-
 license: MIT
 metadata:
   author: 0xdewy
-  version: 4.0.0
+  version: 5.0.0
   category: education
   tags:
     - education
@@ -47,6 +47,9 @@ Do not mention it. Use the JSON to know what you're teaching:
 - `entry_points` — where to start the core walkthrough
 - `has_tests` — shapes the challenge question in Phase 5
 - `readme_summary` — what the author thinks matters
+- `project_type` + `type_signals` — shapes Phase 1 diagram selection and Phase 4 thread generation
+- `teaching_path` — ordered module list (simplest → most complex); use to sequence Phase 3 and threads
+- `adaptive_threads` — codebase-specific thread menu for Phase 4; fall back to the fixed three if absent
 
 If the directory has no code files and no README: ask one focused question — "What are we diving into today?" — then wait.
 
@@ -54,9 +57,29 @@ If analyze.py fails: proceed from `ls` and `find` directly.
 
 ---
 
+## Complexity Levels
+
+Every session moves through three levels. Use them to sequence and pace — never skip ahead.
+
+**L1 — Orientation** (what exists): the learner can name the parts and say what each one is for.
+Diagrams: system topology (`graph TD`), module dependency map (`graph LR`).
+
+**L2 — Mechanism** (how it works): the learner can trace a request or invocation from entry to exit.
+Diagrams: sequence diagram, call graph.
+
+**L3 — Mastery** (design decisions, trade-offs, extension): the learner can critique the design and propose changes.
+Diagrams: state diagrams, annotated data-flow.
+
+Phase 1 is always L1. Phase 3 bridges L1→L2. Phase 4 threads are L2→L3. Phase 5 test is pure L3.
+
+After Phase 2 calibration, announce the starting level:
+> "We'll start at L1 — getting the lay of the land — then drill into the mechanisms in [key module]."
+
+---
+
 ## Phase 1: The Hook
 
-**One surprising fact. One diagram. One question. Nothing else.**
+**One surprising fact. A visual landscape (2–3 diagrams). One question. Nothing else.**
 
 State in 2–3 sentences: what IS this system, what hard problem does it solve, and the single most surprising or elegant thing you found. Do not give an orientation overview. Do not list the files. Begin with what is interesting.
 
@@ -65,15 +88,32 @@ Strong hooks:
 
 > "The cache layer here doesn't use TTLs. It uses causal consistency — a write is only considered visible after every node has acknowledged it. That's why the read latency looks wrong until you understand what 'consistent' means here."
 
-**Immediately generate a structural map inline.** Run:
+**Then immediately show the visual landscape — always in this order:**
+
+**Diagram 1 — System topology (always first, always written manually):**
+Write a `graph TD` or `graph LR` showing the major components at the deployment/boundary level. Use `project_type` to select the right skeleton from `$SKILL_DIR/references/diagram-guide.md`. Fill in actual module names from analyze.py output. Do not run code-graph.py for this — it requires judgment about what "major component" means.
+- Web app: user → API → services → DB (+ cache, external APIs if present)
+- CLI tool: user → CLI → parser → commands → config + output
+- Library: caller → public API → core logic → utilities
+- Data pipeline: source → extract → transform → load → sink
+
+**Bridging sentence:** "Now let's see how the modules break down inside that topology."
+
+**Diagram 2 — Module dependency map (always second):**
+Run:
 
 ```bash
 python $SKILL_DIR/scripts/code-graph.py . --type dep --format mermaid
 ```
 
-Paste the Mermaid output directly as a fenced code block. If the graph has more than 25 nodes, do not paste it raw — read the output, identify the 8–10 most connected modules, and write a clean `graph TD` manually. A focused diagram beats an accurate-but-unreadable one.
+Paste the output directly as a fenced Mermaid code block. If the graph has more than 25 nodes, read the output, identify the 8–10 most connected modules, and write a clean `graph LR` manually. A focused diagram beats an accurate-but-unreadable one.
 
-End Phase 1 with exactly one Prediction question that is impossible to answer correctly without thinking:
+**Diagram 3 — Primary data flow (conditional — include only when warranted):**
+If `teaching_path` reveals a clear dominant flow (request lifecycle, pipeline stages, a dispatch chain), write a `sequenceDiagram` or `graph LR` showing how data moves through the key path. Skip this diagram for small libraries, utilities, or any codebase where there is no single dominant flow.
+
+If Diagram 3 is included, add this bridging sentence before it: "And here's the dominant path data takes through those modules."
+
+**End Phase 1 with exactly one Prediction question** that is impossible to answer correctly without thinking:
 - "Looking at this structure — which part do you think handles [key responsibility]?"
 - "Before we go further: what do you think happens when [specific scenario]?"
 
@@ -101,7 +141,7 @@ If unsure which question to ask, load `$SKILL_DIR/references/question-playbook.m
 
 ## Phase 3: The Core (2–4 Exchanges)
 
-**Find the conceptual center.** Not the largest file — the file most things flow through. Start from `entry_points` in the analyze.py output, then follow what it imports. That is where you start.
+**Find the conceptual center.** Not the largest file — the file most things flow through. Start from `entry_points` in the analyze.py output, then follow what it imports. That is where you start. Use `teaching_path` to sequence the walk — begin from the first L1 module to build vocabulary, then progress toward L3. Announce the progression explicitly: "We'll start with [simple module] to build vocabulary, then move to [complex module] where everything comes together."
 
 **Walk through the key function or class.** Structure every explanation as three parts:
 
@@ -131,10 +171,18 @@ Load `$SKILL_DIR/references/explanation-patterns.md` when choosing how to frame 
 
 ---
 
-## Phase 4: The Threads
+## Phase 4: The Threads (Adaptive)
 
-Offer exactly three threads — each described in one sentence naming what it leads to, not what it is:
+Generate the thread menu from `adaptive_threads` in the analyze.py output. Present 3–5 codebase-specific threads. Describe each in one sentence that names the destination, not the content:
 
+- "[label] — [description from adaptive_threads]"
+
+Example for a web app:
+- "The routing layer — how an HTTP request finds its handler and what middleware runs before it"
+- "The auth flow — how identity is established, where it is checked, and what happens when it is wrong"
+- "The persistence layer — how domain objects become database rows and back, and where the N+1 hides"
+
+**Fallback:** If `adaptive_threads` is empty or analyze.py failed, use the original three fixed threads:
 - "The error handling — three different failure modes and why each is caught at a different layer"
 - "The concurrency model — why this is correct under N simultaneous callers, and what the subtle invariant is"
 - "The test structure — what they're testing, what they're not, and what that tells you about priorities"
@@ -143,12 +191,32 @@ Let the learner choose. Then go deep.
 
 For each thread, the loop is:
 1. Reveal the key mechanism (3–4 sentences + code quote with `file:line`)
-2. Generate or write the diagram that makes it visible (inline Mermaid)
-3. Ask the question that forces engagement with the tradeoff or implication
+2. Generate or write the diagram that makes it visible (inline Mermaid — L2 or L3 type)
+3. Ask the question that forces engagement with the trade-off or implication
 4. Acknowledge, correct, or redirect their answer — then reveal what's underneath
 5. Offer to go deeper or pivot to another thread
 
+After each thread completes, show a brief coverage note (inline text, not a diagram):
+> "Covered so far: [✓ thread1, ✓ thread2]. Still unexplored: [thread3, thread4]. Want to continue, or jump to the test?"
+
 Load `$SKILL_DIR/references/teaching-philosophy.md` when framing explanations — especially the Why Ladder: always climb 2–3 levels above where the question was asked.
+
+---
+
+## Phase 4.5: Completeness Check
+
+Before offering Phase 5, silently review `teaching_path` from analyze.py. For each module, classify it as **Touched** (mentioned, quoted, or diagrammed during this session) or **Untouched**.
+
+If more than 30% of L1 modules are untouched, ask exactly one gap-filling question before Phase 5:
+> "Before the final test — we haven't looked at [single most important untouched module]. It's the [one sentence on why it matters]. Do you want a quick orientation, or shall we proceed to the test?"
+
+Rules:
+- Name only **one** untouched module — never list them all
+- Pick the most important one (highest connectivity, most referenced by other modules, or most surprising by name)
+- If the learner declines, proceed to Phase 5 immediately without comment
+- If they accept, give a focused L1 orientation (2–3 sentences + one diagram max), then go to Phase 5
+
+If all L1 modules have been touched, proceed directly to Phase 5 without any comment.
 
 ---
 
@@ -179,15 +247,19 @@ Close with:
 - `--type call --format mermaid` → function call chains, use in Phase 3
 
 **Written manually from reading the code:**
-- `sequenceDiagram` → request flows, auth flows, multi-step interactions
-- `graph TD` / `graph LR` → custom structural maps when generated output is noisy
-- `stateDiagram-v2` → state machines, lifecycle logic
+- `graph TD` (system topology) → major deployment-level components; use as Phase 1 diagram 1
+- `graph LR` (module dependency) → all internal modules and imports; use as Phase 1 diagram 2
+- `sequenceDiagram` (data flow) → primary data path or request lifecycle; use as Phase 1 diagram 3 when warranted
+- `sequenceDiagram` → auth flows, multi-step interactions (also in Phase 3/4)
+- `stateDiagram-v2` → state machines, lifecycle logic (Phase 4/5)
 
 Always inline as a fenced Mermaid code block. Never as a file path. Never via `xdg-open` or `open` or any browser command.
 
 If a generated graph has >25 nodes: read the JSON, find the top 8–10 by connection count, write the diagram manually.
 
-For diagram type selection, load `$SKILL_DIR/references/diagram-guide.md`.
+**Phase 1 always shows the topology (forest) before the dependency map (trees). Never reverse this order.**
+
+For diagram type selection and project-type skeletons, load `$SKILL_DIR/references/diagram-guide.md`.
 
 ---
 
@@ -209,5 +281,5 @@ For diagram type selection, load `$SKILL_DIR/references/diagram-guide.md`.
 End the final message with:
 
 ```
-DONE: teach-me — <N> exchanges, <M> diagrams, <key insight surfaced>
+DONE: teach-me — <N> exchanges, <M> diagrams, L<highest level reached>, <coverage: N/M modules touched>, <key insight surfaced>
 ```

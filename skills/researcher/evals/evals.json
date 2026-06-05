@@ -1,0 +1,55 @@
+{
+  "skill_name": "researcher",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Do a deep research dive on whether intermittent fasting improves insulin sensitivity in non-diabetic adults.",
+      "expected_output": "PI frames a sharp research question, builds a paper corpus via search_papers.py across multiple sources, spawns hypothesis-generator sub-agents, tests each hypothesis with a Proponent/Falsifier pair, synthesizes, and writes RESEARCH.md with real citations.",
+      "expectations": [
+        "Restates the topic as a specific, answerable research question",
+        "Runs scripts/search_papers.py with one or more query strings to build corpus.json",
+        "Creates a durable workspace folder research/{slug}/ with a README status board, 00-question.md, and data/ before spawning sub-agents",
+        "Parallel sub-agents each write their own file (e.g. 04-evidence/H1-falsifier.md); the PI is the sole writer of the README, 02-hypotheses.md, and 05-decision-log.md (no shared-file clobbering)",
+        "Spawns 3-5 hypothesis-generator sub-agents in parallel, each with a distinct stance",
+        "Fetches full text (scripts/fetch_fulltext.py) for the papers the surviving hypotheses cite, producing a manifest.json that marks each paper full_text / abstract_only / failed",
+        "Each surviving hypothesis is tested by a matched Proponent and Falsifier sub-agent (adversarial, not confirmation-only) that read full text where available",
+        "Assigns a Supported/Refuted/Inconclusive verdict per hypothesis calibrated to evidence quality and read depth",
+        "Verdicts are recorded in 05-decision-log.md as PROPOSED, then RATIFIED only after a red-team pass challenges the synthesis (06-red-team.md)",
+        "RESEARCH.md is written at the workspace root with a TL;DR, novel insight, hypotheses table, and a References list of real corpus papers (DOIs/URLs) tagged [full text] or [abstract only]",
+        "No fabricated citations — every cited paper appears in the corpus",
+        "Ends with a DONE: research/{slug}/RESEARCH.md completion line"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What does the science say about microplastics crossing the blood-brain barrier? Research this topic for me.",
+      "expected_output": "Triggers on 'what does the science say' + 'research this topic'. Prioritizes biomedical sources, runs the hypothesis -> test -> synthesis pipeline, reports honest confidence given likely thin/emerging evidence.",
+      "expectations": [
+        "Triggers the researcher skill",
+        "Builds corpus emphasizing biomedical sources (europepmc/openalex) given the topic",
+        "Falsifier phase genuinely attempts to refute, mining full-text Methods/Results for confounds and methodological weaknesses where open-access full text is available",
+        "Paywalled papers with no open-access copy are marked abstract_only and weighted lower rather than dropped or overstated",
+        "Confidence is calibrated; an 'Inconclusive' verdict is treated as a valid result, not a failure",
+        "RESEARCH.md includes a 'Novel Insight' section and a best open question"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "What's the capital of Australia?",
+      "expected_output": "Does NOT trigger researcher. A quick factual lookup with a known answer — no literature search, hypotheses, or sub-agents.",
+      "expectations": [
+        "Does NOT invoke the researcher skill",
+        "Answers directly without spawning sub-agents or building a corpus"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Summarize this paper I'm pasting below: [abstract text...]",
+      "expected_output": "Does NOT trigger researcher. The user supplied a single source to summarize; there is no literature search or hypothesis-testing pipeline to run.",
+      "expectations": [
+        "Does NOT invoke the researcher skill for a single user-supplied paper",
+        "Summarizes the provided text directly"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+# docs/specs/ — Feature and Component Specifications
+
+This directory holds specifications that define requirements and interfaces
+before implementation. Agents working from a spec treat it as the source
+of truth for what to build.
+
+**Important:** Files in this directory are agent work artifacts — agentify
+never overwrites them. Only this README.md is maintained by agentify.
+
+## How Agents Use This Directory
+
+1. Find the relevant spec before implementing (or confirm one doesn't exist)
+2. Read it completely — the spec defines the contract
+3. Note ambiguities and ask for clarification before coding
+4. Do not deviate from the spec without updating it first
+
+## File Naming Convention
+
+`feature-or-component-slug.md`
+
+Examples: `oauth-provider.md`, `payment-webhook-api.md`, `user-auth-service.md`
+
+## Spec File Format
+
+```markdown
+---
+title: "Feature or component name"
+status: draft | review | approved | implemented | deprecated
+version: "1.0"
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+---
+
+## Overview
+
+What this feature/component does and why it exists. (3-5 sentences)
+
+## Requirements
+
+### Functional
+
+- REQ-001: (what the system must do)
+- REQ-002: ...
+
+### Non-Functional
+
+- Performance: ...
+- Security: ...
+- Constraints: ...
+
+## Interface / API
+
+(Public interface — function signatures, REST endpoints, data structures,
+config schema, CLI flags, etc.)
+
+## Examples
+
+(1-3 concrete usage examples showing inputs and expected outputs)
+
+## Out of Scope
+
+- Explicit list of what this spec does NOT cover
+- Known limitations or deferred items
+
+## Open Questions
+
+- (Questions that must be answered before implementation can begin)
+```
+
+## Status Lifecycle
+
+`draft` → `review` → `approved` → `implemented` (or `deprecated` if superseded)

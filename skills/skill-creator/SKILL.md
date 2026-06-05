@@ -48,8 +48,8 @@ personal preference that applies only to this user's workspace, a `CLAUDE.md`
 entry fits better. If it involves automated recurring behavior (run X every
 night), a cron + `schedule` skill is the right layer.
 
-Before starting fresh, check whether a skill already exists by invoking the
-`find-skills` skill. If you have hermes installed with a tap configured:
+Before starting fresh, check whether a skill already exists by running
+`skill list` to see what's already installed. If you have hermes installed with a tap configured:
 
 ```bash
 hermes skills search <keywords>

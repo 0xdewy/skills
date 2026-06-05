@@ -1,0 +1,63 @@
+# docs/plans/ — Implementation Plans
+
+This directory holds implementation plans that agents (or developers) can
+pick up and execute. Each file is one self-contained plan.
+
+**Important:** Files in this directory are agent work artifacts — agentify
+never overwrites them. Only this README.md is maintained by agentify.
+
+## How Agents Use This Directory
+
+1. Read the relevant plan file completely before writing any code
+2. Update the `status:` frontmatter field as work progresses
+3. Add findings or blockers under "Notes / Blockers" as you go
+4. When complete, update status to `complete`
+
+## File Naming Convention
+
+`YYYY-MM-DD-short-slug.md`
+
+Examples: `2026-06-01-add-oauth-provider.md`, `2026-05-15-refactor-api-layer.md`
+
+## Plan File Format
+
+```markdown
+---
+title: "Short descriptive title"
+status: draft | ready | in-progress | blocked | complete
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+assignee: (agent or developer name, optional)
+---
+
+## Goal
+
+One paragraph: what this plan achieves and why.
+
+## Context
+
+What the agent needs to know before starting. Link to relevant docs:
+- Architecture: docs/OVERVIEW.md
+- Component being changed: docs/{component}.md
+- Related spec (if any): docs/specs/{spec-file}.md
+
+## Acceptance Criteria
+
+- [ ] Criterion 1 (testable, specific)
+- [ ] Criterion 2 (testable, specific)
+- [ ] Criterion 3 (testable, specific)
+
+## Steps
+
+1. Step one — specific action with file path if applicable
+2. Step two — specific action
+3. Step three — specific action
+
+## Notes / Blockers
+
+(Add findings, decisions, and blockers here as work progresses)
+```
+
+## Status Lifecycle
+
+`draft` → `ready` → `in-progress` → `complete` (or `blocked` if stuck)

@@ -1,0 +1,49 @@
+<!-- .claude/context-map.md — navigation index for {{project_name}} -->
+<!-- Updated: {{date}} | Maintained by: /agentify update -->
+<!-- Every entry here must point to a file that exists on disk. -->
+
+# Context Map: {{project_name}}
+
+## Architecture and Design
+
+- System architecture, components, data flow → `docs/OVERVIEW.md`
+{{component_rows_format:
+- {{Component name}} internals, patterns, key files → `docs/{{slug}}.md`}}
+
+## Coding Conventions
+
+{{rules_rows_format:
+- {{Domain}} conventions ({{brief scope description}}) → `.claude/rules/{{domain}}.md`}}
+- Your personal preferences → `CLAUDE.local.md` (gitignored, keep yours)
+
+## Project Operations
+
+- How to build, test, run, lint → `CLAUDE.md` (Commands section)
+- How to navigate and update these docs → `docs/NAVIGATION.md`
+- Session learnings → `~/.claude/projects/.../memory/MEMORY.md` (auto memory, Claude-managed)
+
+## Finding Specific Things
+
+- Where data/requests enter the system → `docs/OVERVIEW.md` (Data Flow section)
+{{specific_things_format:
+- How to add a new {{thing}} → `docs/{{relevant_component}}.md`
+- Where {{key_concept}} is implemented → `docs/{{relevant_component}}.md`}}
+- All file-pointer cross-references → this file
+
+{{optional_coordination_section:
+## Agent Coordination
+
+- Implementation plans for agents to pick up and execute → `docs/plans/`
+- Feature and API specifications → `docs/specs/`
+- Code and design review findings → `docs/reviews/`
+}}
+
+## Subagent Use
+
+This context map is designed to be useful both in the main session and in
+subagents. Subagents load their own copy of CLAUDE.md and path-scoped rules.
+When spawning a subagent, reference the relevant doc from this map as part
+of the subagent's task prompt.
+
+---
+*To rebuild this context system: run `/agentify update` in this repo.*

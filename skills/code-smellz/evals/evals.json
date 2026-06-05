@@ -4,17 +4,34 @@
     {
       "id": 1,
       "prompt": "Run code-smellz on this codebase",
-      "expected_output": "Three subagents dispatched in parallel, findings merged and triaged, changes applied, test suite run, final report with LOC delta emitted.",
+      "expected_output": "Four subagents dispatched in parallel, findings merged and triaged with patches, STAGED_CHANGES.md written, changes applied via git apply (no commits), type-checker, linter, and formatter gates run, test suite run, final report with LOC delta emitted.",
       "files": ["src/", "tests/"],
       "expectations": [
         "stinky-output/ directory created before any subagents are launched",
-        "detect_runner.py and measure_loc.py are called in Phase 0",
-        "All three subagents (bugs, simplify, arch) are launched simultaneously in Phase 1",
-        "stinky-output/findings-bugs.json exists and contains valid JSON after Phase 1",
-        "stinky-output/findings-simplify.json exists and contains valid JSON after Phase 1",
+        "static_analysis.py, detect_runner.py, and measure_loc.py are called in Phase 0",
+        "dead_code.json, dupes.json, tools.json, exclusions.txt generated in Phase 0",
+        ".stinkyignore is checked and loaded if present",
+        "Dependency CVE scanner is detected and run in Phase 0 (dep-audit-raw.json)",
+        "All four subagents (bugs, simplify, arch, security) are launched simultaneously in Phase 1",
+        "Security Auditor receives dep-audit-raw.json as pre-computed data (does NOT run its own scans)",
+        "stinky-output/findings-bugs.json exists and contains valid JSON with patch field after Phase 1",
+        "stinky-output/findings-simplify.json exists and contains valid JSON with patch field after Phase 1",
         "stinky-output/findings-arch.json exists and contains valid JSON after Phase 1",
+        "stinky-output/security-audit.json exists and contains valid JSON after Phase 1",
+        "STAGED_CHANGES.md is written before any edits are applied in Phase 2",
         "Triage summary is printed before Phase 3 changes are applied",
+        "git diff checkpoint is saved as pre-iter-N.diff before Phase 3 edits",
+        "Patches are applied with git apply --check before git apply in Phase 3",
+        "Type checker runs after each individual change in Phase 3 (if available)",
+        "Second minimizer pass runs on architect-modified files in Phase 3.3",
+        "Type-checker gate runs in Phase 4 (if available) before test suite",
+        "Linter gate runs in Phase 4 (if available)",
+        "Formatter gate runs in Phase 4 (if available)",
         "Test suite is run in Phase 4 and result is recorded",
+        "Failed changes are reverted with git apply -R (not git commit/revert)",
+        "No git commit is made at any point",
+        "Session.json tracks category_stats, quarantine state, and patch_file paths",
+        "Final report includes format status and 'review with git diff' note",
         "DONE: signal emitted with iteration count and LOC delta"
       ]
     },
@@ -25,10 +42,18 @@
       "files": ["src/"],
       "expectations": [
         "Skill triggers on informal 'stinky' phrasing",
+        ".stinkyignore is checked before source file enumeration",
+        "Static analysis pre-pass runs and dead code / dupes / tools are detected",
+        "Dependency CVE scanner is detected and run if available",
         "Codebase goal is read from README or project manifest before spawning agents",
-        "stinky-output/session.json is created with baseline_loc populated",
-        "At least one change is applied and the final LOC is measured",
-        "Final report shows starting vs ending LOC and changes-applied count"
+        "stinky-output/session.json is created with baseline_loc, dead_code_count, dupe_block_count, format_cmd populated",
+        "Subagents receive dead_code.json, dupes.json, and dep-audit-raw.json as pre-computed data",
+        "At least one change is applied via git apply with --check",
+        "STAGED_CHANGES.md is written before edits",
+        "Type-check, lint, and format gates run (or noted as unavailable)",
+        "No git commit is made",
+        "Final LOC is measured",
+        "Final report shows starting vs ending LOC, changes-applied count, quarantine state, and format status"
       ]
     },
     {
@@ -39,6 +64,7 @@
       "expectations": [
         "Skill is NOT triggered",
         "No stinky-output/ directory is created",
+        "No static analysis is run",
         "No subagents are spawned",
         "No file edits are made",
         "Response is a plain explanation of the code's purpose and structure"
