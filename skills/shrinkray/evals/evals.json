@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1,
+    "prompt": "shrink this codebase — it's gotten really bloated",
+    "expected_output": "Four subagents run in parallel (dead code hunter, ghost file hunter, code consolidator, verbosity reducer), baseline LOC is measured, tests are run before any changes, findings are applied in safe batches, and a final report shows lines removed per category with before/after test counts.",
+    "expectations": [
+      "Skill triggers on 'shrink this codebase' phrasing",
+      "Establishes baseline LOC before any changes",
+      "Runs tests before making changes",
+      "Spawns at least 4 parallel subagents",
+      "Writes findings JSON files to /tmp/shrinkray-output/",
+      "Writes STAGED_CHANGES.md before applying any edits",
+      "Runs tests after applying changes",
+      "Reverts changes that cause test failures",
+      "Never runs git commit",
+      "Prints final report with LOC before and after"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "remove all the dead code from this repo and make it smaller",
+    "expected_output": "Skill triggers (dead code removal + make smaller = shrinkray scope). Four subagents deployed. Dead Code Hunter finds unused functions/imports/variables, Ghost File Hunter finds unreferenced files, both report with confidence levels. Changes applied and tests verified.",
+    "expectations": [
+      "Skill triggers on 'remove dead code' combined with size reduction intent",
+      "Dead Code Hunter subagent specifically searches for unreachable code",
+      "Ghost File Hunter searches for unreferenced files",
+      "Each change is logged with category and estimated LOC saved",
+      "Tests pass after all changes",
+      "Final report breaks down lines removed by category"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt": "run shrinkray",
+    "expected_output": "Explicit skill invocation. Full pipeline executes: Phase 0 setup, 4 parallel subagents, triage, apply, verify, convergence loop.",
+    "expectations": [
+      "Skill triggers on explicit 'run shrinkray' command",
+      "Detects test runner automatically",
+      "Measures baseline LOC",
+      "Spawns all four subagents simultaneously",
+      "Applies changes with per-change syntax checks",
+      "Runs full test suite after changes",
+      "Stops when converged or 5 iterations elapsed"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "can you review this code and find bugs?",
+    "expected_output": "Skill does NOT trigger. Bug finding without size reduction is code-smellz territory or a simple review. Shrinkray should be skipped.",
+    "expectations": [
+      "Skill does NOT trigger on pure bug-finding requests",
+      "Claude answers the review request directly or suggests code-smellz instead"
+    ]
+  },
+  {
+    "id": 5,
+    "prompt": "minify my JavaScript bundle for production",
+    "expected_output": "Skill does NOT trigger. JS bundle minification (webpack/esbuild) is a build tool concern, not a source code restructuring task.",
+    "expectations": [
+      "Skill does NOT trigger on JS/CSS bundle minification requests",
+      "Claude suggests using the appropriate build tool instead"
+    ]
+  }
+]

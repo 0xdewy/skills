@@ -58,6 +58,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [implementer](skills/implementer/SKILL.md) | Implement → blind Skeptic pass + scored Review → Fix loop until 10/10 quality |
 | [one-shot-project](skills/one-shot-project/SKILL.md) | Full project builder: Architect, PM, parallel implementers, tester |
 | [code-smellz](skills/code-smellz/SKILL.md) | Parallel bug-hunter, simplifier, optimizer, and security auditor |
+| [shrinkray](skills/shrinkray/SKILL.md) | Reduces codebase to its smallest correct form: dead code, ghost files, duplication, verbosity |
 | [brainstormers](skills/brainstormers/SKILL.md) | Dialectical thinker sub-agents debate ideas until convergence |
 | [dialectic-council](skills/dialectic-council/SKILL.md) | Multi-model debate: Claude + DeepSeek, OpenAI, Gemini, MiniMax |
 
@@ -66,7 +67,6 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | Skill | What it does |
 |---|---|
 | [student-counsel](skills/student-counsel/SKILL.md) | Student works, philosophers review in dialectic rounds until consensus |
-| [look-for-flaws](skills/look-for-flaws/SKILL.md) | Submit work to a dialectic of sub-agents who find flaws in the codebase |
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
@@ -81,15 +81,21 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 |---|---|
 | [teach-me](skills/teach-me/SKILL.md) | Learn any codebase with Mermaid diagrams |
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
-| [prediction_markets](skills/prediction_markets/SKILL.md) | Polymarket and Kalshi: APIs, CLOB trading, auth, order types |
+| [prediction-markets](skills/prediction-markets/SKILL.md) | Polymarket and Kalshi: APIs, CLOB trading, auth, order types |
 | [web-scraping](skills/web-scraping/SKILL.md) | Playwright, httpx, anti-bot evasion, pagination, structured extraction |
+
+**Productivity & Lifestyle** — skills for everyday planning and personal workflows:
+
+| Skill | What it does |
+|---|---|
+| [travel-agent](skills/travel-agent/SKILL.md) | Intelligent travel agent: best flights, nice layovers, multi-city stopovers on long routes, flight+hotel deals; Duffel + Google data, or fully keyless via browser (no API key needed) |
 
 **Meta** — skills that create, curate, and constrain other skills:
 
 | Skill | What it does |
 |---|---|
 | [skill-creator](skills/skill-creator/SKILL.md) | Create, test, and publish new skills |
-| [stakeholder-of-last-resort](skills/stakeholder-of-last-resort/SKILL.md) | Speaks for absent parties facing foreseeable harm in decisions |
+| [repo-orient](skills/repo-orient/SKILL.md) | Hierarchical context system for any repo: CLAUDE.md, .claude/rules/, docs/ hierarchy, context-map — layered for minimal always-loaded context with on-demand depth |
 
 ---
 

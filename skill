@@ -22,6 +22,7 @@ Usage:
   skill remove       <name>           Remove an installed skill
   skill remove-all                    Remove all installed skills
   skill reinstall-all [repo-path]     Remove all then reinstall from repo
+  skill repair                        Replace stale real directories in tool paths with symlinks
   skill list                          List all installed skills
   skill update       <name>           Pull latest (git-cloned skills) or no-op (symlinked)
 
@@ -49,6 +50,7 @@ _skill_name_from_url() {
 
 _link_to_tools() {
     local name="$1"
+    local force="${2:-false}"
     local central="$CENTRAL_STORE/$name"
     local linked=()
     for tool_dir in "${TOOL_PATHS[@]}"; do
@@ -62,9 +64,13 @@ _link_to_tools() {
             fi
             rm "$link"
         elif [[ -d "$link" ]]; then
-            _yellow "WARNING: $link is a real directory (not managed by skill). Skipping to avoid data loss."
-            _yellow "  Remove it manually first if you want to link $name there."
-            continue
+            if [[ "$force" == true ]]; then
+                rm -rf "$link"
+            else
+                _yellow "WARNING: $link is a real directory (not managed by skill). Skipping to avoid data loss."
+                _yellow "  Run 'skill repair' to replace stale real directories with symlinks."
+                continue
+            fi
         elif [[ -e "$link" ]]; then
             rm "$link"
         fi
@@ -325,6 +331,35 @@ cmd_reinstall_all() {
     cmd_install_all "$@"
 }
 
+cmd_repair() {
+    if [[ ! -d "$CENTRAL_STORE" ]]; then
+        echo "No skills installed in central store."
+        return
+    fi
+
+    local count=0
+    while IFS= read -r -d '' entry; do
+        local name
+        name=$(basename "$entry")
+        for tool_dir in "${TOOL_PATHS[@]}"; do
+            local link="$tool_dir/$name"
+            if [[ -d "$link" && ! -L "$link" ]]; then
+                _yellow "Replacing stale real dir: $link"
+                rm -rf "$link"
+                ln -s "$CENTRAL_STORE/$name" "$link"
+                _green "  ✓ $name → $tool_dir"
+                (( ++count )) || true
+            fi
+        done
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
+
+    if [[ $count -eq 0 ]]; then
+        _green "No stale skill directories found — all tool paths look clean."
+    else
+        _green "Repaired $count stale skill link(s)."
+    fi
+}
+
 _install_one() {
     local source="$1"
     local name="$2"
@@ -338,7 +373,7 @@ _install_one() {
     fi
 
     ln -s "$(realpath "$source")" "$central"
-    _link_to_tools "$name" > /dev/null
+    _link_to_tools "$name" true > /dev/null
     _green "  ✓ $name"
 }
 
@@ -350,6 +385,7 @@ case "${1:-}" in
     remove)    shift; cmd_remove  "$@" ;;
     remove-all) cmd_remove_all ;;
     reinstall-all) shift; cmd_reinstall_all "$@" ;;
+    repair)    cmd_repair ;;
     list)      cmd_list ;;
     update)    shift; cmd_update  "$@" ;;
     -h|--help|help|"") usage ;;

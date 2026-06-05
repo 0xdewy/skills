@@ -271,6 +271,349 @@ def build_module_structure(files: list, lang_lines: Counter) -> list:
     return result
 
 
+def detect_project_type(files: list, root: Path, readme: str) -> dict:
+    paths = [f["path"] for f in files]
+    path_set = set(paths)
+    readme_lower = readme.lower()
+
+    web_signals: list = []
+    web_names = {"app.py", "app.js", "app.ts", "server.py", "server.go", "server.js", "server.ts",
+                 "routes.py", "routes.js", "routes.ts", "views.py", "views.js"}
+    for p in paths:
+        if Path(p).name in web_names:
+            web_signals.append(Path(p).name)
+        if any(kw in p.lower() for kw in ["routes/", "views/", "controllers/", "handlers/"]):
+            web_signals.append(p.split("/")[0] + "/")
+    for fw in ["flask", "django", "express", "fastapi", "rails", "spring", "gin", "echo",
+               "fiber", "actix", "axum", "phoenix", "laravel", "hono", "nestjs"]:
+        if fw in readme_lower:
+            web_signals.append(f"{fw} in README")
+    pkg_json = root / "package.json"
+    if pkg_json.exists():
+        try:
+            data = json.loads(pkg_json.read_text(errors="ignore"))
+            deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+            for fw in ["express", "koa", "fastify", "hapi", "next", "nuxt", "gatsby", "hono", "@nestjs/core"]:
+                if fw in deps:
+                    web_signals.append(f"{fw} in package.json")
+        except Exception:
+            pass
+
+    cli_signals: list = []
+    cli_names = {"cli.py", "cli.js", "cli.ts", "cli.go"}
+    for p in paths:
+        if Path(p).name in cli_names:
+            cli_signals.append(Path(p).name)
+    top_dirs = {Path(p).parts[0] for p in paths if Path(p).parts}
+    if "cmd" in top_dirs:
+        cli_signals.append("cmd/ directory")
+    if "commands" in top_dirs:
+        cli_signals.append("commands/ directory")
+    cargo = root / "Cargo.toml"
+    if cargo.exists():
+        try:
+            if "[[bin]]" in cargo.read_text(errors="ignore"):
+                cli_signals.append("[[bin]] in Cargo.toml")
+        except Exception:
+            pass
+    cli_keywords = ["import click", "from click import", "import argparse", "cobra.Command",
+                    "urfave/cli", "spf13/cobra", "clap::Parser", "clap::Command"]
+    for f in files[:40]:
+        try:
+            content = (root / f["path"]).read_text(errors="ignore")
+            for kw in cli_keywords:
+                if kw in content:
+                    cli_signals.append(kw.split()[1] if " " in kw else kw)
+                    break
+        except Exception:
+            pass
+
+    lib_signals: list = []
+    if "src/lib.rs" in path_set:
+        lib_signals.append("src/lib.rs present")
+    root_inits = [p for p in paths if Path(p).parent == Path(".") and Path(p).name == "__init__.py"]
+    if root_inits and not any(Path(p).stem == "main" for p in paths):
+        lib_signals.append("root __init__.py, no main.*")
+    for kw in ["library", "sdk", "package", "module", "framework"]:
+        if kw in readme_lower[:300]:
+            lib_signals.append(f"'{kw}' in README")
+            break
+
+    data_signals: list = []
+    data_dirs = {"pipeline", "etl", "transform", "ingest", "extract", "dags", "flows", "tasks"}
+    for d in top_dirs:
+        if d.lower() in data_dirs:
+            data_signals.append(f"{d}/ directory")
+    data_keywords = ["import pandas", "import spark", "from pyspark", "import dbt",
+                     "from airflow", "import luigi", "import prefect", "import dagster"]
+    for f in files[:40]:
+        try:
+            content = (root / f["path"]).read_text(errors="ignore")
+            for kw in data_keywords:
+                if kw in content:
+                    data_signals.append(kw.split()[-1] + " usage")
+                    break
+        except Exception:
+            pass
+
+    scores = {
+        "web_app": len(set(web_signals)),
+        "cli_tool": len(set(cli_signals)),
+        "library": len(set(lib_signals)),
+        "data_pipeline": len(set(data_signals)),
+    }
+    best = max(scores, key=scores.get)
+    if scores[best] == 0:
+        return {"project_type": "unknown", "type_signals": []}
+    signals_map = {
+        "web_app": web_signals,
+        "cli_tool": cli_signals,
+        "library": lib_signals,
+        "data_pipeline": data_signals,
+    }
+    return {
+        "project_type": best,
+        "type_signals": list(dict.fromkeys(signals_map[best]))[:5],
+    }
+
+
+def build_teaching_path(files: list, entry_points: list) -> list:
+    if not files:
+        return []
+
+    def classify(f):
+        p = f["path"].lower()
+        lines = f["lines"]
+        if any(kw in p for kw in ["util", "helper", "common", "shared", "constant", "type", "error", "exception"]):
+            return "L1", "utility/helper leaf"
+        if "test" in p or "spec" in p or "mock" in p or "fixture" in p:
+            return "L1", "test file"
+        if lines < 80:
+            return "L1", f"small file ({lines} lines)"
+        if any(kw in p for kw in ["model", "schema", "entity", "dto", "struct", "domain"]):
+            return "L1", "data model"
+        if any(kw in p for kw in ["db", "database", "cache", "redis", "http", "client",
+                                   "adapter", "repository", "store", "queue", "broker"]):
+            return "L2", "integration/adapter"
+        if any(kw in p for kw in ["service", "handler", "controller", "middleware",
+                                   "route", "api", "cmd", "command"]):
+            return "L2", "service/handler layer"
+        if lines > 300:
+            return "L3", f"large cross-cutting file ({lines} lines)"
+        return "L2", "core logic"
+
+    result = []
+    seen: set = set()
+
+    for ep in entry_points:
+        for f in files:
+            if f["path"] == ep and ep not in seen:
+                complexity, reason = classify(f)
+                result.append({"path": f["path"], "complexity": complexity,
+                                "reason": f"entry point — {reason}"})
+                seen.add(ep)
+
+    for f in sorted(files, key=lambda x: x["lines"]):
+        if f["path"] in seen:
+            continue
+        p = f["path"].lower()
+        if any(kw in p for kw in ["util", "helper", "common", "shared", "constant", "type", "error"]):
+            complexity, reason = classify(f)
+            result.append({"path": f["path"], "complexity": complexity, "reason": reason})
+            seen.add(f["path"])
+
+    for f in sorted(files, key=lambda x: x["lines"]):
+        if f["path"] in seen:
+            continue
+        p = f["path"].lower()
+        if any(kw in p for kw in ["model", "schema", "entity", "dto", "struct", "domain"]):
+            complexity, reason = classify(f)
+            result.append({"path": f["path"], "complexity": complexity, "reason": reason})
+            seen.add(f["path"])
+
+    for f in sorted(files, key=lambda x: -x["lines"]):
+        if f["path"] in seen:
+            continue
+        p = f["path"].lower()
+        if "test" in p or "spec" in p or "mock" in p:
+            continue
+        if any(kw in p for kw in ["db", "database", "cache", "redis", "http", "client",
+                                   "adapter", "repository", "store"]):
+            continue
+        complexity, reason = classify(f)
+        result.append({"path": f["path"], "complexity": complexity, "reason": reason})
+        seen.add(f["path"])
+
+    for f in sorted(files, key=lambda x: x["lines"]):
+        if f["path"] in seen:
+            continue
+        p = f["path"].lower()
+        if any(kw in p for kw in ["db", "database", "cache", "redis", "http", "client",
+                                   "adapter", "repository", "store"]):
+            complexity, reason = classify(f)
+            result.append({"path": f["path"], "complexity": complexity, "reason": reason})
+            seen.add(f["path"])
+
+    for f in sorted(files, key=lambda x: x["lines"]):
+        if f["path"] not in seen:
+            complexity, reason = classify(f)
+            result.append({"path": f["path"], "complexity": complexity, "reason": reason})
+            seen.add(f["path"])
+
+    return result
+
+
+def build_adaptive_threads(files: list, project_type: str, has_tests: bool) -> list:
+    threads = []
+
+    def match_files(keywords):
+        return [f["path"] for f in files
+                if any(kw in f["path"].lower() for kw in keywords)][:3]
+
+    if project_type == "web_app":
+        route_files = match_files(["route", "router", "handler", "controller", "view", "endpoint"])
+        threads.append({
+            "label": "routing layer",
+            "description": "how an HTTP request finds its handler and what middleware runs before it",
+            "key_files": route_files or ["routes.*"],
+        })
+        auth_files = match_files(["auth", "session", "token", "jwt", "login", "permission", "guard"])
+        if auth_files:
+            threads.append({
+                "label": "auth flow",
+                "description": "how identity is established, where it is checked, and what happens when it is wrong",
+                "key_files": auth_files,
+            })
+        db_files = match_files(["model", "db", "database", "repository", "store", "migration", "schema"])
+        if db_files:
+            threads.append({
+                "label": "persistence layer",
+                "description": "how domain objects become database rows and back, and where the N+1 hides",
+                "key_files": db_files,
+            })
+        mw_files = match_files(["middleware", "error", "exception", "hook"])
+        if mw_files:
+            threads.append({
+                "label": "error and middleware chain",
+                "description": "how errors propagate from handler to client and what middleware intercepts them",
+                "key_files": mw_files,
+            })
+        if has_tests:
+            threads.append({
+                "label": "test structure",
+                "description": "what is tested, what is not, and what the gaps reveal about design priorities",
+                "key_files": match_files(["test", "spec"]),
+            })
+
+    elif project_type == "cli_tool":
+        cmd_files = match_files(["cmd", "command", "cli", "arg", "flag", "main"])
+        threads.append({
+            "label": "command parsing and dispatch",
+            "description": "how the user's invocation is parsed, validated, and routed to the right handler",
+            "key_files": cmd_files or ["main.*", "cli.*"],
+        })
+        cfg_files = match_files(["config", "setting", "option", "env", "conf"])
+        threads.append({
+            "label": "configuration loading",
+            "description": "how flags, environment variables, and config files are merged into a single runtime config",
+            "key_files": cfg_files or ["config.*"],
+        })
+        out_files = match_files(["output", "format", "render", "print", "display", "ui", "tui"])
+        threads.append({
+            "label": "output formatting",
+            "description": "how results are formatted for stdout/stderr and how exit codes signal success or failure",
+            "key_files": out_files or ["output.*"],
+        })
+        err_files = match_files(["error", "err", "exception"])
+        if err_files:
+            threads.append({
+                "label": "error and exit-code handling",
+                "description": "how errors are caught, reported to the user, and mapped to exit codes",
+                "key_files": err_files,
+            })
+
+    elif project_type == "library":
+        pub_files = match_files(["__init__", "lib", "api", "public", "interface", "mod"])
+        threads.append({
+            "label": "public API surface",
+            "description": "what the library exposes to callers, how the public interface is designed, and what it hides",
+            "key_files": pub_files or ["lib.*", "__init__.py"],
+        })
+        int_files = match_files(["util", "helper", "internal", "private", "impl"])
+        threads.append({
+            "label": "internal utilities",
+            "description": "the building blocks the public API is assembled from, and why they are not exposed",
+            "key_files": int_files or ["utils.*"],
+        })
+        err_files = match_files(["error", "err", "exception", "result"])
+        threads.append({
+            "label": "error types and propagation",
+            "description": "how errors are typed, propagated through the call stack, and surfaced to the caller",
+            "key_files": err_files or ["errors.*"],
+        })
+        if has_tests:
+            threads.append({
+                "label": "test patterns",
+                "description": "how the library tests its own contracts and what the tests reveal about intended usage",
+                "key_files": match_files(["test", "spec"]),
+            })
+
+    elif project_type == "data_pipeline":
+        threads.append({
+            "label": "ingestion / source connectors",
+            "description": "how raw data enters the pipeline, what sources are supported, and how schema mismatches are handled",
+            "key_files": match_files(["extract", "ingest", "source", "reader", "fetch", "connector", "input"]) or ["extract.*"],
+        })
+        threads.append({
+            "label": "transformation logic",
+            "description": "how data is reshaped, validated, and enriched between ingestion and output",
+            "key_files": match_files(["transform", "process", "map", "filter", "enrich", "clean", "normalize"]) or ["transform.*"],
+        })
+        threads.append({
+            "label": "output / sink connectors",
+            "description": "where processed data lands, how idempotency is guaranteed, and how partial writes are handled",
+            "key_files": match_files(["load", "sink", "output", "writer", "export", "publish"]) or ["load.*"],
+        })
+        sched_files = match_files(["schedule", "dag", "flow", "retry", "backfill", "orchestrat"])
+        if sched_files:
+            threads.append({
+                "label": "scheduling and retry logic",
+                "description": "how pipeline runs are triggered, retried on failure, and backfilled after outages",
+                "key_files": sched_files,
+            })
+
+    else:  # unknown
+        non_test = [f for f in files if "test" not in f["path"].lower() and "spec" not in f["path"].lower()]
+        if non_test:
+            largest = max(non_test, key=lambda x: x["lines"])
+            threads.append({
+                "label": f"{Path(largest['path']).stem} in depth",
+                "description": "the largest module — where most of the logic lives",
+                "key_files": [largest["path"]],
+            })
+        entry_files = match_files(["main", "app", "index", "server", "cli"])
+        if entry_files:
+            threads.append({
+                "label": "entry point flow",
+                "description": "how execution begins, what is initialized, and how it reaches the core logic",
+                "key_files": entry_files,
+            })
+        if has_tests:
+            threads.append({
+                "label": "test structure",
+                "description": "what is tested, what is not, and what the gaps reveal about design priorities",
+                "key_files": match_files(["test", "spec"]),
+            })
+        else:
+            threads.append({
+                "label": "missing test coverage",
+                "description": "there are no tests — which behaviors would be most valuable to test first, and why",
+                "key_files": [],
+            })
+
+    return threads
+
+
 def infer(root_str: str) -> dict:
     root = Path(root_str).resolve()
     files, lang_lines = scan_directory(root)
@@ -311,6 +654,9 @@ def infer(root_str: str) -> dict:
     )
 
     module_structure = build_module_structure(files, lang_lines)
+    project_type_info = detect_project_type(files, root, readme)
+    teaching_path = build_teaching_path(files, entry_points)
+    adaptive_threads = build_adaptive_threads(files, project_type_info["project_type"], has_tests)
 
     return {
         "topic": topic,
@@ -327,6 +673,10 @@ def infer(root_str: str) -> dict:
         "largest_file": largest_file,
         "module_structure": module_structure,
         "has_tests": has_tests,
+        "project_type": project_type_info["project_type"],
+        "type_signals": project_type_info["type_signals"],
+        "teaching_path": teaching_path,
+        "adaptive_threads": adaptive_threads,
     }
 
 

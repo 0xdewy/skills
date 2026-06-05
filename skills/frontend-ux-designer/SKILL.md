@@ -12,7 +12,7 @@ description: >-
   "fix alignment", "review typography", "improve visual hierarchy", "make the
   layout symmetric", "is the UI polished?", "frontend design audit", "CSS review",
   "visual QA", "make it prettier". SKIP on: functional bug-finding without design
-  focus (use frontend-adversarial-tester instead), requests to build new features,
+  focus (use frontend-twerkin instead), requests to build new features,
   non-UI code review, backend code.
 license: MIT
 metadata:
@@ -40,8 +40,8 @@ critique grounded in evidence. Then you fix things.
 
 `$SKILL_DIR` = the directory containing this SKILL.md file.
 
-**Key distinction from `frontend-adversarial-tester`:** That skill finds bugs.
-This skill improves quality. You don't just report — you improve.
+**Key distinction from `frontend-twerkin`:** That skill exhaustively tests features.
+This skill improves design quality. You don't just report — you improve.
 
 ---
 
@@ -176,6 +176,16 @@ view feel like it was designed for mobile, or is it just a squished desktop?
 Look at `overflowIssues` in `report.json` — any horizontal scroll on mobile is
 an immediate fix.
 
+**Nav overflow checklist (common hidden trap):**
+- Are there any `flex-shrink: 0` items on both ends of the nav (logo + CTA button)?
+- Does the logo block contain a tagline/subtitle with high `letter-spacing`? If so, test at 375px — high letter-spacing can make a short phrase 200px+ wide.
+- Fix pattern: hide the decorative tagline at tablet breakpoint; hide the nav CTA at ≤600px if the hero section provides the same CTA.
+- Always add `overflow-x: hidden` to `html, body` as a safety net.
+
+**Adjacent dark-background section check:**
+- Are there two consecutive dark-background blocks (e.g. CTA strip + footer) with identical colors? If so, they will read as a "double footer."
+- Fix: move the CTA band outside any nested section → standalone sibling of footer; use a slightly lighter shade for the CTA vs the footer (e.g. `forest-mid` vs `forest-dark`); add a gold/accent `border-bottom` to separate them.
+
 ### 3.8 Interactive States
 
 Elements should visually respond to hover, focus, active. If the app is a SPA,
@@ -190,6 +200,11 @@ The difference between "pretty good" and "beautiful" is micro-details:
 - Do buttons have consistent internal padding?
 - Are there stray underlines, stray borders, or stray shadows?
 - Is text ever clipped or truncated unexpectedly?
+
+**Image blending (for sites with illustrated/vintage assets):**
+- Do PNG images have a visible rectangular background that doesn't match the page?
+- `mix-blend-mode: multiply` alone only works for pure-white image backgrounds. For beige/off-white image BGs, also add: `mask-image: radial-gradient(ellipse at center, black 40%, transparent 78%); -webkit-mask-image: ...` to fade the edges into the page background.
+- Adjust the ellipse stop points based on content: tight figures need `black 50%, transparent 82%`; small icons can use `black 45%, transparent 80%`.
 
 ---
 

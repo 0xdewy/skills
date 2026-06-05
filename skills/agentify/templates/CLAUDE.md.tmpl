@@ -1,0 +1,71 @@
+# {{project_name}}
+
+{{2-3 sentence purpose. What is this? What does it do? What does it NOT do?
+Be specific. Bad: "A tool for X." Good: "REST API service that manages user
+accounts and auth for the {{app_name}} platform. Handles registration, login,
+JWT issuance, and role-based access control. Does not serve the frontend."}}
+
+{{optional_ag_import_if_agents_md_exists:
+@AGENTS.md
+
+## Claude Code
+
+{{Claude-specific instructions below the shared AGENTS.md import.}}}}
+
+{{optional_imports_if_large_claude_md:
+@.claude/commands.md  }}
+
+## Commands
+
+```bash
+# Build
+{{build_command}}
+
+# Test
+{{test_command}}
+
+# Run / dev server
+{{run_command}}
+
+# Lint / format
+{{lint_command}}
+```
+
+{{optional_extra_commands_section_if_more_than_4_commands}}
+
+## Key Constraints
+
+{{2-4 non-obvious constraints specific to this repo. Examples:
+- "Never commit directly to main — all changes via PR"
+- "Migrations must be run before tests: make migrate-test"
+- "All API endpoints require authentication except /health and /auth/login"
+- Use "IMPORTANT:" or "YOU MUST:" prefix for critical rules to improve adherence
+
+If there are no unusual constraints, DELETE this section entirely.}}
+
+## Navigation
+
+| Topic | Where to find it |
+|-------|-----------------|
+| Architecture & components | docs/OVERVIEW.md |
+{{component_rows_format:
+| {{Component name}} | docs/{{slug}}.md |}}
+| API conventions | .claude/rules/api.md |
+| Testing patterns | .claude/rules/testing.md |
+{{additional_rules_rows_format:
+| {{Domain}} conventions | .claude/rules/{{domain}}.md |}}
+| Find anything quickly | .claude/context-map.md |
+| How to maintain these docs | docs/NAVIGATION.md |
+| Personal preferences | CLAUDE.local.md (add to .gitignore) |
+
+{{optional_recent_context_section:
+## Recent Context
+{{1-2 sentences if recent git history reveals something important an agent
+should know. E.g.: "Auth was refactored from sessions to JWT in April 2026 —
+old session-based code still exists in git history but is no longer active."
+DELETE this section if nothing noteworthy.}}}
+
+<!--
+HTML comments like this are stripped before context injection.
+Use them for maintainer notes without spending context tokens.
+-->

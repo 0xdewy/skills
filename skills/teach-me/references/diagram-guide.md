@@ -168,3 +168,158 @@ Example: Understanding a web request
 | **Graphviz DOT** | Large dependency graphs | Less control over aesthetics |
 | **PlantUML** | UML diagrams | Syntax-heavy |
 | **ASCII** | Quick, no rendering needed | Poor for complex diagrams |
+
+---
+
+## Project-Type Visual Templates
+
+Load this section when `project_type` is known. Use these as skeletons — fill in actual module names from analyze.py output. Each set covers the three Phase 1 diagrams in order: topology → dependency map → data flow.
+
+### web_app
+
+**Diagram 1 — System topology:**
+```mermaid
+graph TD
+    U[User / Browser] --> API[API Server]
+    API --> SVC[Services]
+    SVC --> DB[(Database)]
+    SVC --> CACHE[(Cache)]
+    API --> EXT[External APIs]
+```
+
+**Diagram 2 — Module dependency map** (fill in from code-graph.py output):
+```mermaid
+graph LR
+    routes --> services
+    routes --> middleware
+    services --> models
+    services --> db
+    services --> cache
+    models --> db
+```
+
+**Diagram 3 — Request lifecycle (include if a dominant HTTP path exists):**
+```mermaid
+sequenceDiagram
+    Client->>Router: HTTP request
+    Router->>Middleware: apply chain
+    Middleware->>Handler: validated request
+    Handler->>Service: business logic
+    Service->>DB: query
+    DB-->>Service: result
+    Service-->>Handler: domain object
+    Handler-->>Client: HTTP response
+```
+
+---
+
+### cli_tool
+
+**Diagram 1 — System topology:**
+```mermaid
+graph TD
+    User --> CLI[CLI Entry Point]
+    CLI --> Parser[Argument Parser]
+    Parser --> Dispatch[Command Dispatcher]
+    Dispatch --> CMD1[Command A]
+    Dispatch --> CMD2[Command B]
+    CMD1 --> Config[Config Loader]
+    CMD1 --> Output[Output Formatter]
+```
+
+**Diagram 2 — Module dependency map** (fill in from code-graph.py output):
+```mermaid
+graph LR
+    main --> cli
+    cli --> commands
+    commands --> config
+    commands --> output
+    output --> formatter
+```
+
+**Diagram 3 — Command execution flow (include if commands have non-trivial logic):**
+```mermaid
+sequenceDiagram
+    User->>main: $ tool <cmd> [args]
+    main->>Parser: parse argv
+    Parser->>Config: load config + merge flags
+    Config-->>Parser: resolved options
+    Parser->>Handler: dispatch
+    Handler->>Output: format result
+    Output->>User: stdout / stderr
+```
+
+---
+
+### library
+
+**Diagram 1 — System topology:**
+```mermaid
+graph TD
+    Caller[Caller Code] --> PubAPI[Public API]
+    PubAPI --> Core[Core Logic]
+    Core --> Types[Type Definitions]
+    Core --> Utils[Internal Utilities]
+    Core --> Errors[Error Types]
+```
+
+**Diagram 2 — Module dependency map** (fill in from code-graph.py output):
+```mermaid
+graph LR
+    api --> core
+    core --> types
+    core --> utils
+    core --> errors
+    api --> errors
+```
+
+**Diagram 3 — Usage flow (include for libraries with stateful or multi-step APIs):**
+```mermaid
+sequenceDiagram
+    Caller->>PublicFn: call with args
+    PublicFn->>Validator: validate inputs
+    Validator-->>PublicFn: ok / error
+    PublicFn->>CoreImpl: execute
+    CoreImpl-->>PublicFn: result
+    PublicFn-->>Caller: typed return / error
+```
+
+---
+
+### data_pipeline
+
+**Diagram 1 — System topology:**
+```mermaid
+graph TD
+    Source[Data Source] --> Extract[Extractor]
+    Extract --> Transform[Transformer]
+    Transform --> Validate[Validator]
+    Validate --> Load[Loader]
+    Load --> Sink[Data Sink]
+    Validate --> DLQ[Dead Letter Queue]
+```
+
+**Diagram 2 — Module dependency map** (fill in from code-graph.py output):
+```mermaid
+graph LR
+    pipeline --> extract
+    pipeline --> transform
+    pipeline --> load
+    transform --> schema
+    load --> sink
+    extract --> source
+```
+
+**Diagram 3 — Stage execution flow (include for pipelines with explicit orchestration):**
+```mermaid
+sequenceDiagram
+    Scheduler->>Extractor: trigger run
+    Extractor->>Source: fetch batch
+    Source-->>Extractor: raw records
+    Extractor->>Transformer: raw records
+    Transformer-->>Extractor: transformed batch
+    Extractor->>Loader: transformed batch
+    Loader->>Sink: write
+    Sink-->>Loader: ack
+    Loader-->>Scheduler: run complete
+```
