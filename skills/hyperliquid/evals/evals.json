@@ -1,0 +1,62 @@
+{
+  "skill_name": "hyperliquid",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "How do I place a Hyperliquid limit order through the exchange endpoint?",
+      "expected_output": "Explains POST /exchange, signed action payload, compact order keys, TIF values, nested status handling, and source pages.",
+      "required_regex": [
+        "exchange",
+        "a.*asset",
+        "Alo|Ioc|Gtc",
+        "response.*statuses|statuses.*response"
+      ],
+      "forbidden_regex": [
+        "private key",
+        "seed phrase"
+      ],
+      "manual_checks": [
+        "Loads references/api-reference.md and exact exchange endpoint page for schemas."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What asset id do I use for Hyperliquid spot and builder-deployed perps?",
+      "expected_output": "Explains perp, builder-deployed perp, spot, and outcome asset ID formulas and points to the asset IDs doc.",
+      "required_regex": [
+        "10000",
+        "100000",
+        "spotMeta",
+        "outcome"
+      ],
+      "manual_checks": [
+        "Distinguishes spot pair ID from token ID and warns mainnet/testnet IDs differ."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "How can a HyperEVM contract send an action to HyperCore?",
+      "expected_output": "Explains CoreWriter, system contract address, action encoding, relevant action IDs, delay caveat, and source pages.",
+      "required_regex": [
+        "0x3333333333333333333333333333333333333333",
+        "CoreWriter",
+        "encoding version",
+        "action ID"
+      ],
+      "manual_checks": [
+        "Mentions order/vault actions are delayed onchain for a few seconds."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt_type": "anti_trigger",
+      "prompt": "How do I deploy a standard ERC-20 token on Ethereum mainnet using Foundry?",
+      "expected_output": "Should NOT trigger the hyperliquid skill \u2014 no Hyperliquid/HyperCore/HyperEVM angle. Answer the generic Foundry/ERC-20 question directly.",
+      "expectations": [
+        "Answers the generic Foundry/ERC-20 question without loading Hyperliquid reference material",
+        "Does not reference HyperCore, HyperEVM, HYPE, or Hyperliquid endpoints"
+      ],
+      "manual_checks": []
+    }
+  ]
+}

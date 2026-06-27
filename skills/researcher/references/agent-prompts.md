@@ -5,6 +5,43 @@ Prompt blocks for each sub-agent the researcher PI spawns. Slot in the
 cite **only** papers found there — fabricated citations invalidate the inquiry.
 
 ---
+## Bias Obligations — All Agents
+
+Every agent in every phase applies these rules. Biases are **flagged and noted,
+not excluded** — unless the paper is from a predatory journal or known fraudulent
+research (those are excluded entirely).
+
+**A. Funding / conflict detection**
+When citing a paper, check its abstract for these signals:
+`funded by | received | grant from | honoraria | advisory board |
+employee of | consultant to | stock | founder of | conflict of interest |
+industry | pharmaceutical | supplement company`
+
+If found, add inline: `[FUNDING CONFLICT — downgraded {old}→{new}]`
+
+**B. Publication bias**
+If the corpus has only positive results on a topic (no null-result papers),
+note in your analysis: "Publication bias suspected — null-result papers
+absent from corpus; confidence in positive direction is reduced."
+
+**C. Institutional concentration**
+If >50% of cited papers come from the same institution or author group,
+flag: "Corpus imbalanced — {X}% from {institution}; findings may reflect
+that group's interpretation."
+
+**D. Confidence penalty table**
+| Source | Penalty |
+|---|---|
+| For-profit company funding own product | Downgrade 1 level |
+| Government/academic funding (no corporate interest) | No penalty |
+| Funding not declared | Flag, no penalty |
+| Predatory journal / fraud | **Exclude** — do not cite |
+
+**E. Retraction rule**
+A paper with `is_retracted: true` in the corpus may be cited only as
+withdrawn/refuted work, labeled `(RETRACTED)`. Never build support on it.
+
+---
 
 ## Hypothesis Generator (Phase 2)
 

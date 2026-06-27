@@ -47,7 +47,7 @@
   {
     "id": 5,
     "prompt": "What is the gas cost of a cold SLOAD vs warm SLOAD and why does it matter?",
-    "expected_output": "Cold SLOAD = 2100 gas (EIP-2929), warm = 100 gas. Matters for access lists and contract design — pre-warming slots with access lists or touch-patterns saves significant gas.",
+    "expected_output": "Cold SLOAD = 2100 gas (EIP-2929), warm = 100 gas. Matters for access lists and contract design \u2014 pre-warming slots with access lists or touch-patterns saves significant gas.",
     "expectations": [
       "States cold SLOAD = 2100",
       "States warm SLOAD = 100",
@@ -65,5 +65,16 @@
       "Calls keccak256(0x00, 0x40)",
       "Uses sload() to read the resulting slot"
     ]
+  },
+  {
+    "id": 7,
+    "prompt_type": "anti_trigger",
+    "prompt": "Write me a generic React todo-list component in TypeScript.",
+    "expected_output": "Should NOT trigger rust-evm \u2014 no EVM/Rust/Foundry/bytecode/assembly angle. Write the React component directly.",
+    "expectations": [
+      "Does not load rust-evm reference material",
+      "Writes the React/TypeScript component directly without EVM framing"
+    ],
+    "manual_checks": []
   }
 ]

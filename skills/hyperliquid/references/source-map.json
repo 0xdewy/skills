@@ -1,0 +1,1314 @@
+{
+  "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/llms.txt",
+  "page_count": 145,
+  "ok_count": 145,
+  "error_count": 0,
+  "user_agent": "CodexSkillBuilder/1.0 (+https://openai.com; docs reference scrape)",
+  "pages": [
+    {
+      "title": "About Hyperliquid",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/about-hyperliquid.md",
+      "description": "",
+      "slug": "about-hyperliquid",
+      "section": "general",
+      "local_path": "references/docs/about-hyperliquid.md",
+      "status": "ok"
+    },
+    {
+      "title": "Hyperliquid 101 for non-crypto audiences",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/about-hyperliquid/hyperliquid-101-for-non-crypto-audiences.md",
+      "description": "",
+      "slug": "about-hyperliquid-hyperliquid-101-for-non-crypto-audiences",
+      "section": "general",
+      "local_path": "references/docs/about-hyperliquid-hyperliquid-101-for-non-crypto-audiences.md",
+      "status": "ok"
+    },
+    {
+      "title": "Core contributors",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/about-hyperliquid/core-contributors.md",
+      "description": "",
+      "slug": "about-hyperliquid-core-contributors",
+      "section": "general",
+      "local_path": "references/docs/about-hyperliquid-core-contributors.md",
+      "status": "ok"
+    },
+    {
+      "title": "Onboarding",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding.md",
+      "description": "",
+      "slug": "onboarding",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding.md",
+      "status": "ok"
+    },
+    {
+      "title": "How to start trading",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/how-to-start-trading.md",
+      "description": "",
+      "slug": "onboarding-how-to-start-trading",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-how-to-start-trading.md",
+      "status": "ok"
+    },
+    {
+      "title": "How to use the HyperEVM",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/how-to-use-the-hyperevm.md",
+      "description": "",
+      "slug": "onboarding-how-to-use-the-hyperevm",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-how-to-use-the-hyperevm.md",
+      "status": "ok"
+    },
+    {
+      "title": "How to stake HYPE",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/how-to-stake-hype.md",
+      "description": "",
+      "slug": "onboarding-how-to-stake-hype",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-how-to-stake-hype.md",
+      "status": "ok"
+    },
+    {
+      "title": "Connect mobile via QR code",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/connect-mobile-via-qr-code.md",
+      "description": "",
+      "slug": "onboarding-connect-mobile-via-qr-code",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-connect-mobile-via-qr-code.md",
+      "status": "ok"
+    },
+    {
+      "title": "Export your email wallet",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/export-your-email-wallet.md",
+      "description": "",
+      "slug": "onboarding-export-your-email-wallet",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-export-your-email-wallet.md",
+      "status": "ok"
+    },
+    {
+      "title": "Testnet faucet",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/testnet-faucet.md",
+      "description": "",
+      "slug": "onboarding-testnet-faucet",
+      "section": "onboarding",
+      "local_path": "references/docs/onboarding-testnet-faucet.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperCore",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore.md",
+      "description": "",
+      "slug": "hypercore",
+      "section": "general",
+      "local_path": "references/docs/hypercore.md",
+      "status": "ok"
+    },
+    {
+      "title": "Overview",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/overview.md",
+      "description": "",
+      "slug": "hypercore-overview",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-overview.md",
+      "status": "ok"
+    },
+    {
+      "title": "Bridge",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/bridge.md",
+      "description": "",
+      "slug": "hypercore-bridge",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-bridge.md",
+      "status": "ok"
+    },
+    {
+      "title": "API servers",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/api-servers.md",
+      "description": "",
+      "slug": "hypercore-api-servers",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-api-servers.md",
+      "status": "ok"
+    },
+    {
+      "title": "Clearinghouse",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/clearinghouse.md",
+      "description": "",
+      "slug": "hypercore-clearinghouse",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-clearinghouse.md",
+      "status": "ok"
+    },
+    {
+      "title": "Oracle",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/oracle.md",
+      "description": "",
+      "slug": "hypercore-oracle",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-oracle.md",
+      "status": "ok"
+    },
+    {
+      "title": "Order book",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/order-book.md",
+      "description": "",
+      "slug": "hypercore-order-book",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-order-book.md",
+      "status": "ok"
+    },
+    {
+      "title": "Staking",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking.md",
+      "description": "",
+      "slug": "hypercore-staking",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-staking.md",
+      "status": "ok"
+    },
+    {
+      "title": "Vaults",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/vaults.md",
+      "description": "",
+      "slug": "hypercore-vaults",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-vaults.md",
+      "status": "ok"
+    },
+    {
+      "title": "Protocol vaults",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/vaults/protocol-vaults.md",
+      "description": "",
+      "slug": "hypercore-vaults-protocol-vaults",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-vaults-protocol-vaults.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperCore vaults (legacy)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/vaults/hypercore-vaults-legacy.md",
+      "description": "",
+      "slug": "hypercore-vaults-hypercore-vaults-legacy",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-vaults-hypercore-vaults-legacy.md",
+      "status": "ok"
+    },
+    {
+      "title": "For vault leaders (legacy)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/vaults/for-vault-leaders-legacy.md",
+      "description": "",
+      "slug": "hypercore-vaults-for-vault-leaders-legacy",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-vaults-for-vault-leaders-legacy.md",
+      "status": "ok"
+    },
+    {
+      "title": "For vault depositors (legacy)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/vaults/for-vault-depositors-legacy.md",
+      "description": "",
+      "slug": "hypercore-vaults-for-vault-depositors-legacy",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-vaults-for-vault-depositors-legacy.md",
+      "status": "ok"
+    },
+    {
+      "title": "Multi-sig",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/multi-sig.md",
+      "description": "Advanced Feature",
+      "slug": "hypercore-multi-sig",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-multi-sig.md",
+      "status": "ok"
+    },
+    {
+      "title": "Permissionless spot quote assets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/permissionless-spot-quote-assets.md",
+      "description": "",
+      "slug": "hypercore-permissionless-spot-quote-assets",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-permissionless-spot-quote-assets.md",
+      "status": "ok"
+    },
+    {
+      "title": "Aligned quote assets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/aligned-quote-assets.md",
+      "description": "",
+      "slug": "hypercore-aligned-quote-assets",
+      "section": "hypercore",
+      "local_path": "references/docs/hypercore-aligned-quote-assets.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperEVM",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperevm.md",
+      "description": "",
+      "slug": "hyperevm",
+      "section": "hyperevm",
+      "local_path": "references/docs/hyperevm.md",
+      "status": "ok"
+    },
+    {
+      "title": "Tools for HyperEVM builders",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperevm/tools-for-hyperevm-builders.md",
+      "description": "",
+      "slug": "hyperevm-tools-for-hyperevm-builders",
+      "section": "hyperevm",
+      "local_path": "references/docs/hyperevm-tools-for-hyperevm-builders.md",
+      "status": "ok"
+    },
+    {
+      "title": "Hyperliquid Improvement Proposals (HIPs)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-1: Native token standard",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-1-native-token-standard.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips-hip-1-native-token-standard",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips-hip-1-native-token-standard.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-2: Hyperliquidity",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-2-hyperliquidity.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips-hip-2-hyperliquidity",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips-hip-2-hyperliquidity.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-3: Builder-deployed perpetuals",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips-hip-3-builder-deployed-perpetuals",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips-hip-3-builder-deployed-perpetuals.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-4: Outcome markets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips-hip-4-outcome-markets",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips-hip-4-outcome-markets.md",
+      "status": "ok"
+    },
+    {
+      "title": "Frontend checks",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/frontend-checks.md",
+      "description": "",
+      "slug": "hyperliquid-improvement-proposals-hips-frontend-checks",
+      "section": "hips",
+      "local_path": "references/docs/hyperliquid-improvement-proposals-hips-frontend-checks.md",
+      "status": "ok"
+    },
+    {
+      "title": "Trading",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading.md",
+      "description": "",
+      "slug": "trading",
+      "section": "trading",
+      "local_path": "references/docs/trading.md",
+      "status": "ok"
+    },
+    {
+      "title": "Fees",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "description": "",
+      "slug": "trading-fees",
+      "section": "trading",
+      "local_path": "references/docs/trading-fees.md",
+      "status": "ok"
+    },
+    {
+      "title": "Sub-accounts",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/sub-accounts.md",
+      "description": "",
+      "slug": "trading-sub-accounts",
+      "section": "trading",
+      "local_path": "references/docs/trading-sub-accounts.md",
+      "status": "ok"
+    },
+    {
+      "title": "Builder codes",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/builder-codes.md",
+      "description": "",
+      "slug": "trading-builder-codes",
+      "section": "trading",
+      "local_path": "references/docs/trading-builder-codes.md",
+      "status": "ok"
+    },
+    {
+      "title": "Perpetual assets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/perpetual-assets.md",
+      "description": "",
+      "slug": "trading-perpetual-assets",
+      "section": "trading",
+      "local_path": "references/docs/trading-perpetual-assets.md",
+      "status": "ok"
+    },
+    {
+      "title": "Contract specifications",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+      "description": "",
+      "slug": "trading-contract-specifications",
+      "section": "trading",
+      "local_path": "references/docs/trading-contract-specifications.md",
+      "status": "ok"
+    },
+    {
+      "title": "Margining",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md",
+      "description": "",
+      "slug": "trading-margining",
+      "section": "trading",
+      "local_path": "references/docs/trading-margining.md",
+      "status": "ok"
+    },
+    {
+      "title": "Account abstraction modes",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/account-abstraction-modes.md",
+      "description": "",
+      "slug": "trading-account-abstraction-modes",
+      "section": "trading",
+      "local_path": "references/docs/trading-account-abstraction-modes.md",
+      "status": "ok"
+    },
+    {
+      "title": "Portfolio margin",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md",
+      "description": "Alpha mode",
+      "slug": "trading-portfolio-margin",
+      "section": "trading",
+      "local_path": "references/docs/trading-portfolio-margin.md",
+      "status": "ok"
+    },
+    {
+      "title": "Margin tiers",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md",
+      "description": "",
+      "slug": "trading-margin-tiers",
+      "section": "trading",
+      "local_path": "references/docs/trading-margin-tiers.md",
+      "status": "ok"
+    },
+    {
+      "title": "Robust price indices",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/robust-price-indices.md",
+      "description": "",
+      "slug": "trading-robust-price-indices",
+      "section": "trading",
+      "local_path": "references/docs/trading-robust-price-indices.md",
+      "status": "ok"
+    },
+    {
+      "title": "Liquidations",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+      "description": "",
+      "slug": "trading-liquidations",
+      "section": "trading",
+      "local_path": "references/docs/trading-liquidations.md",
+      "status": "ok"
+    },
+    {
+      "title": "Auto-deleveraging",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/auto-deleveraging.md",
+      "description": "",
+      "slug": "trading-auto-deleveraging",
+      "section": "trading",
+      "local_path": "references/docs/trading-auto-deleveraging.md",
+      "status": "ok"
+    },
+    {
+      "title": "Funding",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+      "description": "",
+      "slug": "trading-funding",
+      "section": "trading",
+      "local_path": "references/docs/trading-funding.md",
+      "status": "ok"
+    },
+    {
+      "title": "Order book",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/order-book.md",
+      "description": "",
+      "slug": "trading-order-book",
+      "section": "trading",
+      "local_path": "references/docs/trading-order-book.md",
+      "status": "ok"
+    },
+    {
+      "title": "Order types",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/order-types.md",
+      "description": "",
+      "slug": "trading-order-types",
+      "section": "trading",
+      "local_path": "references/docs/trading-order-types.md",
+      "status": "ok"
+    },
+    {
+      "title": "Take profit and stop loss orders (TP/SL)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/take-profit-and-stop-loss-orders-tp-sl.md",
+      "description": "",
+      "slug": "trading-take-profit-and-stop-loss-orders-tp-sl",
+      "section": "trading",
+      "local_path": "references/docs/trading-take-profit-and-stop-loss-orders-tp-sl.md",
+      "status": "ok"
+    },
+    {
+      "title": "Entry price and pnl",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/entry-price-and-pnl.md",
+      "description": "",
+      "slug": "trading-entry-price-and-pnl",
+      "section": "trading",
+      "local_path": "references/docs/trading-entry-price-and-pnl.md",
+      "status": "ok"
+    },
+    {
+      "title": "Self-trade prevention",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/self-trade-prevention.md",
+      "description": "",
+      "slug": "trading-self-trade-prevention",
+      "section": "trading",
+      "local_path": "references/docs/trading-self-trade-prevention.md",
+      "status": "ok"
+    },
+    {
+      "title": "Index perpetual contracts",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/index-perpetual-contracts.md",
+      "description": "",
+      "slug": "trading-index-perpetual-contracts",
+      "section": "trading",
+      "local_path": "references/docs/trading-index-perpetual-contracts.md",
+      "status": "ok"
+    },
+    {
+      "title": "Uniswap perpetuals",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/uniswap-perpetuals.md",
+      "description": "",
+      "slug": "trading-uniswap-perpetuals",
+      "section": "trading",
+      "local_path": "references/docs/trading-uniswap-perpetuals.md",
+      "status": "ok"
+    },
+    {
+      "title": "Hyperps",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/hyperps.md",
+      "description": "",
+      "slug": "trading-hyperps",
+      "section": "trading",
+      "local_path": "references/docs/trading-hyperps.md",
+      "status": "ok"
+    },
+    {
+      "title": "Delisting",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/delisting.md",
+      "description": "",
+      "slug": "trading-delisting",
+      "section": "trading",
+      "local_path": "references/docs/trading-delisting.md",
+      "status": "ok"
+    },
+    {
+      "title": "Market making",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/market-making.md",
+      "description": "",
+      "slug": "trading-market-making",
+      "section": "trading",
+      "local_path": "references/docs/trading-market-making.md",
+      "status": "ok"
+    },
+    {
+      "title": "Portfolio graphs",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-graphs.md",
+      "description": "",
+      "slug": "trading-portfolio-graphs",
+      "section": "trading",
+      "local_path": "references/docs/trading-portfolio-graphs.md",
+      "status": "ok"
+    },
+    {
+      "title": "Miscellaneous UI",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/miscellaneous-ui.md",
+      "description": "",
+      "slug": "trading-miscellaneous-ui",
+      "section": "trading",
+      "local_path": "references/docs/trading-miscellaneous-ui.md",
+      "status": "ok"
+    },
+    {
+      "title": "Validators",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/validators.md",
+      "description": "",
+      "slug": "validators",
+      "section": "validators",
+      "local_path": "references/docs/validators.md",
+      "status": "ok"
+    },
+    {
+      "title": "Running a validator",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/validators/running-a-validator.md",
+      "description": "",
+      "slug": "validators-running-a-validator",
+      "section": "validators",
+      "local_path": "references/docs/validators-running-a-validator.md",
+      "status": "ok"
+    },
+    {
+      "title": "Delegation program",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/validators/delegation-program.md",
+      "description": "",
+      "slug": "validators-delegation-program",
+      "section": "validators",
+      "local_path": "references/docs/validators-delegation-program.md",
+      "status": "ok"
+    },
+    {
+      "title": "Referrals",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/referrals.md",
+      "description": "",
+      "slug": "referrals",
+      "section": "general",
+      "local_path": "references/docs/referrals.md",
+      "status": "ok"
+    },
+    {
+      "title": "Proposal: Staking referral program",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/referrals/proposal-staking-referral-program.md",
+      "description": "",
+      "slug": "referrals-proposal-staking-referral-program",
+      "section": "general",
+      "local_path": "references/docs/referrals-proposal-staking-referral-program.md",
+      "status": "ok"
+    },
+    {
+      "title": "Points",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/points.md",
+      "description": "",
+      "slug": "points",
+      "section": "general",
+      "local_path": "references/docs/points.md",
+      "status": "ok"
+    },
+    {
+      "title": "Historical data",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/historical-data.md",
+      "description": "",
+      "slug": "historical-data",
+      "section": "general",
+      "local_path": "references/docs/historical-data.md",
+      "status": "ok"
+    },
+    {
+      "title": "Risks",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/risks.md",
+      "description": "",
+      "slug": "risks",
+      "section": "general",
+      "local_path": "references/docs/risks.md",
+      "status": "ok"
+    },
+    {
+      "title": "Bug bounty program",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/bug-bounty-program.md",
+      "description": "",
+      "slug": "bug-bounty-program",
+      "section": "general",
+      "local_path": "references/docs/bug-bounty-program.md",
+      "status": "ok"
+    },
+    {
+      "title": "Audits",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/audits.md",
+      "description": "",
+      "slug": "audits",
+      "section": "general",
+      "local_path": "references/docs/audits.md",
+      "status": "ok"
+    },
+    {
+      "title": "Brand kit",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/brand-kit.md",
+      "description": "",
+      "slug": "brand-kit",
+      "section": "general",
+      "local_path": "references/docs/brand-kit.md",
+      "status": "ok"
+    },
+    {
+      "title": "API",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api.md",
+      "description": "Documentation for the Hyperliquid public API",
+      "slug": "for-developers-api",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api.md",
+      "status": "ok"
+    },
+    {
+      "title": "Notation",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/notation.md",
+      "description": "",
+      "slug": "for-developers-api-notation",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-notation.md",
+      "status": "ok"
+    },
+    {
+      "title": "Asset IDs",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/asset-ids.md",
+      "description": "",
+      "slug": "for-developers-api-asset-ids",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-asset-ids.md",
+      "status": "ok"
+    },
+    {
+      "title": "Tick and lot size",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md",
+      "description": "",
+      "slug": "for-developers-api-tick-and-lot-size",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-tick-and-lot-size.md",
+      "status": "ok"
+    },
+    {
+      "title": "Nonces and API wallets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/nonces-and-api-wallets.md",
+      "description": "",
+      "slug": "for-developers-api-nonces-and-api-wallets",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-nonces-and-api-wallets.md",
+      "status": "ok"
+    },
+    {
+      "title": "Info endpoint",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint.md",
+      "description": "The info endpoint is used to fetch information about the exchange and specific users. The different request bodies result in different corresponding response body schemas.",
+      "slug": "for-developers-api-info-endpoint",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-info-endpoint.md",
+      "status": "ok"
+    },
+    {
+      "title": "Perpetuals",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals.md",
+      "description": "The section documents the info endpoints that are specific to perpetuals. See Rate limits section for rate limiting logic and weights.",
+      "slug": "for-developers-api-info-endpoint-perpetuals",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-info-endpoint-perpetuals.md",
+      "status": "ok"
+    },
+    {
+      "title": "Spot",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot.md",
+      "description": "The section documents the info endpoints that are specific to spot.",
+      "slug": "for-developers-api-info-endpoint-spot",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-info-endpoint-spot.md",
+      "status": "ok"
+    },
+    {
+      "title": "Exchange endpoint",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/exchange-endpoint.md",
+      "description": "The exchange endpoint is used to interact with and trade on the Hyperliquid chain. See the Python SDK for code to generate signatures for these requests.",
+      "slug": "for-developers-api-exchange-endpoint",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-exchange-endpoint.md",
+      "status": "ok"
+    },
+    {
+      "title": "Websocket",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket.md",
+      "description": "",
+      "slug": "for-developers-api-websocket",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-websocket.md",
+      "status": "ok"
+    },
+    {
+      "title": "Subscriptions",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/subscriptions.md",
+      "description": "This page describes subscribing to data streams using the WebSocket API.",
+      "slug": "for-developers-api-websocket-subscriptions",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-websocket-subscriptions.md",
+      "status": "ok"
+    },
+    {
+      "title": "Post requests",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/post-requests.md",
+      "description": "This page describes posting requests using the WebSocket API.",
+      "slug": "for-developers-api-websocket-post-requests",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-websocket-post-requests.md",
+      "status": "ok"
+    },
+    {
+      "title": "Timeouts and heartbeats",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/websocket/timeouts-and-heartbeats.md",
+      "description": "This page describes the measures to keep WebSocket connections alive.",
+      "slug": "for-developers-api-websocket-timeouts-and-heartbeats",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-websocket-timeouts-and-heartbeats.md",
+      "status": "ok"
+    },
+    {
+      "title": "Error responses",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/error-responses.md",
+      "description": "",
+      "slug": "for-developers-api-error-responses",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-error-responses.md",
+      "status": "ok"
+    },
+    {
+      "title": "Signing",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/signing.md",
+      "description": "",
+      "slug": "for-developers-api-signing",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-signing.md",
+      "status": "ok"
+    },
+    {
+      "title": "Rate limits and user limits",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/rate-limits-and-user-limits.md",
+      "description": "",
+      "slug": "for-developers-api-rate-limits-and-user-limits",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-rate-limits-and-user-limits.md",
+      "status": "ok"
+    },
+    {
+      "title": "Activation gas fee",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/activation-gas-fee.md",
+      "description": "",
+      "slug": "for-developers-api-activation-gas-fee",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-activation-gas-fee.md",
+      "status": "ok"
+    },
+    {
+      "title": "Priority fees",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/priority-fees.md",
+      "description": "Advanced feature for latency-sensitive users",
+      "slug": "for-developers-api-priority-fees",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-priority-fees.md",
+      "status": "ok"
+    },
+    {
+      "title": "Optimizing latency",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/optimizing-latency.md",
+      "description": "",
+      "slug": "for-developers-api-optimizing-latency",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-optimizing-latency.md",
+      "status": "ok"
+    },
+    {
+      "title": "Bridge2",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/bridge2.md",
+      "description": "",
+      "slug": "for-developers-api-bridge2",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-bridge2.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deploying HIP-1 and HIP-2 assets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/deploying-hip-1-and-hip-2-assets.md",
+      "description": "",
+      "slug": "for-developers-api-deploying-hip-1-and-hip-2-assets",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-deploying-hip-1-and-hip-2-assets.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-3 deployer actions",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/hip-3-deployer-actions.md",
+      "description": "",
+      "slug": "for-developers-api-hip-3-deployer-actions",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-hip-3-deployer-actions.md",
+      "status": "ok"
+    },
+    {
+      "title": "HIP-3 deployer actions",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/hip-3-deployer-actions-1.md",
+      "description": "",
+      "slug": "for-developers-api-hip-3-deployer-actions-1",
+      "section": "api",
+      "local_path": "references/docs/for-developers-api-hip-3-deployer-actions-1.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperEVM",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm.md",
+      "description": "",
+      "slug": "for-developers-hyperevm",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm.md",
+      "status": "ok"
+    },
+    {
+      "title": "Dual-block architecture",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/dual-block-architecture.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-dual-block-architecture",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-dual-block-architecture.md",
+      "status": "ok"
+    },
+    {
+      "title": "Raw HyperEVM block data",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/raw-hyperevm-block-data.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-raw-hyperevm-block-data",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-raw-hyperevm-block-data.md",
+      "status": "ok"
+    },
+    {
+      "title": "Interacting with HyperCore",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interacting-with-hypercore.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-interacting-with-hypercore",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-interacting-with-hypercore.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperCore <> HyperEVM transfers",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/hypercore-less-than-greater-than-hyperevm-transfers.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-hypercore-less-than-greater-than-hyperevm-transfers",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-hypercore-less-than-greater-than-hyperevm-transfers.md",
+      "status": "ok"
+    },
+    {
+      "title": "Interaction timings",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interaction-timings.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-interaction-timings",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-interaction-timings.md",
+      "status": "ok"
+    },
+    {
+      "title": "Wrapped HYPE",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/wrapped-hype.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-wrapped-hype",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-wrapped-hype.md",
+      "status": "ok"
+    },
+    {
+      "title": "JSON-RPC",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/json-rpc.md",
+      "description": "",
+      "slug": "for-developers-hyperevm-json-rpc",
+      "section": "hyperevm-dev",
+      "local_path": "references/docs/for-developers-hyperevm-json-rpc.md",
+      "status": "ok"
+    },
+    {
+      "title": "Nodes",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/nodes.md",
+      "description": "Documentation for running nodes",
+      "slug": "for-developers-nodes",
+      "section": "nodes",
+      "local_path": "references/docs/for-developers-nodes.md",
+      "status": "ok"
+    },
+    {
+      "title": "L1 data schemas",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/nodes/l1-data-schemas.md",
+      "description": "",
+      "slug": "for-developers-nodes-l1-data-schemas",
+      "section": "nodes",
+      "local_path": "references/docs/for-developers-nodes-l1-data-schemas.md",
+      "status": "ok"
+    },
+    {
+      "title": "Foundation non-validating node",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/nodes/foundation-non-validating-node.md",
+      "description": "",
+      "slug": "for-developers-nodes-foundation-non-validating-node",
+      "section": "nodes",
+      "local_path": "references/docs/for-developers-nodes-foundation-non-validating-node.md",
+      "status": "ok"
+    },
+    {
+      "title": "Read Me - Builder Tools",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/builder-tools/read-me-builder-tools.md",
+      "description": "",
+      "slug": "builder-tools-read-me-builder-tools",
+      "section": "builder-tools",
+      "local_path": "references/docs/builder-tools-read-me-builder-tools.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperEVM Tools",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/builder-tools/hyperevm-tools.md",
+      "description": "",
+      "slug": "builder-tools-hyperevm-tools",
+      "section": "builder-tools",
+      "local_path": "references/docs/builder-tools-hyperevm-tools.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperCore Tools",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/builder-tools/hypercore-tools.md",
+      "description": "",
+      "slug": "builder-tools-hypercore-tools",
+      "section": "builder-tools",
+      "local_path": "references/docs/builder-tools-hypercore-tools.md",
+      "status": "ok"
+    },
+    {
+      "title": "Read Me - Support Guide",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/read-me-support-guide.md",
+      "description": "This Support Guide is meant to help you resolve common issues that users face on Hyperliquid.",
+      "slug": "support-read-me-support-guide",
+      "section": "support",
+      "local_path": "references/docs/support-read-me-support-guide.md",
+      "status": "ok"
+    },
+    {
+      "title": "Connectivity issues",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/connectivity-issues.md",
+      "description": "",
+      "slug": "support-faq-connectivity-issues",
+      "section": "support",
+      "local_path": "references/docs/support-faq-connectivity-issues.md",
+      "status": "ok"
+    },
+    {
+      "title": "Connected via wallet",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/connectivity-issues/connected-via-wallet.md",
+      "description": "Description: I can\u2019t connect my wallet to Hyperliquid / I'm stuck in a loop when trying to sign / My wallet isn\u2019t responding. What should I do?",
+      "slug": "support-faq-connectivity-issues-connected-via-wallet",
+      "section": "support",
+      "local_path": "references/docs/support-faq-connectivity-issues-connected-via-wallet.md",
+      "status": "ok"
+    },
+    {
+      "title": "Connected via email",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/connectivity-issues/connected-via-email.md",
+      "description": "Description: I no longer receive verification codes to login with email",
+      "slug": "support-faq-connectivity-issues-connected-via-email",
+      "section": "support",
+      "local_path": "references/docs/support-faq-connectivity-issues-connected-via-email.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposit or transfer issues (missing / lost)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Arbitrum network (USDC)",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-arbitrum-network-usdc.md",
+      "description": "Description: You deposited via the Arbitrum network",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-arbitrum-network-usdc",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-arbitrum-network-usdc.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited fiat",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-fiat.md",
+      "description": "Description: You deposited USDC using fiat, which is managed by Swapped.com",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-fiat",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-fiat.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Bitcoin network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-bitcoin-network.md",
+      "description": "Description: You deposited via the Bitcoin network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-bitcoin-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-bitcoin-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Ethereum network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-ethereum-network.md",
+      "description": "Description: You deposited via the Ethereum network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-ethereum-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-ethereum-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Solana network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-solana-network.md",
+      "description": "Description: You deposited via the Solana network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-solana-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-solana-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Avalanche network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-avalanche-network.md",
+      "description": "Description: You deposited via the Avalanche network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-avalanche-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-avalanche-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Base network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-base-network.md",
+      "description": "Description: You deposited via the Base network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-base-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-base-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Monad network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-monad-network.md",
+      "description": "Description: You deposited via the Monad network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-monad-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-monad-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Deposited via Plasma network",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-plasma-network.md",
+      "description": "Description: You deposited via the Plasma network, which is managed by Unit Protocol.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-plasma-network",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-deposited-via-plasma-network.md",
+      "status": "ok"
+    },
+    {
+      "title": "Transfer or deposit to USDC (Perps) missing",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/transfer-or-deposit-to-usdc-perps-missing.md",
+      "description": "Description: You transferred USDC from your Spot to Perps balance or deposited USDC via Arbitrum and can\u2019t figure out where it went or why you are not able to use the USDC in your Perps balance.",
+      "slug": "support-faq-deposit-or-transfer-issues-missing-lost-transfer-or-deposit-to-usdc-perps-missing",
+      "section": "support",
+      "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-transfer-or-deposit-to-usdc-perps-missing.md",
+      "status": "ok"
+    },
+    {
+      "title": "Withdrawal issues",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/withdrawal-issues.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-withdrawal-issues",
+      "section": "support",
+      "local_path": "references/docs/support-faq-withdrawal-issues.md",
+      "status": "ok"
+    },
+    {
+      "title": "Withdrawal has not arrived in my wallet",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/withdrawal-issues/withdrawal-has-not-arrived-in-my-wallet.md",
+      "description": "Description: You made a withdrawal, but your funds have not arrived in your wallet or intended destination.",
+      "slug": "support-faq-withdrawal-issues-withdrawal-has-not-arrived-in-my-wallet",
+      "section": "support",
+      "local_path": "references/docs/support-faq-withdrawal-issues-withdrawal-has-not-arrived-in-my-wallet.md",
+      "status": "ok"
+    },
+    {
+      "title": "My withdrawal keeps getting re-deposited",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/withdrawal-issues/my-withdrawal-keeps-getting-re-deposited.md",
+      "description": "Description: You made a withdrawal, but your funds have been re-deposited.",
+      "slug": "support-faq-withdrawal-issues-my-withdrawal-keeps-getting-re-deposited",
+      "section": "support",
+      "local_path": "references/docs/support-faq-withdrawal-issues-my-withdrawal-keeps-getting-re-deposited.md",
+      "status": "ok"
+    },
+    {
+      "title": "Withdrawing to Phantom Wallet",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/withdrawal-issues/withdrawing-to-phantom-wallet.md",
+      "description": "Description: You are connected using Phantom Wallet and face issues with withdrawal",
+      "slug": "support-faq-withdrawal-issues-withdrawing-to-phantom-wallet",
+      "section": "support",
+      "local_path": "references/docs/support-faq-withdrawal-issues-withdrawing-to-phantom-wallet.md",
+      "status": "ok"
+    },
+    {
+      "title": "Trade outcome looks incorrect",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-trade-outcome-looks-incorrect",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect.md",
+      "status": "ok"
+    },
+    {
+      "title": "Why was I liquidated?",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/why-was-i-liquidated.md",
+      "description": "Description: Your perps position was liquidated and you see \"Market Liquidation\" in your Trade History",
+      "slug": "support-faq-trade-outcome-looks-incorrect-why-was-i-liquidated",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-why-was-i-liquidated.md",
+      "status": "ok"
+    },
+    {
+      "title": "How does margining work?",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/how-does-margining-work.md",
+      "description": "Description: You have open cross margin positions and don\u2019t understand how margin is attributed to positions",
+      "slug": "support-faq-trade-outcome-looks-incorrect-how-does-margining-work",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-how-does-margining-work.md",
+      "status": "ok"
+    },
+    {
+      "title": "My TP/SL did not execute correctly",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/my-tp-sl-did-not-execute-correctly.md",
+      "description": "Description: You set a TP/SL and believe it was not executed correctly",
+      "slug": "support-faq-trade-outcome-looks-incorrect-my-tp-sl-did-not-execute-correctly",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-my-tp-sl-did-not-execute-correctly.md",
+      "status": "ok"
+    },
+    {
+      "title": "I can't sell leftover spot assets",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/i-cant-sell-leftover-spot-assets.md",
+      "description": "Description:  I have a small amount of a spot asset that I can\u2019t sell",
+      "slug": "support-faq-trade-outcome-looks-incorrect-i-cant-sell-leftover-spot-assets",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-i-cant-sell-leftover-spot-assets.md",
+      "status": "ok"
+    },
+    {
+      "title": "What does \"Action already expired\" mean?",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/what-does-action-already-expired-mean.md",
+      "description": "Description: You received an error message saying '\"Action already expired\"' when placing an order",
+      "slug": "support-faq-trade-outcome-looks-incorrect-what-does-action-already-expired-mean",
+      "section": "support",
+      "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-what-does-action-already-expired-mean.md",
+      "status": "ok"
+    },
+    {
+      "title": "HyperEVM issues",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-hyperevm-issues",
+      "section": "support",
+      "local_path": "references/docs/support-faq-hyperevm-issues.md",
+      "status": "ok"
+    },
+    {
+      "title": "Accidentally transferred to HyperEVM",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/accidentally-transferred-to-hyperevm.md",
+      "description": "Description: You clicked the \u201cTransfer to/from EVM\u201d button and can\u2019t figure out what happened",
+      "slug": "support-faq-hyperevm-issues-accidentally-transferred-to-hyperevm",
+      "section": "support",
+      "local_path": "references/docs/support-faq-hyperevm-issues-accidentally-transferred-to-hyperevm.md",
+      "status": "ok"
+    },
+    {
+      "title": "Can\u2019t see my HyperEVM assets in wallet extension",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/cant-see-my-hyperevm-assets-in-wallet-extension.md",
+      "description": "Description: You are using the EVM and don\u2019t see your assets on the EVM in your wallet extension",
+      "slug": "support-faq-hyperevm-issues-cant-see-my-hyperevm-assets-in-wallet-extension",
+      "section": "support",
+      "local_path": "references/docs/support-faq-hyperevm-issues-cant-see-my-hyperevm-assets-in-wallet-extension.md",
+      "status": "ok"
+    },
+    {
+      "title": "Gas problem on EVM",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/gas-problem-on-evm.md",
+      "description": "Description: You are having issues paying for gas or getting transactions through on the HyperEVM",
+      "slug": "support-faq-hyperevm-issues-gas-problem-on-evm",
+      "section": "support",
+      "local_path": "references/docs/support-faq-hyperevm-issues-gas-problem-on-evm.md",
+      "status": "ok"
+    },
+    {
+      "title": "Portfolio margin",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/portfolio-margin.md",
+      "description": "",
+      "slug": "support-faq-portfolio-margin",
+      "section": "support",
+      "local_path": "references/docs/support-faq-portfolio-margin.md",
+      "status": "ok"
+    },
+    {
+      "title": "Unstaking & link staking issues",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/unstaking-and-link-staking-issues.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-unstaking-and-link-staking-issues",
+      "section": "support",
+      "local_path": "references/docs/support-faq-unstaking-and-link-staking-issues.md",
+      "status": "ok"
+    },
+    {
+      "title": "Unstaking transfer taking more than 7 days",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/unstaking-and-link-staking-issues/unstaking-transfer-taking-more-than-7-days.md",
+      "description": "Description: You believe that you unstaked HYPE and the transfer has taken >7 days. Your unstaked HYPE has not reached your Spot balance",
+      "slug": "support-faq-unstaking-and-link-staking-issues-unstaking-transfer-taking-more-than-7-days",
+      "section": "support",
+      "local_path": "references/docs/support-faq-unstaking-and-link-staking-issues-unstaking-transfer-taking-more-than-7-days.md",
+      "status": "ok"
+    },
+    {
+      "title": "Staking and trading account linking issues",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/unstaking-and-link-staking-issues/staking-and-trading-account-linking-issues.md",
+      "description": "Description: You have questions after linking a staking and trading account",
+      "slug": "support-faq-unstaking-and-link-staking-issues-staking-and-trading-account-linking-issues",
+      "section": "support",
+      "local_path": "references/docs/support-faq-unstaking-and-link-staking-issues-staking-and-trading-account-linking-issues.md",
+      "status": "ok"
+    },
+    {
+      "title": "Building on Hyperliquid",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/building-on-hyperliquid.md",
+      "description": "Here are the guides in this section:",
+      "slug": "support-faq-building-on-hyperliquid",
+      "section": "support",
+      "local_path": "references/docs/support-faq-building-on-hyperliquid.md",
+      "status": "ok"
+    },
+    {
+      "title": "I have API related questions",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/building-on-hyperliquid/i-have-api-related-questions.md",
+      "description": "Description: You are building on HyperCore or HyperEVM",
+      "slug": "support-faq-building-on-hyperliquid-i-have-api-related-questions",
+      "section": "support",
+      "local_path": "references/docs/support-faq-building-on-hyperliquid-i-have-api-related-questions.md",
+      "status": "ok"
+    },
+    {
+      "title": "I want to deploy a spot token or list a perp",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/building-on-hyperliquid/i-want-to-deploy-a-spot-token-or-list-a-perp.md",
+      "description": "",
+      "slug": "support-faq-building-on-hyperliquid-i-want-to-deploy-a-spot-token-or-list-a-perp",
+      "section": "support",
+      "local_path": "references/docs/support-faq-building-on-hyperliquid-i-want-to-deploy-a-spot-token-or-list-a-perp.md",
+      "status": "ok"
+    },
+    {
+      "title": "I got scammed/hacked",
+      "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/i-got-scammed-hacked.md",
+      "description": "Description: Your account was compromised / you see transactions you did not authorize / your funds are missing.",
+      "slug": "support-faq-i-got-scammed-hacked",
+      "section": "support",
+      "local_path": "references/docs/support-faq-i-got-scammed-hacked.md",
+      "status": "ok"
+    }
+  ]
+}

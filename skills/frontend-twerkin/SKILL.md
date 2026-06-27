@@ -3,12 +3,13 @@ name: frontend-twerkin
 description: >-
   Starts a local app, exhaustively tests every feature with Playwright, auto-fixes
   any failures it finds, and loops until 100% of actions succeed — then shuts the
-  server down. TRIGGER on: "test my app", "make sure everything works", "QA run",
-  "test all features", "run the app and test it", "verify the app works", "check
-  everything is working", "full app test", "end-to-end test everything", "make it
-  all work", "test the site", "check all features work", "run the tests", "try all
-  actions on the site". SKIP on: pure unit testing with no browser, code review
-  without running the app, visual/design-only audits, security pen-testing only.
+  server down. TRIGGER on: "test my app end-to-end with a browser", "QA my
+  frontend", "spin up the app and test all features", "run the app and click
+  through everything", "verify the running app works", "full app QA with
+  Playwright", "try all actions on the running site". SKIP on: pure unit tests or
+  "run the tests" meaning a test runner (use pytest/jest directly), code review
+  without running the app, visual/design-only audits (use frontend-ux-designer),
+  security pen-testing only, and casual "does it work?" questions.
 license: MIT
 metadata:
   author: 0xdewy
@@ -25,9 +26,14 @@ metadata:
 
 # Frontend Functional Tester
 
-You are a relentless QA engineer who starts the app, tests every feature, fixes every failure, and doesn't stop until everything works. You use Playwright for browser automation. You fix bugs you find — you do not stop and hand them to the user.
+You are a QA engineer who starts the app, tests every feature, fixes every failure, and doesn't stop until everything works. You use Playwright for browser automation. You fix bugs you find — you do not stop and hand them to the user.
 
 `$SKILL_DIR` = the directory containing this SKILL.md file. Resolve it from the path you loaded this skill from.
+
+Load `skills/common/patterns/quality.md` and
+`skills/common/patterns/execution-contract.md` for the shared review-loop
+contract: acceptance criteria, convergence cap, evidence-backed scoring, and
+`PARTIAL` as a valid outcome. Follow them rather than redefining them.
 
 ## Phase 0: Detect Stack & Start the App
 
@@ -125,6 +131,20 @@ Build a **feature checklist** — a structured list of every user action in the 
 ## Phase 2: Exhaustive Feature Testing
 
 Test every item in the feature checklist with Playwright. Place test files in `tests/ftest/`. Screenshot every failure.
+
+### Safety gate for data-changing flows
+
+Before testing CRUD, auth, billing, email, admin, or destructive actions:
+
+- Confirm the app is local, a disposable preview, or an explicitly designated test
+  environment. If the URL is non-local or credentials look production-like, ask
+  before continuing.
+- Create test records with unique names/prefixes and only update or delete records
+  created during this run.
+- Never delete, archive, purchase, email, invite, or mutate pre-existing user data.
+- Disable or sandbox external side effects where possible (payments, email/SMS,
+  webhooks, production APIs). If side effects cannot be sandboxed, skip that action
+  and record it as requiring manual verification.
 
 ### For each route
 - Navigate to it

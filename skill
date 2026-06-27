@@ -3,7 +3,9 @@ set -euo pipefail
 
 CENTRAL_STORE="${XDG_DATA_HOME:-$HOME/.local/share}/skills"
 TOOL_PATHS=(
+    "$HOME/.codex/skills"
     "$HOME/.claude/skills"
+    "$HOME/.agents/skills"
     "$HOME/.config/agents/skills"
     "$HOME/.local/share/hermes/skills"
 )

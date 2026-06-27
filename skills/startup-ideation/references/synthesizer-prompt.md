@@ -30,6 +30,10 @@ find the version of the seed that fits the company shape you were assigned.
 
 ## What To Produce
 
+Write your output to the exact `output_path` provided by the orchestrator. Do not
+write any other file. End your final message with:
+`DONE: {output_path} — <N> ideas generated`
+
 Generate 3-5 startup ideas. For each idea, use exactly this structure:
 
 ```

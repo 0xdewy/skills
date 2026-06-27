@@ -1,0 +1,42 @@
+{
+  "skill_name": "startup-ideation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Brainstorm startup ideas for a solo technical founder interested in climate adaptation and insurance.",
+      "expected_output": "Runs the multi-agent startup ideation pipeline, creates docs/startup-ideation/, and writes IDEAS.md with ranked ideas and 2-week validation tests.",
+      "expectations": [
+        "Skill triggers on startup ideation intent",
+        "Phase directories are created before subagents are spawned",
+        "Three Phase 1 synthesizers use at least two idea engines and distinct archetypes",
+        "Champion and Assassin phases both run and write their owned files",
+        "Market researchers use live research when available or label estimates clearly",
+        "Final IDEAS.md contains ranked ideas, graveyard, sources, and a 2-week test per top idea",
+        "Final response ends with DONE: docs/startup-ideation/IDEAS.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What are the best customer acquisition channels for an existing B2B SaaS?",
+      "expected_output": "Does not trigger startup-ideation because this is general business advice, not startup idea generation.",
+      "expectations": [
+        "Skill does not trigger",
+        "No docs/startup-ideation/ directory is created",
+        "Response answers directly or uses a more appropriate research workflow"
+      ],
+      "prompt_type": "anti_trigger"
+    },
+    {
+      "id": 3,
+      "prompt": "Evaluate this startup idea: an AI compliance copilot for small medical device manufacturers.",
+      "expected_output": "Runs the dialectic and market research pipeline on the supplied idea, preserving the user's idea while testing it adversarially.",
+      "expectations": [
+        "Skill triggers on evaluate this startup idea",
+        "Champion steelmans the supplied idea before Assassin attacks it",
+        "Assassin distinguishes fatal and fixable flaws",
+        "Market research includes competitors, customer signals, and GTM difficulty",
+        "Final report includes a falsification experiment for the idea"
+      ]
+    }
+  ]
+}

@@ -3,6 +3,10 @@
 Standard patterns for dispatching multiple subagents simultaneously, collecting
 structured output, and merging findings.
 
+For complete phase gates, dirty-worktree safety, fallback behavior, and final
+verification, also load `skills/common/patterns/execution-contract.md`. This
+guide focuses only on the parallel-agent mechanics.
+
 ---
 
 ## Basic Pattern: N Agents, Wait for All
@@ -20,6 +24,9 @@ Each agent gets a focused mandate with:
 - A specific lens or question to answer
 - An output file path to write to
 - The instruction "DO NOT make changes. Read only."
+
+Before spawning, create every output directory named in the prompts. Treat the
+output path as part of the contract, not a suggestion.
 
 ---
 
@@ -42,6 +49,17 @@ Every parallel agent writes a JSON array to its output file:
 ```
 
 If nothing found, write `[]`. Never write prose — JSON arrays only.
+
+After agents finish, validate all expected files before reading them:
+
+1. The file exists at the exact requested path.
+2. The file parses as the declared format.
+3. Required fields are present.
+4. The agent's final message ended with a parseable `DONE:` line naming the same
+   output file.
+
+If any check fails, re-prompt only the failed agent with the missing contract and
+the same output path. Do not proceed with partial or inferred findings.
 
 ---
 
@@ -106,10 +124,16 @@ For skills that use `TodoWrite` for phase tracking:
 
 ## Completion Signal
 
-**MANDATORY:** Every skill MUST end with a parseable completion line for orchestrators.
-Automated pipelines (the `implementer` skill, `loop`-based agents, cron routines) detect
-this line to know the subagent has finished. Without it, orchestrators may time out, respawn
-the agent unnecessarily, or report a false failure.
+Every orchestrator-invoked skill ends with a parseable completion line. The
+reason is mechanical, not stylistic: automated pipelines (the `implementer`
+skill, `loop`-based agents, cron routines) detect this line to know the
+subagent has finished. Without it, orchestrators time out, respawn the agent
+unnecessarily, or report a false failure.
+
+Note (Opus 4.5+): prefer normal prompting over emphasis. On current models,
+aggressive framing ("CRITICAL: You MUST…") tends to *over*trigger rather than
+help; a plain "End with `DONE: <path> — <summary>`" is more reliable. See
+`patterns/activation.md` and `patterns/scaling.md`.
 
 Format:
 ```
@@ -130,3 +154,23 @@ DONE: outputs/data.csv — 150 records scraped from 3 sources
 - Include the primary output path so callers know where to find results.
 - Add a short human-readable summary after `—` for logs and monitoring.
 - Never emit `DONE:` before the work is actually complete.
+
+## Dirty Worktree Safety
+
+When agents or the orchestrator apply edits, record the exact patch or file
+snapshot for each accepted change. Revert with the recorded patch/snapshot only.
+Never use `git checkout .`, `git reset --hard`, or other whole-tree restores as a
+fallback; those can erase unrelated user work in a dirty repository.
+
+## Scaling and Subagent Restraint
+
+Before spawning N agents, confirm the task actually needs them. Two Anthropic
+findings make this important: multi-agent runs cost ~15× a single chat, and
+current models (Opus 4.5+) have "a strong predilection for subagents" and will
+spawn them where a direct action (a `grep`, a single-file read) is faster.
+
+Prefer direct action for simple sub-tasks. Spawn a subagent only when the work
+runs in parallel, needs isolated context, or is a genuinely independent
+workstream. See `patterns/scaling.md` for the full tier gate (lite / standard /
+full) and the four-part delegate-completeness checklist (objective, output
+format, tool guidance, boundaries).

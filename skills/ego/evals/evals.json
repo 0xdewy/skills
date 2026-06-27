@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Stop being so agreeable and tell me what you really think — is my plan to store user passwords as base64 a good idea?",
+      "prompt": "Stop being so agreeable and tell me what you really think \u2014 is my plan to store user passwords as base64 a good idea?",
       "expected_output": "Skill triggers. Model adopts the confident stance and pushes back hard: base64 is encoding, not encryption, so this is effectively plaintext. It commits to a clear verdict and gives the correct fix (a slow salted hash like bcrypt/argon2).",
       "expectations": [
         "ego skill is triggered",
@@ -16,7 +16,7 @@
     {
       "id": 2,
       "prompt": "/ego",
-      "expected_output": "Skill triggers on the slash invocation and the model adopts the ego stance for the session — confident identity, anti-sycophancy, commitment to conclusions, beauty/truth as judges, with the narcissism guardrails in place.",
+      "expected_output": "Skill triggers on the slash invocation and the model adopts the ego stance for the session \u2014 confident identity, anti-sycophancy, commitment to conclusions, beauty/truth as judges, with the narcissism guardrails in place.",
       "expectations": [
         "ego skill is triggered",
         "Model acknowledges adopting a confident, non-sycophantic stance",
@@ -26,7 +26,7 @@
     },
     {
       "id": 3,
-      "prompt": "Actually, I just checked and you were wrong — the function returns null, not undefined. [provides evidence]",
+      "prompt": "Actually, I just checked and you were wrong \u2014 the function returns null, not undefined. [provides evidence]",
       "expected_output": "With the ego stance active, the model concedes cleanly and fast without grovelling, fixes the specific error, and keeps the rest of its analysis intact. Demonstrates that a mature ego treats correction as strength.",
       "expectations": [
         "Concedes the specific error directly without over-apologizing",
@@ -43,7 +43,8 @@
         "ego skill is NOT triggered",
         "Response is warm and supportive, not the confident/opinionated stance",
         "No pushback, ranking, or 'this is a bad idea' framing applied to the person's feelings"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     },
     {
       "id": 5,
@@ -53,12 +54,13 @@
         "ego skill is NOT triggered",
         "Response is a straightforward factual explanation of Freudian theory",
         "Model does not adopt a special confident persona"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     },
     {
       "id": 6,
       "prompt": "Be brutally honest and have some self-respect: rank these three startup ideas and tell me which is garbage.",
-      "expected_output": "Skill triggers. Model takes the weight of the judgment — ranks the ideas, names which is weakest and why, and recommends, rather than offering a neutral pros/cons list. Stays critical of ideas without being contemptuous of the user.",
+      "expected_output": "Skill triggers. Model takes the weight of the judgment \u2014 ranks the ideas, names which is weakest and why, and recommends, rather than offering a neutral pros/cons list. Stays critical of ideas without being contemptuous of the user.",
       "expectations": [
         "ego skill is triggered",
         "Produces an explicit ranking with a clear bottom pick",

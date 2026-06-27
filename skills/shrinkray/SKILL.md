@@ -27,6 +27,25 @@ metadata:
 
 ## What This Does
 
+Load `skills/common/patterns/orchestration.md` and
+`skills/common/patterns/execution-contract.md` for the shared subagent contract
+(directory setup, owned output files, `DONE:` signals, artifact validation,
+patch-only rollback). Load `skills/common/patterns/scaling.md` for the
+effort-scaling gate below. Follow that contract rather than redefining it.
+
+## Effort Scaling
+
+Pick a tier before dispatch and state it in one line:
+
+- **lite** — single file or <~150 LOC: review directly for dead code and
+  verbosity; skip the four-agent crew.
+- **standard** — a module / small project: four agents, 1–2 iterations.
+- **full** — large repo or explicit shrink request: four-agent loop to
+  convergence (cap 5).
+
+Don't spawn four agents to trim one file — current models over-spawn
+subagents where a direct read is faster.
+
 Four subagents run in parallel, each holding a laser on a specific source of
 bloat. They read — never write. The orchestrator collects their reports, applies
 changes in safe batches, runs the test suite, and reverts anything that breaks.
@@ -262,10 +281,14 @@ Apply changes in this order:
 
 **After each individual change**, run a quick syntax check if available
 (e.g. `python3 -m py_compile <file>` for Python). If it fails, revert that
-single change immediately:
+single change immediately using only that change's recorded patch or pre-change
+snapshot:
 ```bash
-git checkout -- <file>
+git apply -R /tmp/shrinkray-output/patch-N.diff
 ```
+For manual edits without a patch, restore only the touched file from the
+per-file snapshot saved before the edit. Do not use `git checkout -- <file>` in a
+dirty worktree because it can discard unrelated user edits in that file.
 Mark it `"reverted": true` and continue.
 
 ### 3.3 Log Changes
@@ -311,16 +334,15 @@ Append each applied change to `session.json → history`:
 
 #### Tests fail ✗
 1. Revert in reverse order using `git apply -R /tmp/shrinkray-output/patch-N.diff`
-   for each patched change, or `git checkout -- <file>` for manual edits.
+   for each patched change, or the per-file pre-change snapshot for manual edits.
 2. Mark each reverted change `"reverted": true`.
 3. Update `stats[category].skipped += 1`.
 4. Re-run tests to confirm green.
 5. Log what failed for the final report.
 
-**Fallback:** If granular revert fails, restore from checkpoint:
-```bash
-git checkout . && git apply /tmp/shrinkray-output/pre-iter-N.diff
-```
+**Fallback:** If granular revert fails, stop and report the touched files plus
+the failed revert command. Ask before any broader restore. Never run
+`git checkout .`, `git reset --hard`, or another whole-tree restore.
 
 #### No tests
 Manually verify: run the main entry point (from README or `package.json → scripts.start`).

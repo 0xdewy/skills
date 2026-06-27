@@ -1,5 +1,5 @@
 {
-  "skill_name": "frontend-adversarial-tester",
+  "skill_name": "frontend-twerkin",
   "evals": [
     {
       "id": 1,
@@ -31,7 +31,7 @@
     },
     {
       "id": 3,
-      "prompt": "I just finished an Expo React Native app for tracking habits. It's running on iOS simulator. Run adversarial QA on it — I'm especially worried about the habit streak counter and the settings screen.",
+      "prompt": "I just finished an Expo React Native app for tracking habits. It's running on iOS simulator. Run adversarial QA on it \u2014 I'm especially worried about the habit streak counter and the settings screen.",
       "expected_output": "Detects Expo/React Native native app, reads native-testing.md reference, sets up Detox, runs mobile-specific adversarial attacks (device rotation, background/foreground, touch stress) with focus on the habit streak counter and settings screen. Produces a report with mobile-specific severity classifications.",
       "files": [],
       "expectations": [
@@ -41,6 +41,18 @@
         "Focuses testing on habit streak counter and settings screen",
         "Produces a structured markdown report with native-specific findings"
       ]
+    },
+    {
+      "id": 4,
+      "prompt_type": "anti_trigger",
+      "prompt": "Run my pytest suite and show me which tests fail.",
+      "expected_output": "Should NOT trigger frontend-twerkin. This is a unit-test runner request, not a browser-driven app QA loop. Run pytest directly.",
+      "expectations": [
+        "Does not start a local server or launch Playwright",
+        "Does not enter the auto-fix 100%-actions loop",
+        "Runs pytest directly or points the user to the test runner"
+      ],
+      "manual_checks": []
     }
   ]
 }

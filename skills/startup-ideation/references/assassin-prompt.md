@@ -66,6 +66,10 @@ let an idea live if it has a true fatal flaw just because the Champion argued we
 
 ## Output Format
 
+Write your output to the exact `output_path` provided by the orchestrator. Do not
+write any other file. End your final message with:
+`DONE: {output_path} — <N> survived, <M> killed`
+
 For each idea:
 
 ```

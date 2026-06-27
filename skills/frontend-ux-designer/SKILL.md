@@ -1,19 +1,16 @@
 ---
 name: frontend-ux-designer
 description: >-
-  Comprehensive frontend UX and visual design auditor + fixer. Browses the app
-  with Playwright (Chromium), evaluates layout consistency, visual hierarchy,
-  typography, color use, spacing rhythm, component symmetry, and UX ordering.
-  Produces a design critique report with specific fix recommendations, then
-  applies CSS/layout improvements to make the UI beautiful, ordered, and polished.
+  Frontend UX and visual design auditor/fixer. Uses Playwright screenshots and
+  computed CSS to evaluate layout, hierarchy, typography, color, spacing,
+  symmetry, responsive quality, and polish, then applies targeted UI/CSS fixes.
   TRIGGER on: "review the design", "audit the UI", "make it look better",
-  "improve the UX", "check the layout", "is the design consistent?", "make it
-  beautiful", "fix the styling", "UX review", "design critique", "check spacing",
-  "fix alignment", "review typography", "improve visual hierarchy", "make the
-  layout symmetric", "is the UI polished?", "frontend design audit", "CSS review",
-  "visual QA", "make it prettier". SKIP on: functional bug-finding without design
-  focus (use frontend-twerkin instead), requests to build new features,
-  non-UI code review, backend code.
+  "improve the UX", "check the layout", "is the design consistent?",
+  "fix the styling", "UX review", "design critique", "check spacing",
+  "fix alignment", "review typography", "improve visual hierarchy",
+  "frontend design audit", "CSS review", "visual QA", "make it prettier".
+  SKIP on: functional testing without design focus, new feature builds,
+  non-UI code review, or backend code.
 license: MIT
 metadata:
   author: 0xdewy
@@ -43,6 +40,11 @@ critique grounded in evidence. Then you fix things.
 **Key distinction from `frontend-twerkin`:** That skill exhaustively tests features.
 This skill improves design quality. You don't just report — you improve.
 
+Load `skills/common/patterns/quality.md` and
+`skills/common/patterns/execution-contract.md` for the shared review contract:
+acceptance criteria, evidence-backed sub-scores, no-pass-with-failed-criteria,
+and `PARTIAL` outcomes. Follow them rather than redefining them.
+
 ---
 
 ## Phase 0: Setup
@@ -59,13 +61,15 @@ bash $SKILL_DIR/scripts/detect_stack.sh [project-dir]
 
 - If a URL was provided in the invocation, use it directly.
 - Otherwise check common ports: `curl -sf http://localhost:3000 || curl -sf http://localhost:5173 || curl -sf http://localhost:8080 || curl -sf http://localhost:4173`
-- If not running, start it in the background using the detected `DEV_CMD`.
+- If not running, start it in the background using the detected `DEV_CMD`, save
+  the PID, and set `SERVER_STARTED_BY_SKILL=true`.
+- If an existing server is found, use it and set `SERVER_STARTED_BY_SKILL=false`.
 - Wait until the server responds before continuing.
 
 ### Ensure Playwright is available
 
 ```bash
-python3 -c "from playwright.sync_api import sync_playwright; print('ok')" 2>/dev/null || pip install playwright && playwright install chromium
+bash $SKILL_DIR/scripts/setup_playwright.sh [project-dir] [PKG_MGR]
 ```
 
 ---
@@ -280,10 +284,10 @@ If new issues were introduced (unlikely, but possible), fix those too.
 
 ## Output Summary
 
-At completion:
+At completion, emit a summary whose final line is the parseable completion
+signal (orchestrators detect this line to know the run finished):
 
 ```
-DONE: UX audit complete.
 Routes checked: N
 Screenshots: /tmp/ux-audit/screenshots/
 Design critique: /tmp/ux-audit/design-critique.md
@@ -291,7 +295,11 @@ Critical fixes applied: A
 Moderate fixes applied: B
 Minor issues documented (not applied): C
 Post-fix screenshots: /tmp/ux-audit-post/screenshots/
+DONE: /tmp/ux-audit/ — UX audit complete, A critical / B moderate fixes applied, C minor documented
 ```
+
+If `SERVER_STARTED_BY_SKILL=true`, stop that process group after the audit. Do
+not stop a server that was already running before the skill began.
 
 ---
 

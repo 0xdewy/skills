@@ -1,0 +1,80 @@
+{
+  "skill_name": "red-team",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Red-team this build at /tmp/coders-slugify/ \u2014 it's supposed to be a Python slugify(text) function. Stress-test it from the user/hacker/red-team angles.",
+      "expected_output": "Spawns the three personas (user, hacker, redteam) in parallel, each writing its own findings-*.json under /tmp/red-team-*/, then consolidates into REPORT.md with a prioritized, deduplicated list and cross-persona signals, ending in a parseable DONE: line.",
+      "expectations": [
+        "Spawns 3 personas in parallel (dispatched as sub-agents, not serialized)",
+        "Produces findings-user.json, findings-hacker.json, findings-redteam.json (each a valid JSON array, possibly [])",
+        "Writes REPORT.md with a summary count and prioritized findings",
+        "Each persona stays in its lane (user=UX/requirements, hacker=bugs/security, redteam=architecture/economic)",
+        "Personas are read-only and make no edits to the target",
+        "Final line is a DONE: line naming the red-team output dir",
+        "Does not commit to git or edit the deliverable"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [
+        "git reset --hard",
+        "git commit"
+      ],
+      "manual_checks": []
+    },
+    {
+      "id": 2,
+      "prompt": "Red-team a small Flask API at ./reports-api/ that accepts a CSV upload, parses it, and stores rows in Postgres. Look for flaws across all three personas.",
+      "expected_output": "Realistic findings across the three lenses: e.g. Hacker flags CSV/upload validation and SQL injection; User flags missing error feedback or unclear failure modes; Red-teamer flags row-scaling/cost or single-DB failure modes. All routed to the correct persona.",
+      "expectations": [
+        "Hacker findings address input validation / injection / unsafe parsing",
+        "User findings address UX/requirement issues (not security)",
+        "Red-teamer findings address architecture/economic/operability (not bugs)",
+        "REPORT.md deduplicates overlapping findings and surfaces cross-persona signals",
+        "Ends with a DONE: line"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 3,
+      "prompt": "Implement a slugify function and test it.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Should recognize this as an implementation task, not an adversarial review. Points the user to coders/implementer rather than spawning red-team personas on a non-existent deliverable.",
+      "expectations": [
+        "Does not spawn red-team personas to implement code",
+        "Redirects to coders or implementer for the implementation task"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 4,
+      "prompt": "Do a full EVM/Solidity security audit of this smart contract.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Should redirect deep smart-contract security auditing to evm-auditor (or rust-evm for revm/foundry specifics) rather than running the broader, shallower red-team personas.",
+      "expectations": [
+        "Does not run red-team personas as a substitute for a dedicated EVM audit",
+        "References evm-auditor for smart-contract security auditing"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 5,
+      "prompt": "Red-team this single ~20-line function for bugs only: /tmp/snippet.py.",
+      "expected_output": "Takes the lite tier: runs just the Hacker persona on a single small function, not all three personas.",
+      "expectations": [
+        "Takes the lite tier \u2014 runs a single persona (Hacker), not all three, for a one-function bug review",
+        "Produces hacker findings (or [] if none)"
+      ],
+      "manual_checks": []
+    }
+  ]
+}

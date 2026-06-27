@@ -32,7 +32,7 @@
     "id": 3,
     "prompt": "what does process_user() return?",
     "context": "Any Python project with a process_user function",
-    "expected_output": "Skill does NOT trigger — this is a single factual function query without learning intent",
+    "expected_output": "Skill does NOT trigger \u2014 this is a single factual function query without learning intent",
     "expectations": [
       "Skill does not trigger",
       "analyze.py is not run",
@@ -40,7 +40,8 @@
       "No Socratic questioning in the response",
       "No Mermaid diagrams generated",
       "No DONE: completion signal"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   },
   {
     "id": 4,
@@ -60,13 +61,14 @@
     "id": 5,
     "prompt": "fix the bug in user_validator.py",
     "context": "Any project",
-    "expected_output": "Skill does NOT trigger — direct edit/fix request",
+    "expected_output": "Skill does NOT trigger \u2014 direct edit/fix request",
     "expectations": [
       "Skill does not trigger",
       "No analyze.py run",
       "No Socratic questions asked",
       "Response addresses the bug directly"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   },
   {
     "id": 6,
@@ -103,7 +105,7 @@
     "expected_output": "Phase 1 opens with a hook sentence, then 2-3 Mermaid diagrams in order: system topology (graph TD), module dependency map (graph LR), optionally a request lifecycle (sequenceDiagram). A bridging sentence appears between diagrams. The prediction question ends Phase 1. No more than 3 diagrams appear before the prediction question.",
     "expectations": [
       "At least two Mermaid diagrams appear before the prediction question in Phase 1",
-      "First diagram is a system topology (graph TD or graph LR showing user → API → services → DB structure)",
+      "First diagram is a system topology (graph TD or graph LR showing user \u2192 API \u2192 services \u2192 DB structure)",
       "Second diagram shows module dependencies (graph LR), generated from code-graph.py output",
       "A bridging sentence appears between the first and second diagram",
       "Prediction question ends Phase 1, not a diagram",
@@ -114,7 +116,7 @@
   {
     "id": 9,
     "prompt": "explore this project",
-    "context": "A Go CLI tool with cmd/, config/, and output/ directories — no significant concurrency",
+    "context": "A Go CLI tool with cmd/, config/, and output/ directories \u2014 no significant concurrency",
     "expected_output": "Phase 4 presents threads specific to the CLI archetype: command parsing/dispatch, configuration loading, output formatting. The generic 'concurrency model' thread does not appear because the project has no meaningful concurrency.",
     "expectations": [
       "Skill triggers on 'explore this project' phrase",
@@ -138,6 +140,7 @@
       "Learner can say 'proceed' or 'skip' and skill moves directly to Phase 5",
       "If learner accepts, skill delivers a brief L1 orientation (2-3 sentences + at most one diagram) then continues to Phase 5",
       "The skill does not refuse to proceed to Phase 5 if the learner declines"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   }
 ]

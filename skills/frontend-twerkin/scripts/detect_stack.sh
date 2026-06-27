@@ -31,7 +31,7 @@ if [ -f "package.json" ]; then
         BUILD_TOOL="next"
         DEV_CMD="npx next dev"
         ROUTING="file-based"
-    elif echo "$ALL_DEPS" | grep -q '"@remix-run'`; then
+    elif echo "$ALL_DEPS" | grep -q '"@remix-run'; then
         FRAMEWORK="react"
         BUILD_TOOL="remix"
         DEV_CMD="npx remix dev"
