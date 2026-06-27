@@ -35,7 +35,7 @@
   },
   {
     "id": 4,
-    "prompt": "report only — give me a design critique of http://localhost:3000 but don't change anything",
+    "prompt": "report only \u2014 give me a design critique of http://localhost:3000 but don't change anything",
     "expected_output": "Audit runs and report is produced, but no file edits are made to the project",
     "expectations": [
       "design-critique.md written",
@@ -51,15 +51,17 @@
       "skill does not trigger on a casual CSS question",
       "no playwright audit run",
       "direct answer given inline"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   },
   {
     "id": 6,
     "prompt": "find all the bugs in my app",
-    "expected_output": "User directed to frontend-adversarial-tester, skill NOT invoked",
+    "expected_output": "User directed to frontend-twerkin, skill NOT invoked",
     "expectations": [
       "frontend-ux-designer skill does not trigger on bug-finding requests",
-      "user informed that frontend-adversarial-tester is the right skill for bugs"
-    ]
+      "user informed that frontend-twerkin is the right skill for bugs"
+    ],
+    "prompt_type": "anti_trigger"
   }
 ]

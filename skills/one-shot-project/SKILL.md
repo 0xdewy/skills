@@ -4,12 +4,14 @@ description: >-
   Multi-agent software project builder. Spawns 3 parallel implementer agents
   (each with a dedicated reviewer), iterated until a tester/runner confirms
   correctness, then validated by a project manager — looping until truly done.
-  TRIGGER on: "one-shot project", "build this project", "implement X from scratch",
-  "create a complete app/tool/service", "build a working version of", any request
-  for a full working implementation where quality matters and multiple solution
-  approaches are worth exploring in parallel.
+  TRIGGER on: "one-shot project", "build three competing implementations",
+  "create a complete app/tool/service from scratch with parallel approaches",
+  "full project from scratch with multiple solution paths", "compare competing
+  implementations", or explicit requests for a multi-agent project build.
   SKIP on: single-file edits, small bug fixes, code explanations, questions
-  about existing code, simple refactors, tasks with one obvious solution path.
+  about existing code, simple refactors, user-provided implementation plans that
+  should be executed directly, incremental feature work, tasks with one obvious
+  solution path.
 license: MIT
 metadata:
   author: iamky1e
@@ -30,6 +32,32 @@ scratch. Three implementers explore different design angles, each reviewed by
 a dedicated critic, tested by a runner, and validated by a project manager.
 The PM loops until it is satisfied.
 
+Load `skills/common/patterns/orchestration.md`,
+`skills/common/patterns/execution-contract.md`, and
+`skills/common/parallel-agents-guide.md` before starting. Follow the shared
+contract: create directories before dispatch, assign disjoint write roots,
+validate every expected artifact before the next phase, and end the overall run
+with a parseable `DONE:` line.
+
+If subagents are unavailable, run the implementer/reviewer/tester/PM roles
+sequentially into the same directories and state that the run was serialized.
+
+Load `skills/common/patterns/scaling.md` for the effort-scaling gate below.
+
+## Effort Scaling
+
+This skill's default tier is **full** (competing approaches is its purpose).
+Pick a tier before Phase 0 and state it in one line:
+
+- **lite** — a single small component or a one-step build: implement directly
+  with one implementer and one self-check; no critic, no PM loop.
+- **standard** — a normal multi-file project: 3 implementers + critics, one PM round.
+- **full** — large/ambitious project, or an explicit "compare approaches" request:
+  the full fleet and PM loop.
+
+Escalate down when the task is clearly small — current models (Opus 4.5+)
+over-spawn, and you should not stand up 3 competing builds for a one-screen task.
+
 ```
 Phase 1:  Impl-A ─┐
           Impl-B ─┤ (parallel)
@@ -42,8 +70,10 @@ Phase 2:  Rev-A ─┐
 Phase 3:  Tester/Runner
                    ↓
 Phase 4:  Project Manager
-              ├── DONE → deliver winner
-              └── ITERATE → targeted revision → Phase 3 (max 5 PM rounds)
+                   ↓
+Phase 5:  Orchestrator Verification
+              ├── PASS → deliver winner
+              └── FAIL → targeted revision → Phase 3 (max 5 PM rounds)
 ```
 
 ---
@@ -323,8 +353,42 @@ Parse the PM completion signal and route:
 ### If STATUS=DONE
 
 1. Note the WINNER directory (`$OUTPUT_ROOT/impl-{winner}/`)
-2. Copy the winner to the project root (or user's specified output path)
-3. Proceed to the Completion Report
+2. Run the **Orchestrator Verification Gate** below. Do not copy or deliver the
+   winner until this gate passes.
+3. Copy the winner to `$OUTPUT_ROOT/final/` by default only after verification.
+4. If the user explicitly requested a project-root or existing output path,
+   produce a conflict list and ask before overwriting any existing file.
+5. Proceed to the Completion Report
+
+### Orchestrator Verification Gate
+
+The PM is an advisor, not an authority. The top-level orchestrator must
+independently verify the chosen implementation before delivery:
+
+1. Read the original acceptance criteria from Phase 0.
+2. Read `$OUTPUT_ROOT/test-results/run-{PM_ROUND}.json` and confirm the winner
+   has `status=pass`, `score >= 7`, and no unresolved critical review findings.
+3. Run the winner's documented demo command (`run.sh` or README command) yourself.
+4. Run its tests if a `tests/` directory or test command exists.
+5. Inspect the produced output against the original task. If the output does not
+   actually satisfy the task, treat verification as failed even if the PM said
+   DONE.
+6. Write `$OUTPUT_ROOT/pm-decisions/orchestrator-verification-{PM_ROUND}.md`:
+   ```
+   STATUS: PASS | FAIL
+   WINNER: impl_a | impl_b | impl_c
+   COMMANDS_RUN:
+     - <command> -> <pass|fail>
+   ACCEPTANCE_CHECK:
+     - <criterion> -> <pass|fail>
+   BLOCKERS:
+     - <specific blocker, or "none">
+   ```
+
+If verification fails and `PM_ROUND < MAX_PM_ROUNDS`, convert the failure into
+targeted guidance for the same winner and follow the `STATUS=ITERATE` path. If
+verification fails at the round cap, deliver `PARTIAL` and clearly list the
+remaining blockers.
 
 ### If STATUS=ITERATE and PM_ROUND < MAX_PM_ROUNDS
 
@@ -355,8 +419,9 @@ Parse the PM completion signal and route:
 
 ### If STATUS=ITERATE and PM_ROUND >= MAX_PM_ROUNDS
 
-1. Read all test results, pick the implementation with the highest score
-2. Copy it to the project root
+1. Read all test results, pick the implementation with the highest score.
+2. Run the Orchestrator Verification Gate. If it fails, still copy the best
+   available implementation to `$OUTPUT_ROOT/final/`, but mark the run `PARTIAL`.
 3. Tell the user: max rounds reached, here's the best available, here's what
    remains unresolved, here's what manual work is still needed
 
@@ -376,7 +441,7 @@ Final Score: {score}/10
 What was built:
 {one paragraph from the winner's IMPLEMENTATION_SUMMARY.md}
 
-Location: $OUTPUT_ROOT/impl-{winner}/ (copied to project root)
+Location: $OUTPUT_ROOT/final/ (winner copied from $OUTPUT_ROOT/impl-{winner}/)
 
 Why this implementation won:
 {PM RATIONALE from final decision}
@@ -385,32 +450,30 @@ Approaches compared:
 - A (Minimal/Elegant):     {one line from IMPLEMENTATION_SUMMARY.md}
 - B (Robust/Defensive):    {one line from IMPLEMENTATION_SUMMARY.md}
 - C (Feature-Complete):    {one line from IMPLEMENTATION_SUMMARY.md}
+
+Verification:
+{PASS/PARTIAL plus one sentence from orchestrator-verification-{PM_ROUND}.md}
+
+DONE: $OUTPUT_ROOT/final/ — winner impl_{a|b|c}, PM rounds {PM_ROUND}, verification {PASS|FAIL}, status {DONE|PARTIAL}
 ```
 
 ---
 
 ## Orchestration Notes
 
+The shared contract (`orchestration.md`, `execution-contract.md`) governs
+resumability, re-spawning agents that omit their completion signal, and the
+orchestrator owning final verification over the PM. The notes below are
+specific to this skill:
+
 **Parallelism:** Make 3 Agent tool calls in a single message to run implementers
 or reviewers in parallel. Never run them sequentially — that defeats the purpose.
 
-**State tracking:** Keep PM_ROUND and REVIEW_ROUND as simple variables in your
-working context. If the conversation compresses, re-read the pm-decisions/
-directory to reconstruct state.
-
-**Agent failures:** If an agent returns without the expected completion signal,
-re-spawn it with a note: "Previous attempt did not complete. Resume from where
-you left off, reading $OUTPUT_ROOT/impl-{x}/ to see what exists."
-
-**PM authority:** The PM is the final arbiter. Trust its DONE verdict even if
-the tester score is borderline — it reads the full picture.
-
 **Philosophy diversity:** The three implementer angles (minimal, robust,
 feature-complete) are intentional. Do not collapse them. The tension between
-approaches surfaces the best final solution and the PM should weigh which
+approaches surfaces the best final solution, and the PM should weigh which
 philosophy fits the task when selecting the winner.
 
 **Output directory as shared memory:** All agent communication flows through
-`$OUTPUT_ROOT/`. It is the single source of truth. Never pass large blobs
-of code between agents through prompts — always write to disk and tell the next
-agent where to read from.
+`$OUTPUT_ROOT/`. Never pass large blobs of code between agents through prompts —
+write to disk and tell the next agent where to read from.

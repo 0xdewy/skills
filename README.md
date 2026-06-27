@@ -60,7 +60,8 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [code-smellz](skills/code-smellz/SKILL.md) | Parallel bug-hunter, simplifier, optimizer, and security auditor |
 | [shrinkray](skills/shrinkray/SKILL.md) | Reduces codebase to its smallest correct form: dead code, ghost files, duplication, verbosity |
 | [brainstormers](skills/brainstormers/SKILL.md) | Dialectical thinker sub-agents debate ideas until convergence |
-| [dialectic-council](skills/dialectic-council/SKILL.md) | Multi-model debate: Claude + DeepSeek, OpenAI, Gemini, MiniMax |
+| [startup-ideation](skills/startup-ideation/SKILL.md) | Parallel idea engines + Champion-vs-Assassin dialectic rank startup concepts |
+| [researcher](skills/researcher/SKILL.md) | Rigorous literature research with adversarial Proponent/Falsifier and cited synthesis |
 
 **Quality** — skills that demand excellence through adversarial refinement:
 
@@ -81,21 +82,23 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 |---|---|
 | [teach-me](skills/teach-me/SKILL.md) | Learn any codebase with Mermaid diagrams |
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
-| [prediction-markets](skills/prediction-markets/SKILL.md) | Polymarket and Kalshi: APIs, CLOB trading, auth, order types |
+| [hyperliquid](skills/hyperliquid/SKILL.md) | Hyperliquid developer reference: HyperCore/HyperEVM APIs, signing, HIPs |
+| [polymarketv2](skills/polymarketv2/SKILL.md) | Polymarket v2 APIs and SDKs: Gamma, Data, CLOB, auth, orders |
 | [web-scraping](skills/web-scraping/SKILL.md) | Playwright, httpx, anti-bot evasion, pagination, structured extraction |
+| [simple-memory](skills/simple-memory/SKILL.md) | Persistent factual memory for skills in an append-only JSONL store |
 
-**Productivity & Lifestyle** — skills for everyday planning and personal workflows:
+**Voice** — skills that shape how the agent speaks:
 
 | Skill | What it does |
 |---|---|
-| [travel-agent](skills/travel-agent/SKILL.md) | Intelligent travel agent: best flights, nice layovers, multi-city stopovers on long routes, flight+hotel deals; Duffel + Google data, or fully keyless via browser (no API key needed) |
+| [ego](skills/ego/SKILL.md) | Confident, non-sycophantic voice: commit when warranted, cut ritual hedging |
 
 **Meta** — skills that create, curate, and constrain other skills:
 
 | Skill | What it does |
 |---|---|
 | [skill-creator](skills/skill-creator/SKILL.md) | Create, test, and publish new skills |
-| [repo-orient](skills/repo-orient/SKILL.md) | Hierarchical context system for any repo: CLAUDE.md, .claude/rules/, docs/ hierarchy, context-map — layered for minimal always-loaded context with on-demand depth |
+| [agentify](skills/agentify/SKILL.md) | Layered agent-doc system for a repo: CLAUDE.md, .claude/rules/, context-map, docs hierarchy |
 
 ---
 

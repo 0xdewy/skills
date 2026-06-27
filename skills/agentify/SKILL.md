@@ -1,29 +1,16 @@
 ---
 name: agentify
 description: >-
-  Creates and maintains a hierarchical, context-efficient documentation system for
-  any git repo — generating CLAUDE.md (≤200 lines), .claude/rules/ path-scoped
-  files, .claude/context-map.md (navigation index), docs/OVERVIEW.md (architecture),
-  and docs/{component}.md deep-dives. Analyzes codebase, audits existing docs and
-  auto memory (MEMORY.md), then generates or improves the hierarchy so an LLM agent
-  can cold-start with minimal context and navigate to detail on demand. Idempotent:
-  files scoring >80/100 are kept; only gaps are filled. Supports @import syntax,
-  AGENTS.md interoperability, CLAUDE.local.md, and user-level rules.
-  TRIGGER on: "map this repo", "prep this repo for agents", "make this repo agent-ready",
-  "set up context for agents", "document this repo",
-  "set up docs for LLMs", "create CLAUDE.md",
-  "generate documentation hierarchy", "run agentify", "agentify this repo",
-  "make this repo LLM-navigable", "set up docs",
-  "create context map", "set up .claude/rules", "/agentify", "run /agentify",
-  "set up docs for agents", "set up AGENTS.md",
-  "update the docs", "refresh documentation",
-  "create context memory", "set up CLAUDE.local.md",
-  "set up coordination docs", "create docs/plans", "agent coordination hub",
-  "create plans/specs/reviews", "set up agent coordination",
-  "agentify --yes", "agentify --non-interactive".
-  SKIP on: editing a single existing doc without wanting the full system, asking what
-  CLAUDE.md should contain (answer directly without running scripts), repos already
-  with excellent docs and no request to improve them, simple README edits.
+  Builds a layered agent-doc system for a git repo: CLAUDE.md, .claude/rules/,
+  context-map, docs/OVERVIEW.md, component docs, and optional coordination dirs.
+  Audits existing docs and fills gaps idempotently. TRIGGER on: "agentify",
+  "map this repo", "prep this repo for agents", "make this repo agent-ready",
+  "document this repo for agents", "create CLAUDE.md", "set up AGENTS.md",
+  "create context map", "set up .claude/rules", "generate documentation hierarchy",
+  "refresh LLM documentation", "set up docs/plans", "agent coordination hub",
+  "agentify --yes", "agentify --non-interactive". SKIP on: single doc edits,
+  README-only edits, asking what CLAUDE.md should contain, or repos already
+  documented well with no request for a full agent-doc system.
 license: MIT
 metadata:
   author: iamky1e
@@ -54,6 +41,10 @@ work from specifications, and leave review artifacts.
 structure varies by type (monorepo, service, library, CLI, webapp). Scripts
 detect what already exists, assess gaps, and generate only what's missing —
 so the output is accurate, not generic boilerplate.
+
+Load `skills/common/patterns/execution-contract.md` for the shared activation
+gate, worktree safety, verification gate, and completion-line rules. The phases
+below follow that contract rather than redefining it.
 
 **The multi-level hierarchy this skill creates or integrates with:**
 
@@ -337,7 +328,7 @@ in CLAUDE.md. Those belong in OVERVIEW.md.
 
 **Agentify header:** prepend this as line 1 of every file you create or update:
 ```
-<!-- agentify: generated {YYYY-MM-DD} | score-before: {prior_score_or_0} | source: 1.3.0 -->
+<!-- agentify: generated {YYYY-MM-DD} | score-before: {prior_score_or_0} | source: 1.4.0 -->
 ```
 When **keeping** a file as-is (score >80, not stale): leave the header unchanged.
 When **improving**: update the date but keep the prior `score-before` value.

@@ -1,23 +1,15 @@
 ---
 name: researcher
 description: >-
-  Conducts deep, rigorous research on a topic by searching publicly available
-  scientific literature (OpenAlex, arXiv, Crossref, Europe PMC, Semantic Scholar),
-  then driving findings through the scientific method: literature reconnaissance →
-  hypothesis generation by brainstorming sub-agents → fetching the full text of
-  open-access papers for the hypotheses under test → adversarial hypothesis
-  testing (a Proponent gathers confirming evidence, a Falsifier mines methods and
-  results to refute) → synthesis into novel, well-grounded truths. All
-  coordination happens through a durable, inspectable workspace of markdown files
-  (status board, hypotheses, evidence, decision log, red-team) under
-  ./research/{slug}/, and the inquiry concludes in RESEARCH.md with full
-  citations. TRIGGER on: "deep research on", "research this topic", "do a
-  literature review", "what does the science say about", "investigate the
-  research on", "find papers on", "scientific consensus on", "research deep dive",
-  "form a hypothesis about", "test this hypothesis against the literature",
-  "/researcher". SKIP on: quick factual lookups with a known answer, current-events
-  or news queries (not scientific literature), single-paper summaries the user
-  pastes in, casual mentions of the word "research", code/implementation tasks.
+  Runs rigorous scientific literature research using OpenAlex, arXiv, Crossref,
+  Europe PMC, Semantic Scholar, OA full text, hypothesis generation, adversarial
+  Proponent/Falsifier testing, and cited synthesis in ./research/{slug}/RESEARCH.md.
+  TRIGGER on: "deep research on", "research this topic", "do a literature review",
+  "what does the science say about", "investigate the research on", "find papers
+  on", "scientific consensus on", "research deep dive", "form a hypothesis about",
+  "test this hypothesis against the literature", "/researcher". SKIP on: quick
+  factual lookups, news/current events, single-paper summaries the user pasted,
+  casual mentions of research, and code or implementation tasks.
 license: MIT
 metadata:
   author: 0xdewy
@@ -53,6 +45,14 @@ The mechanical work — querying scientific databases — is done by
 in the final report traces to a paper in the corpus.
 
 ---
+
+## Shared Patterns
+
+Load `skills/common/patterns/orchestration.md` and
+`skills/common/patterns/execution-contract.md` for the shared subagent contract:
+single-writer coordination files, owned output paths, `DONE:` signals, and
+artifact validation at every phase boundary. Follow them rather than redefining
+them.
 
 ## The Research Workspace
 

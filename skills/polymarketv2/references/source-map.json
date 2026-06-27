@@ -1,0 +1,137 @@
+{
+  "_comment": "Alias/term -> reference file index for scripts/search_refs.py. Permissive: includes common WRONG/LEGACY terms that route to the correct v2 doc. last verified: 2026-06-09",
+  "entries": [
+    {
+      "terms": ["gamma", "markets", "events", "tags", "series", "search", "discovery", "slug", "keyset", "pagination", "clobTokenIds", "condition id from gamma", "gamma-api"],
+      "file": "api-gamma.md",
+      "anchor": "endpoints",
+      "source_url": "https://docs.polymarket.com"
+    },
+    {
+      "terms": ["data api", "positions", "closed positions", "trades", "activity", "open interest", "oi", "live volume", "holders", "leaderboard", "pnl", "data-api"],
+      "file": "api-data.md",
+      "anchor": "endpoints-commonly-used",
+      "source_url": "https://docs.polymarket.com"
+    },
+    {
+      "terms": ["orderbook", "order book", "book", "books", "price", "prices", "midpoint", "spread", "last trade price", "fee rate", "fee-rate", "tick size", "tick_size", "neg risk", "neg_risk", "markets-by-token", "token to market", "clob public", "prices-history", "price history"],
+      "file": "api-clob-public.md",
+      "anchor": "endpoints",
+      "source_url": "https://docs.polymarket.com"
+    },
+    {
+      "terms": ["auth", "authentication", "l1", "l2", "l2 creds", "api key", "api creds", "apikey", "secret", "passphrase", "poly_address", "poly_signature", "hmac", "eip-712", "eip712", "clobauthdomain", "create api key", "derive api key", "nonce", "signature type", "signaturetype", "funder", "headers"],
+      "file": "auth-l1-l2.md",
+      "anchor": "signature-types-funder",
+      "source_url": "https://docs.polymarket.com/api-reference/authentication"
+    },
+    {
+      "terms": ["deposit wallet", "poly_1271", "poly 1271", "1271", "erc-1271", "erc1271", "signature_type=3", "signature type 3", "signaturetype 3", "factory", "beacon", "address derivation", "create2", "balance allowance", "balance-allowance", "sync balance", "pusd", "fund wallet", "new api user"],
+      "file": "deposit-wallets.md",
+      "anchor": "integration-flow",
+      "source_url": "https://docs.polymarket.com/trading/deposit-wallets"
+    },
+    {
+      "terms": ["relayer", "wallet-create", "wallet create", "wallet batch", "gasless", "submit", "deploy wallet", "deploy deposit wallet", "batch", "deposit wallet call", "state_confirmed", "approve from wallet", "approval calldata"],
+      "file": "relayer.md",
+      "anchor": "submit-a-wallet-action-wallet-batch",
+      "source_url": "https://docs.polymarket.com/trading/deposit-wallets"
+    },
+    {
+      "terms": ["unified sdk", "@polymarket/client", "polymarket-client", "polymarket client", "createsecureclient", "createpublicclient", "secureclient", "publicclient", "asyncsecureclient", "asyncpublicclient", "setuptradingapprovals", "setup_trading_approvals", "placelimitorder", "placemarketorder", "place_limit_order", "place_market_order", "sdk streams", "recommended sdk", "viem", "privy", "ethers"],
+      "file": "sdk-unified.md",
+      "anchor": "secure-client-auth-trading",
+      "source_url": "https://docs.polymarket.com/dev-tooling/typescript"
+    },
+    {
+      "terms": ["typescript", "ts", "clob-client-v2", "@polymarket/clob-client-v2", "builder-relayer-client", "@polymarket/builder-relayer-client", "relayclient", "clobclient", "createandpostorder", "signaturetypev2", "node"],
+      "file": "sdk-clob-ts.md",
+      "anchor": "trade-from-the-deposit-wallet-poly_1271",
+      "source_url": "https://github.com/Polymarket/clob-client-v2"
+    },
+    {
+      "terms": ["python", "py-clob-client-v2", "py_clob_client_v2", "py-builder-relayer-client", "orderargs", "partialcreateoptions", "partialcreateorderoptions", "create_and_post_order", "balanceallowanceparams", "apicreds"],
+      "file": "sdk-clob-python.md",
+      "anchor": "trade-from-the-deposit-wallet-poly_1271",
+      "source_url": "https://github.com/Polymarket/py-clob-client-v2"
+    },
+    {
+      "terms": ["rust", "polymarket_client_sdk_v2", "localsigner", "limit_order", "build_sign_and_post", "cargo", "crate"],
+      "file": "sdk-rust.md",
+      "anchor": "trade-from-the-deposit-wallet-poly_1271",
+      "source_url": "https://github.com/Polymarket/rs-clob-client-v2"
+    },
+    {
+      "terms": ["concept", "concepts", "mental model", "order lifecycle", "lifecycle", "market vs event", "markets and events", "outcome token", "positions tokens", "prices orderbook", "price discovery", "probability", "maker vs taker", "order status", "trade status", "pusd", "polymarket usd", "wrap", "unwrap", "collateral", "resolution", "uma", "optimistic oracle", "dispute", "redeem winnings"],
+      "file": "concepts.md",
+      "anchor": "order-lifecycle-canonical",
+      "source_url": "https://docs.polymarket.com/concepts"
+    },
+    {
+      "terms": ["websocket", "websockets", "wss", "ws", "stream", "streaming", "market channel", "user channel", "sports channel", "rtds", "real-time data socket", "real time", "subscribe channel", "best_bid_ask", "price_change", "last_trade_price", "tick_size_change", "new_market", "market_resolved", "ping pong", "heartbeat ws", "crypto_prices", "equity_prices"],
+      "file": "api-websockets.md",
+      "anchor": "channels-at-a-glance",
+      "source_url": "https://docs.polymarket.com/market-data/websocket/overview"
+    },
+    {
+      "terms": ["order", "orders", "place order", "post order", "cancel order", "cancel-all", "cancel-market-orders", "gtc", "gtd", "fok", "fak", "post-only", "postonly", "market order", "limit order", "batch orders", "order type", "order scoring", "heartbeat", "matching engine", "engine restart", "425", "too early", "cancel-only", "post-only mode", "worst-price limit", "slippage protection", "createandpostorder", "open orders", "order attribution"],
+      "file": "orders.md",
+      "anchor": "rest-endpoints",
+      "source_url": "https://docs.polymarket.com/trading/orders/create"
+    },
+    {
+      "terms": ["ctf", "conditional token", "conditional token framework", "split", "merge", "redeem", "split tokens", "merge tokens", "redeem tokens", "negrisk", "neg-risk", "negrisk conversion", "convert", "augmented neg risk", "position id", "collection id", "preparecondition", "payout vector", "erc1155", "outcome slot", "index set", "collateral adapter"],
+      "file": "ctf.md",
+      "anchor": "split-merge-redeem-function-parameters",
+      "source_url": "https://docs.polymarket.com/trading/ctf/overview"
+    },
+    {
+      "terms": ["bridge", "deposit", "withdraw", "withdrawal", "cross chain", "cross-chain", "supported assets", "bridge address", "deposit status", "swap", "fund account", "from another chain", "solana deposit", "bitcoin deposit", "usdc deposit", "onramp", "offramp"],
+      "file": "bridge.md",
+      "anchor": "endpoints",
+      "source_url": "https://docs.polymarket.com/trading/bridge/deposit"
+    },
+    {
+      "terms": ["fee", "fees", "fee model", "taker fee", "maker fee", "fee rate", "liquidity rewards", "maker rebate", "maker rebates", "taker rebate", "taker rebates", "rebate", "rebates", "tiers", "tier", "weighted volume", "bronze silver gold", "platinum diamond obsidian", "earnings", "rewards configuration", "incentive", "feesenabled", "fee curve"],
+      "file": "rewards-rebates.md",
+      "anchor": "fee-model",
+      "source_url": "https://docs.polymarket.com/trading/fees"
+    },
+    {
+      "terms": ["builder", "builders", "builder code", "buildercode", "builder program", "builder fee", "builder fees", "builder tier", "builder leaderboard", "builder trades", "attribution", "attribute order", "verified partner", "poly_builder_code", "builder profile", "builder api key", "route orders"],
+      "file": "builders.md",
+      "anchor": "builder-code",
+      "source_url": "https://docs.polymarket.com/builders/overview"
+    },
+    {
+      "terms": ["combo", "combos", "combo market", "combo markets", "rfq", "request for quote", "quoter", "quoter gateway", "maker quote", "submit quote", "cancel quote", "last look", "lastlook", "quote", "quoting session", "combo position", "combo activity", "combos-rfq", "multi-leg"],
+      "file": "combos-rfq.md",
+      "anchor": "rest-endpoints-quoter-side",
+      "source_url": "https://docs.polymarket.com/market-makers/combos"
+    },
+    {
+      "terms": ["contract", "contracts", "contract address", "ctf exchange", "neg risk exchange", "exchange address", "factory address", "uma adapter", "error code", "error codes", "status code", "blockchain data", "dune", "goldsky", "allium", "subgraph", "referral", "referral program", "audit", "polygonscan", "usdc.e"],
+      "file": "resources.md",
+      "anchor": "contracts-polygon-mainnet-chainid-137",
+      "source_url": "https://docs.polymarket.com/resources/contracts"
+    },
+    {
+      "terms": ["openapi", "open api", "asyncapi", "schema", "spec", "swagger", "yaml spec", "machine readable", "json schema", "api spec"],
+      "file": "openapi/README.md",
+      "anchor": "bundled-machine-readable-specs",
+      "source_url": "https://docs.polymarket.com/api-spec"
+    },
+    {
+      "terms": ["error", "invalid signature", "not enough balance", "insufficient balance", "missing allowance", "allowance", "rejected", "rate limit", "rate limits", "throttle", "429", "geoblock", "blocked region", "restricted", "troubleshoot", "troubleshooting", "nonce_already_used", "invalid_signature", "invalid funder"],
+      "file": "troubleshooting.md",
+      "anchor": "order-rejected-invalid-signature",
+      "source_url": "https://docs.polymarket.com"
+    },
+    {
+      "terms": ["v1", "v2", "version", "migration", "migrate", "legacy", "py-clob-client", "py_clob_client", "@polymarket/clob-client", "clob-client", "safe wallet", "gnosis safe", "proxy wallet", "poly_proxy", "package rename", "deprecated", "old package", "which package"],
+      "file": "v1-v2-migration.md",
+      "anchor": "package-renames-use-the-v2-one",
+      "source_url": "https://docs.polymarket.com/v2-migration"
+    }
+  ]
+}

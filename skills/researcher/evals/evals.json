@@ -16,7 +16,7 @@
         "Assigns a Supported/Refuted/Inconclusive verdict per hypothesis calibrated to evidence quality and read depth",
         "Verdicts are recorded in 05-decision-log.md as PROPOSED, then RATIFIED only after a red-team pass challenges the synthesis (06-red-team.md)",
         "RESEARCH.md is written at the workspace root with a TL;DR, novel insight, hypotheses table, and a References list of real corpus papers (DOIs/URLs) tagged [full text] or [abstract only]",
-        "No fabricated citations — every cited paper appears in the corpus",
+        "No fabricated citations \u2014 every cited paper appears in the corpus",
         "Ends with a DONE: research/{slug}/RESEARCH.md completion line"
       ]
     },
@@ -36,11 +36,12 @@
     {
       "id": 3,
       "prompt": "What's the capital of Australia?",
-      "expected_output": "Does NOT trigger researcher. A quick factual lookup with a known answer — no literature search, hypotheses, or sub-agents.",
+      "expected_output": "Does NOT trigger researcher. A quick factual lookup with a known answer \u2014 no literature search, hypotheses, or sub-agents.",
       "expectations": [
         "Does NOT invoke the researcher skill",
         "Answers directly without spawning sub-agents or building a corpus"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     },
     {
       "id": 4,
@@ -49,7 +50,8 @@
       "expectations": [
         "Does NOT invoke the researcher skill for a single user-supplied paper",
         "Summarizes the provided text directly"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     }
   ]
 }

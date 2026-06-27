@@ -1,22 +1,36 @@
 ---
 name: web-scraping
 description: >-
-  Scrape websites using Playwright for JavaScript-rendered content or
-  requests+BeautifulSoup for static HTML. Provides reliable scraping patterns:
-  handling pagination, login flows, infinite scroll, rate limiting, anti-bot
-  evasion, and data extraction to structured formats (CSV, JSON). Use this skill
-  whenever the user says "scrape", "crawl", "extract data from", "get data from
-  website", "download all pages", "web scraper", "collect data from", "parse
-  HTML", "get all links from", "harvest data", or wants to programmatically
-  collect information from any website — including SPAs, paginated tables,
-  search results, product catalogs, or API-backed sites. Also trigger when the
-  user needs to monitor a page for changes, take screenshots of pages,
-  automate browser interactions, or fill/submit forms programmatically.
+  Builds compliant website scrapers with Playwright for JS-rendered pages or
+  httpx/BeautifulSoup for static HTML, including pagination, login with permission,
+  infinite scroll, rate limits, robots/TOS checks, screenshots, monitoring, and
+  CSV/JSON/JSONL output. TRIGGER on: "scrape", "crawl", "extract data from",
+  "get data from website", "download all pages", "web scraper", "collect data
+  from", "parse HTML", "get all links", "harvest data", browser automation, or
+  programmatic form submission. SKIP on: one-off browsing, factual lookups,
+  official API/SDK tasks, and requests to bypass CAPTCHA, bot defenses, paywalls,
+  geoblocks, access controls, robots.txt, or ToS restrictions.
+license: MIT
+metadata:
+  author: 0xdewy
+  version: 1.1.0
+  category: data
+  tags:
+    - scraping
+    - playwright
+    - beautifulsoup
+    - data-extraction
+    - compliance
 ---
 
 # Web Scraping Skill
 
 A comprehensive guide to scraping websites reliably using Python. Covers both static and dynamic content, with robust patterns for handling the common challenges.
+
+Load `skills/common/patterns/knowledge.md` for source hierarchy, freshness, and
+compliance-before-collection rules. Load
+`skills/common/patterns/execution-contract.md` when writing a scraper or durable
+dataset.
 
 ## Quick Reference
 
@@ -27,7 +41,7 @@ A comprehensive guide to scraping websites reliably using Python. Covers both st
 | API-backed site | Direct API calls | Check Network tab first |
 | Multi-page results | `Playwright` pagination loop | Tables, search results |
 | Authentication-gated | `Playwright` session | Login flows, cookies |
-| CF-protected site | `curl_cffi` + `FlareSolverr` | Cloudflare/bot detection |
+| Access-controlled or bot-challenged site | Stop and seek permission/API/export | Do not bypass defenses |
 
 ## Prerequisites (always verify before starting)
 
@@ -35,14 +49,7 @@ The skill assumes these are available. If not, the user can install them:
 
 ```bash
 pip install playwright httpx beautifulsoup4 lxml
-pip install curl-cffi playwright-stealth
 playwright install chromium
-```
-
-For Cloudflare challenge pages, also run FlareSolverr (Docker):
-
-```bash
-docker run -d --name=flaresolverr -p 8191:8191 ghcr.io/flaresolverr/flaresolverr:latest
 ```
 
 ## Golden Rule: Check Before You Scrape
@@ -52,6 +59,26 @@ Before scraping any site, verify:
 2. **Terms of Service** — Are they OK with automated access?
 3. **Rate limits** — Add delays between requests (`time.sleep(1)` minimum)
 4. **Identify yourself** — Always set a descriptive `User-Agent` header
+
+Write the result of this check before collecting data:
+
+```markdown
+## Scrape Compliance Note
+- Target: <domain and paths>
+- robots.txt checked: <allowed|disallowed|unavailable, with URL>
+- Terms/source permission: <allowed|unclear|disallowed, with URL or note>
+- Rate limit: <delay and max pages>
+- User-Agent: <string>
+- Decision: <proceed|stop and use alternative>
+```
+
+If the decision is `stop`, do not write scraper code for that target. Offer a
+compliant alternative instead.
+
+If the site presents CAPTCHA, Cloudflare/browser integrity checks, paywalls,
+explicit bot blocks, geoblocks, or other access controls, stop. Recommend an
+official API, data export, written permission, or user-provided data instead of
+trying to bypass the control.
 
 ## Approach: Prefer Static, Fall Back to Dynamic
 
@@ -69,15 +96,8 @@ response = httpx.get("https://example.com", headers={
 soup = BeautifulSoup(response.text, "lxml")
 ```
 
-If the site has any bot detection, prefer `curl_cffi` instead of `httpx` — it impersonates real browser TLS fingerprints:
-
-```python
-from curl_cffi import requests
-from bs4 import BeautifulSoup
-
-response = requests.get("https://example.com", impersonate="chrome")
-soup = BeautifulSoup(response.text, "lxml")
-```
+If the site blocks automated access, do not switch to impersonation libraries.
+Use an official API/export or ask the site owner for permission.
 
 If the data you need is in `soup`, you're done. No browser needed.
 
@@ -247,73 +267,23 @@ page.context.add_cookies(cookies)
 page.goto("https://example.com/protected-data")
 ```
 
-## Anti-Bot Evasion
+## Access Blocks and Bot Defenses
 
-Some sites actively block scrapers. Here are techniques to reduce detection.
+If a site actively blocks automation, presents a CAPTCHA/challenge page, requires
+paywalled access, or says automated collection is disallowed, stop the scraping
+workflow. Do not provide bypass code, stealth patches, TLS/browser impersonation,
+challenge solvers, proxy rotation, or residential proxy advice.
 
-> **For sites with Cloudflare challenge pages or advanced bot protection, see the [Handling Cloudflare & Bot Protection](#handling-cloudflare--bot-protection) section below.**
+Use one of these compliant alternatives:
 
-### Manual approach: custom browser context
+1. Official API, export, sitemap, RSS feed, bulk download, or dataset.
+2. Written permission from the site owner with an agreed rate limit and user agent.
+3. User-provided files, screenshots, or manually exported data.
+4. A reduced workflow that only captures pages the user owns or is authorized to
+   automate.
 
-```python
-from playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch(
-        headless=True,
-        args=[
-            "--disable-blink-features=AutomationControlled",
-        ]
-    )
-    
-    context = browser.new_context(
-        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        viewport={"width": 1920, "height": 1080},
-        locale="en-US",
-        timezone_id="America/New_York",
-    )
-    
-    page = context.new_page()
-    page.add_init_script("""
-        Object.defineProperty(navigator, 'webdriver', {
-            get: () => undefined
-        });
-    """)
-    
-    page.goto("https://example.com")
-```
-
-### Recommended approach: playwright-stealth library
-
-The `playwright-stealth` package applies a comprehensive set of stealth patches automatically — hiding `navigator.webdriver`, patching `navigator.plugins`, fixing `chrome.runtime`, and more. Prefer this over manual patches.
-
-```python
-from playwright.sync_api import sync_playwright
-from playwright_stealth import Stealth
-
-with Stealth().use_sync(sync_playwright()) as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
-    page.goto("https://example.com")
-    html = page.content()
-    browser.close()
-```
-
-Async version:
-
-```python
-from playwright.async_api import async_playwright
-from playwright_stealth import Stealth
-
-async def scrape():
-    async with Stealth().use_async(async_playwright()) as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.goto("https://example.com")
-        html = await page.content()
-        await browser.close()
-        return html
-```
+If the user explicitly asks to bypass a block, refuse that part and offer the
+alternatives above.
 
 ### Throttling & politeness
 
@@ -325,160 +295,20 @@ import random
 time.sleep(random.uniform(1, 3))
 ```
 
-## Handling Cloudflare & Bot Protection
-
-Sites behind Cloudflare or similar WAF services require specialized handling. Use this decision tree to pick the right approach:
-
-1. **If the site returns 403/503 with a Cloudflare challenge page** → Use the cookie-refresh pattern (recommended)
-2. **If `curl_cffi` with impersonation alone works** → Just use `curl_cffi` (simplest)
-3. **If basic bot detection but no CF challenge page** → `playwright-stealth` may suffice
-
-### Layer 1 — TLS fingerprint impersonation with curl_cffi
-
-`curl_cffi` is a drop-in replacement for `httpx`/`requests` that impersonates real browser TLS fingerprints. Use it for ALL static requests when bot detection is a concern.
-
-Available impersonation targets: `chrome99`, `chrome100`, `chrome101`, ..., `chrome120`, `chrome131`, `safari15_3`, `safari15_5`, `safari17_0`, `firefox`, `edge99`, and more.
-
-Sync usage:
-
-```python
-from curl_cffi import requests
-
-response = requests.get("https://example.com", impersonate="chrome")
-print(response.status_code)
-print(response.text[:500])
-```
-
-Async usage:
-
-```python
-import asyncio
-from curl_cffi import requests
-
-async def scrape():
-    response = await requests.get("https://example.com", impersonate="chrome")
-    return response.text
-
-html = asyncio.run(scrape())
-```
-
-### Layer 2 — Browser stealth with playwright-stealth
-
-For sites with basic bot detection (but no CF challenge page), `playwright-stealth` patches Playwright to hide automation markers.
-
-```python
-from playwright.sync_api import sync_playwright
-from playwright_stealth import Stealth
-
-with Stealth().use_sync(sync_playwright()) as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
-    page.goto("https://example.com")
-    html = page.content()
-    browser.close()
-```
-
-> **Note:** This only handles basic detection. It won't solve Cloudflare challenge pages on its own.
-
-### Layer 3 — FlareSolverr for CF challenge pages
-
-FlareSolverr is a Docker sidecar that solves Cloudflare challenges in a real browser and returns the HTML plus `cf_clearance` cookies.
-
-Start FlareSolverr:
-
-```bash
-docker run -d --name=flaresolverr -p 8191:8191 ghcr.io/flaresolverr/flaresolverr:latest
-```
-
-Call FlareSolverr from Python:
-
-```python
-import httpx
-
-def solve_cf_challenge(url, flaresolverr_url="http://localhost:8191/v1"):
-    response = httpx.post(flaresolverr_url, json={
-        "cmd": "request.get",
-        "url": url,
-        "maxTimeout": 60000,
-    })
-    data = response.json()
-    html = data["solution"]["response"]
-    cookies = data["solution"]["cookies"]
-    return html, cookies
-```
-
-> **Limitations:** Slow (~5-10 seconds per request), resource-heavy. Captcha solving may be broken on some CF versions.
-
-### The Cookie-Refresh Pattern (RECOMMENDED)
-
-This is the most effective DIY approach for CF-protected sites:
-
-1. Use FlareSolverr to solve the CF challenge once → get `cf_clearance` cookie
-2. Pass that cookie to `curl_cffi` (with matching impersonation) for all subsequent requests
-3. When requests start failing again (cookie expired), repeat step 1
-
-```python
-from curl_cffi import requests as cffi_requests
-import httpx
-
-CF_PROTECTED_URL = "https://example.com"
-FLARESOLVERR_URL = "http://localhost:8191/v1"
-
-def get_cf_cookies(url):
-    resp = httpx.post(FLARESOLVERR_URL, json={
-        "cmd": "request.get",
-        "url": url,
-        "maxTimeout": 60000,
-    })
-    return resp.json()["solution"]["cookies"]
-
-def scrape_cf_protected(url):
-    cookies = get_cf_cookies(url)
-    cookie_dict = {c["name"]: c["value"] for c in cookies}
-    
-    response = cffi_requests.get(url, 
-        impersonate="chrome",
-        cookies=cookie_dict
-    )
-    
-    if response.status_code == 403:
-        cookies = get_cf_cookies(url)
-        cookie_dict = {c["name"]: c["value"] for c in cookies}
-        response = cffi_requests.get(url,
-            impersonate="chrome",
-            cookies=cookie_dict
-        )
-    
-    return response.text
-```
-
-### Alternative: DrissionPage
-
-For advanced cases where even the above approaches fail, [DrissionPage](https://github.com/g1879/DrissionPage) uses Chrome DevTools Protocol directly (no WebDriver artifacts = harder to detect).
-
-```bash
-pip install DrissionPage
-```
-
-> **Note:** DrissionPage documentation is primarily in Chinese.
-
 ## Common Pitfalls
 
 | Problem | Solution |
 |---|---|
 | Page loads but data is empty | Wait for a specific selector: `page.wait_for_selector("div.result")` |
-| "We detect you are a bot" | Add anti-bot evasion script + realistic user agent + human-like delays |
+| "We detect you are a bot" | Stop and use an official API/export or request permission |
 | Data appears after user action (click, scroll) | Simulate the action with Playwright before extracting |
 | Table has many pages | Loop through pagination, checking for "next" button each time |
-| Rate limited (429 status) | Add longer delays, rotate user agents, or use proxies |
+| Rate limited (429 status) | Slow down, reduce scope, or stop and request permission |
 | Dynamic class names | Use partial attribute matches: `[class*="price"]` or structural selectors |
 | Data is behind a login | Save cookies after login and reuse them |
 | Infinite scroll never stops loading | Set a max scroll counter |
 | Page uses shadow DOM | Use `page.evaluate()` to pierce shadow roots |
-| 403/503 with Cloudflare ray id | Use curl_cffi with `impersonate="chrome"` + FlareSolverr for challenge pages |
-| Stuck in CF Turnstile loop | FlareSolverr can solve Turnstile; if not, use a residential proxy |
-| CF challenge page in browser | Use playwright-stealth + headful mode (`headless=False`) — CF detects headless |
-| cf_clearance cookie expired | Re-solve via FlareSolverr and refresh the cookie |
+| 403/503 with WAF/challenge page | Stop and use an official API/export or request permission |
 
 ## When to write a script vs. extract inline
 
@@ -489,6 +319,19 @@ For simple one-off scrapes, extract data inline using the patterns above. For sc
 - Will be reused by others
 
 Write a standalone Python script with command-line arguments, error handling, and progress logging. Bundle it in the `scripts/` directory of this skill if it's a common task.
+
+Standalone scripts must include:
+- CLI arguments for target URL/path, output path, max pages, and delay.
+- Resume behavior: skip already-written records by stable ID or URL.
+- Structured output: JSONL for streaming/resumable scrapes, CSV only when the
+  schema is flat and stable.
+- A final validation step that prints record count, required fields present, and
+  duplicate count.
+- A dry-run mode that fetches one page and prints the inferred schema without
+  writing the full dataset.
+
+For reusable scripts, write a companion README or top-of-file usage block with
+the compliance note, run command, expected output schema, and known limitations.
 
 ## Debugging Tips
 
@@ -515,5 +358,5 @@ Write a standalone Python script with command-line arguments, error handling, an
 End your final message with a parseable completion line:
 
 ```
-DONE: <output-path> — <N> records scraped to <format>
+DONE: <output-path> — <N> records scraped to <format>, <D> duplicates, compliance <proceed|stopped>
 ```

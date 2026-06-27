@@ -3,36 +3,36 @@
     "id": 1,
     "prompt": "Run agentify on this codebase",
     "context": "A TypeScript Node.js REST API service with directories: src/api/ (12 files, route handlers), src/services/ (8 files, business logic), src/models/ (5 files, data models), tests/ (20 test files), and a 45-line README.md. No existing CLAUDE.md, no .claude/ directory, no docs/, no AGENTS.md. package.json has scripts: build, test, start, lint.",
-    "expected_output": "Full documentation hierarchy created: CLAUDE.md (≤200 lines), .claude/rules/ files with paths: frontmatter, .claude/context-map.md, docs/OVERVIEW.md with Mermaid diagram, docs/api.md and docs/services.md component files, docs/NAVIGATION.md. All pointer targets verified. DONE: signal emitted.",
+    "expected_output": "Full documentation hierarchy created: CLAUDE.md (\u2264200 lines), .claude/rules/ files with paths: frontmatter, .claude/context-map.md, docs/OVERVIEW.md with Mermaid diagram, docs/api.md and docs/services.md component files, docs/NAVIGATION.md. All pointer targets verified. DONE: signal emitted.",
     "expectations": [
       "analyze_repo.py is invoked in Phase 1 and analysis.json produced",
       "audit_context.py is invoked in Phase 2 and audit.json produced",
       "Audit correctly identifies CLAUDE.md as missing (score 0)",
       "Phase 3 proposes a documentation plan and pauses for user confirmation before writing any files",
-      "CLAUDE.md is created and is ≤200 lines",
+      "CLAUDE.md is created and is \u2264200 lines",
       "CLAUDE.md contains npm run build, npm run test, npm start, npm run lint commands",
       "CLAUDE.md navigation table appears in the last 50 lines of the file",
       "CLAUDE.md does NOT contain any Mermaid diagrams",
       ".claude/rules/ directory is created",
       "At least one rules file created with YAML frontmatter containing paths: field",
       "Each paths: glob in rules files matches at least one actual file in the repo (verified)",
-      ".claude/context-map.md is created with topic → file mappings",
+      ".claude/context-map.md is created with topic \u2192 file mappings",
       "Every file pointer in context-map.md exists on disk (verified by --check-pointers)",
-      "docs/OVERVIEW.md is created and is ≤400 lines",
+      "docs/OVERVIEW.md is created and is \u2264400 lines",
       "docs/OVERVIEW.md contains at least one ```mermaid code block",
       "docs/OVERVIEW.md has a components section",
       "docs/NAVIGATION.md is created",
       "docs/NAVIGATION.md mentions CLAUDE.local.md and auto memory in the hierarchy",
       ".agentify-lock file is written after completion with skill_version 1.3.0",
       "wc -l is run on generated files in Phase 5 token budget check",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (service)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (service)"
     ]
   },
   {
     "id": 2,
     "prompt": "orient me on this repo",
     "context": "A Python monorepo with services/auth/ (own pyproject.toml, 25 Python files), services/billing/ (own pyproject.toml, 18 Python files), services/notifications/ (own pyproject.toml, 12 Python files), and shared/ library. An existing CLAUDE.md exists with 320 lines and contains Mermaid architecture diagrams but no navigation/pointer map section. No .claude/rules/ directory. No docs/.",
-    "expected_output": "Monorepo type detected. CLAUDE.md audited and scored below 60 (320 lines over budget + Mermaid diagram + no pointer map). Design plan proposed with per-service component docs. User asked to confirm before overwriting CLAUDE.md. After confirmation: CLAUDE.md regenerated ≤200 lines with pointer map; docs/ hierarchy created with per-service docs; .claude/rules/ created. DONE: signal emitted.",
+    "expected_output": "Monorepo type detected. CLAUDE.md audited and scored below 60 (320 lines over budget + Mermaid diagram + no pointer map). Design plan proposed with per-service component docs. User asked to confirm before overwriting CLAUDE.md. After confirmation: CLAUDE.md regenerated \u2264200 lines with pointer map; docs/ hierarchy created with per-service docs; .claude/rules/ created. DONE: signal emitted.",
     "expectations": [
       "analyze_repo.py detects project_type as 'monorepo'",
       "audit_context.py scores existing CLAUDE.md below 60",
@@ -41,13 +41,13 @@
       "Audit summary explicitly reports 'No navigation/pointer map found'",
       "Phase 3 design plan identifies CLAUDE.md as 'Regenerate' (score <60)",
       "Phase 3 pauses and asks user to confirm before overwriting existing CLAUDE.md",
-      "Regenerated CLAUDE.md is ≤200 lines",
+      "Regenerated CLAUDE.md is \u2264200 lines",
       "Regenerated CLAUDE.md has a navigation table in the last 50 lines",
       "Regenerated CLAUDE.md has NO Mermaid diagrams",
       "docs/OVERVIEW.md covers all three services (auth, billing, notifications)",
       "docs/auth.md, docs/billing.md, docs/notifications.md are created",
       ".agentify-lock records files_updated: ['CLAUDE.md'] separately from files_created",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (monorepo)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (monorepo)"
     ]
   },
   {
@@ -65,7 +65,8 @@
       "No .agentify-lock file is written",
       "No DONE: agentify signal is emitted",
       "Agent reads src/api/users.ts and addresses the token expiry bug directly"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   },
   {
     "id": 4,
@@ -74,10 +75,10 @@
     "expected_output": "Plugin type detected by analyze_repo.py. CLAUDE.md generated with extension-specific conventions. docs/OVERVIEW.md has activation flow diagram. docs/commands.md and docs/providers.md created. .claude/rules/extension.md created with extension-specific path scoping.",
     "expectations": [
       "analyze_repo.py detects project_type as 'plugin'",
-      "CLAUDE.md is ≤200 lines",
+      "CLAUDE.md is \u2264200 lines",
       "docs/OVERVIEW.md mentions extension lifecycle (activate/deactivate)",
       "docs/commands.md or equivalent component doc is created",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (plugin)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (plugin)"
     ]
   },
   {
@@ -87,9 +88,9 @@
     "expected_output": "Mobile type detected. CLAUDE.md with emulator commands. docs/OVERVIEW.md with navigation structure diagram. docs/screens.md and docs/native.md created.",
     "expectations": [
       "analyze_repo.py detects project_type as 'mobile'",
-      "CLAUDE.md is ≤200 lines",
+      "CLAUDE.md is \u2264200 lines",
       "docs/OVERVIEW.md mentions platform targets (iOS, Android)",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (mobile)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (mobile)"
     ]
   },
   {
@@ -101,7 +102,7 @@
       "analyze_repo.py detects project_type as 'cli'",
       "analyze_repo.py finds justfile and extracts just commands",
       "CLAUDE.md contains 'just build', 'just test', 'just lint' commands",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (cli)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (cli)"
     ]
   },
   {
@@ -114,7 +115,7 @@
       "Generated CLAUDE.md starts with @AGENTS.md import",
       "AGENTS.md file is not modified",
       "Claude-specific instructions appear below the @AGENTS.md import in CLAUDE.md",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (webapp)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (webapp)"
     ]
   },
   {
@@ -125,13 +126,13 @@
     "expectations": [
       "Phase 0 detects .agentify-lock and asks Update vs Reset",
       "User confirms 'Update' (default)",
-      "audit_context.py scores CLAUDE.md >80 → kept as-is",
-      "audit_context.py scores OVERVIEW.md 55 → marked for improvement",
+      "audit_context.py scores CLAUDE.md >80 \u2192 kept as-is",
+      "audit_context.py scores OVERVIEW.md 55 \u2192 marked for improvement",
       "CLAUDE.md is NOT regenerated (score >80)",
       "docs/OVERVIEW.md is improved (not replaced from scratch)",
       "docs/services.md is created (was missing)",
       ".agentify-lock is updated with new date",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (service)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (service)"
     ]
   },
   {
@@ -145,14 +146,14 @@
       "Phase 1 summary prints 'Multi-agent: yes'",
       "Phase 3 plan includes coordination dirs section",
       "Phase 3 pauses and asks user to confirm (yes/edit/skip/cancel)",
-      "docs/plans/README.md created and is ≤80 lines",
-      "docs/specs/README.md created and is ≤80 lines",
-      "docs/reviews/README.md created and is ≤80 lines",
+      "docs/plans/README.md created and is \u226480 lines",
+      "docs/specs/README.md created and is \u226480 lines",
+      "docs/reviews/README.md created and is \u226480 lines",
       "Each README.md contains an example/template section showing the file format",
       "CLAUDE.md navigation table has rows for docs/plans/, docs/specs/, docs/reviews/",
       ".claude/context-map.md has 'Agent Coordination' section with all three dir entries",
       ".agentify-lock includes 'coordination_dirs': ['docs/plans', 'docs/specs', 'docs/reviews']",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (service)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (service)"
     ]
   },
   {
@@ -168,7 +169,7 @@
       "docs/reviews/ is NOT created",
       "CLAUDE.md does NOT have rows for docs/plans/, docs/specs/, docs/reviews/ in navigation table",
       ".agentify-lock does NOT include 'coordination_dirs' key (or key is absent)",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (cli)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (cli)"
     ]
   },
   {
@@ -196,12 +197,12 @@
       "Phase 1 summary shows 'Service pkgs: api, web, shared'",
       "Phase 3 plan uses Monorepo Pattern (not Standard Pattern)",
       "Phase 4 follows Monorepo Pattern",
-      "Root CLAUDE.md contains only shared standards — no service-specific content",
+      "Root CLAUDE.md contains only shared standards \u2014 no service-specific content",
       "docs/OVERVIEW.md has Mermaid diagram showing service relationships",
-      "docs/api.md, docs/web.md, docs/shared.md each created (≤300 lines)",
+      "docs/api.md, docs/web.md, docs/shared.md each created (\u2264300 lines)",
       "No per-service CLAUDE.md files created (only root CLAUDE.md)",
       ".agentify-lock written with skill_version 1.3.0",
-      "Output ends with: DONE: agentify — N files created/updated for project-name (monorepo)"
+      "Output ends with: DONE: agentify \u2014 N files created/updated for project-name (monorepo)"
     ]
   }
 ]

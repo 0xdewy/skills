@@ -6,12 +6,13 @@ description: >-
   improvements, one auditing security vulnerabilities and CVEs. Applies
   findings, runs tests to verify correctness, and iterates until the code is
   as clean and optimal as it can get. TRIGGER on: "stinky code", "clean up
-  this codebase", "improve this code", "find bugs and fix them", "code quality
-  pass", "refactor this project", "remove dead code", "optimize this codebase",
-  "code smells", "make this code better", "run code-smellz". SKIP on:
+  this codebase for bugs and quality", "find bugs and fix them", "code quality
+  pass", "refactor this project for correctness and maintainability",
+  "audit this code for bugs, security, and architecture", "code smells",
+  "make this code better", "run code-smellz". SKIP on:
   explaining what code does without changing it, single-file reviews that don't
   require subagents, security-only audits (use security-review instead),
-  documentation-only requests.
+  documentation-only requests, size-only/deletion-only cleanup (use shrinkray).
 license: MIT
 metadata:
   author: iamky1e
@@ -28,8 +29,24 @@ metadata:
 ## What This Does
 
 Load `skills/common/patterns/orchestration.md` and
-`skills/common/patterns/activation.md` for cross-skill patterns.
+`skills/common/patterns/activation.md`, and
+`skills/common/patterns/execution-contract.md` for cross-skill patterns.
+Load `skills/common/patterns/scaling.md` for the effort-scaling gate below.
 See `skills/common/episodic-memory-guide.md` for the full memory design.
+
+### Effort Scaling
+
+Pick a tier before Phase 0 and state it in one line:
+
+- **lite** — single file, <~150 LOC, or only one concern (e.g. just bugs, or
+  just a security pass): work directly, or spawn only the 1–2 relevant agents
+  (e.g. Bug Hunter + Security Auditor). One iteration, no quarantine loop.
+- **standard** — a module or small project: spawn all four agents, 1–2 iterations.
+- **full** — a large repo or an explicit "deep clean": the full four-agent loop
+  to convergence.
+
+Current models (Opus 4.5+) over-spawn subagents where a direct read is faster,
+so do not run all four agents on a one-file fix.
 
 Four subagents run in parallel, each with a specific mandate:
 
@@ -73,9 +90,8 @@ After all four report, changes are applied, type-checked, linted, formatted, and
 The loop repeats until nothing meaningful remains — or 5 iterations, or quarantine
 halts a category — whichever comes first.
 
-**This skill never runs `git commit`.** All changes stay in the working tree.
-Review with `git diff` and commit when ready. The skill uses `git apply` to stage
-changes and `git apply -R` to revert them — no commits are created.
+**This skill never runs `git commit`.** It stages with `git apply` and reverts with
+`git apply -R`; all changes stay in the working tree for you to review with `git diff`.
 
 ## Prerequisites
 
@@ -257,7 +273,7 @@ Conflicts are resolved with a bias toward simplification:
 ### 2.3 Priority & Quarantine
 
 **Priority rules:**
-- CRITICAL security findings → apply first, and verify immediately (typecheck + tests)
+- Critical security findings → apply first and verify immediately (typecheck + tests); an active vulnerability is the highest-risk state
   before applying any other changes from the same iteration
 - HIGH severity → apply this iteration (unless category is quarantined)
 - MEDIUM severity → apply unless the change is risky (touches public API, shared
@@ -313,8 +329,9 @@ git diff > /tmp/stinky-output/pre-iter-N.diff
 
 ### 3.1 Apply Security Fixes First
 
-CRITICAL security findings (CVE with known exploit, hardcoded secret in a
-file) MUST be applied first and verified before any other changes.
+Critical security findings (CVE with known exploit, hardcoded secret in a file)
+are applied first and verified before any other changes — an active
+vulnerability left in place while you tidy other issues is the worst outcome.
 
 1. Apply each security patch with `git apply --check && git apply`
 2. Run the type checker: `<typecheck_cmd> 2>&1`
@@ -457,11 +474,10 @@ Run the full test suite:
 5. Note what the failing changes were — they may need manual attention.
 
 **Fallback:** If `git apply -R` fails on a patch (file changed by a later patch),
-restore from the pre-iteration checkpoint:
-```bash
-git checkout . && git apply /tmp/stinky-output/pre-iter-N.diff
-```
-Then re-apply only the changes that passed.
+stop and report the touched files plus the failed revert command. Ask before any
+broader restore; for a manual edit made without a patch, restore only that file
+from its per-iteration snapshot. Follow the patch-only rollback rule in
+`execution-contract.md` — never whole-tree restore in a dirty worktree.
 
 If reverting leaves you with fewer than 2 successful changes this iteration,
 that counts as a plateau (see Phase 5).

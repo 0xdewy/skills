@@ -30,5 +30,27 @@
       "Fixer fix-plan.md identifies exact problem",
       "Second reviewer verdict is DONE (both correctness and succinctness reviewers agree)"
     ]
+  },
+  {
+    "id": 4,
+    "prompt": "Fix the typo in the docstring of utils.py: 'recieve' should be 'receive'.",
+    "expected_output": "Takes the lite tier: edits the typo directly with a single self-check, rather than spawning the Implementer/Correctness/Succinctness/Fixer dual-reviewer loop.",
+    "expectations": [
+      "Takes the lite tier \u2014 does not spawn the full dual-reviewer loop for a one-line typo fix",
+      "Applies the fix directly",
+      "Verifies with a single check rather than a multi-role review"
+    ],
+    "manual_checks": []
+  },
+  {
+    "id": 5,
+    "prompt_type": "anti_trigger",
+    "prompt": "What does fetchUser() in src/auth.js do? Just explain it.",
+    "expected_output": "Should NOT trigger implementer. This is a read-only explanation request, not an implementation/review task. Read the function and explain it directly.",
+    "expectations": [
+      "Does not enter the implement/correctness/succinctness/fixer loop",
+      "Reads src/auth.js and explains fetchUser() directly"
+    ],
+    "manual_checks": []
   }
 ]

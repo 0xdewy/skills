@@ -1,6 +1,25 @@
 ---
 name: simple-memory
-description: Persistent factual memory for LLM skills. Stores, retrieves, and consolidates knowledge in an append-only JSONL file. Use when the user says "remember", "recall", "memory", "store this", "save this", "what do I know about", "what did I say about", "look up", "find that note", "consolidate my notes", "summarize my memories", "what have I learned about", or wants to persist information across sessions.
+description: >-
+  Persistent factual memory for LLM skills. Stores, retrieves, and consolidates
+  knowledge in an append-only JSONL file. Use when the user explicitly wants
+  persisted memory: "remember this", "store this for later", "save this note",
+  "what have you stored about X", "search my saved memories", "recall my note
+  about X", "consolidate my saved notes", or "summarize my memories". SKIP on:
+  ordinary web lookups, codebase/file searches, casual mentions of memory,
+  browser history, CPU/RAM memory, or any query where "look up" means search
+  current files or the internet rather than saved skill memory.
+license: MIT
+metadata:
+  author: 0xdewy
+  version: 1.1.0
+  category: memory
+  tags:
+    - memory
+    - persistence
+    - jsonl
+    - retrieval
+    - consolidation
 ---
 
 # Simple Memory
@@ -45,6 +64,16 @@ Fields:
 - **consolidated_into**: `null` normally; set to summary entry ID after consolidation
 
 The canonical format specification is at `skills/common/memory-guide.md`.
+
+## Privacy and Scope
+
+Default to the invoking skill's own `memory/memory.jsonl`. Do not read another
+skill's memory file unless the user explicitly asks for cross-skill recall or the
+other skill's instructions explicitly require it for the current task.
+
+Do not store secrets, credentials, access tokens, private keys, government IDs,
+or sensitive personal data unless the user explicitly asks to save that exact
+information and understands it will be persisted in plaintext JSONL.
 
 ## Operations
 
@@ -132,10 +161,20 @@ Every skill that needs persistent memory should:
 3. Use the bundled scripts (`store.py`, `retrieve.py`, `consolidate.py`)
    or reimplement them following the same JSONL format.
 
-Because the format is identical across skills, any skill can read any
-other skill's memory file. This enables cross-skill awareness: a skill
-that needs to know user preferences can check another skill's memory
-without coordination.
+Because the format is identical across skills, cross-skill memory is possible,
+but it is permissioned. Ask before reading another skill's memory file and state
+which file will be read. Prefer copying only the specific retrieved facts needed
+for the current task into the response or working notes.
+
+## Completion Format
+
+End memory operations with one of:
+
+```
+DONE: memory/memory.jsonl — stored 1 memory
+DONE: memory/memory.jsonl — retrieved N memories for "<query>"
+DONE: memory/memory.jsonl — consolidated N memories into <summary-id>
+```
 
 ## Scripts
 

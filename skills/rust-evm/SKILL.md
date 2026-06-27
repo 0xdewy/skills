@@ -1,21 +1,16 @@
 ---
 name: rust-evm
 description: >-
-  Deep expert in EVM internals, bytecode, and the Rust/Foundry toolchain.
-  Covers: revm (Rust EVM execution engine), Foundry (forge/cast/anvil/chisel),
-  evmole (bytecode analysis), Yul/inline-assembly, and the full EVM opcode set.
-  Acts as a senior EVM engineer — not just answering questions but producing
-  correct, gas-optimized, production-quality code and analysis. TRIGGER on:
-  "revm", "evm bytecode", "yul", "inline assembly", "forge", "cast", "anvil",
-  "foundry", "evmole", "opcodes", "selectors", "dispatcher", "abi encoding",
-  "storage layout", "evm trace", "inspector", "calldata", "memory layout",
-  "smart contract assembly", "evm internals", "decompile", "bytecode analysis",
-  "function selector", "solidity assembly", "delegatecall", "create2",
-  "transient storage", "eip-1153", "eip-4844", "gas optimization assembly",
-  "custom precompile", "evm fork", "anvil fork", "revm inspector", "revm
-  database". SKIP on: high-level Solidity questions with no assembly/bytecode
-  angle (answer directly), generic Rust questions unrelated to EVM, web3.js /
-  ethers.js questions (unless they involve raw bytecode/calldata).
+  Expert EVM/Rust/Foundry skill for revm, forge/cast/anvil/chisel, evmole,
+  bytecode analysis, Yul/inline assembly, opcodes, gas, calldata, memory, storage,
+  selectors, dispatchers, traces, CREATE2, delegatecall, transient storage,
+  EIP-1153/EIP-4844, and custom precompiles. TRIGGER on: "revm", "foundry",
+  "forge", "cast", "anvil", "evm bytecode", "evm opcodes", "yul",
+  "inline assembly", "evm storage layout", "evm trace", "revm inspector",
+  "evmole", "calldata", "function selector", "solidity assembly", "decompile",
+  "gas optimization assembly". SKIP on: high-level Solidity without bytecode or
+  assembly angle, generic Rust unrelated to EVM, and ethers/web3 questions unless
+  raw calldata, bytecode, or traces are involved.
 license: MIT
 metadata:
   author: iamky1e
@@ -40,7 +35,29 @@ metadata:
 
 Expert-level EVM engineering skill. Covers the full stack from opcode semantics
 through bytecode analysis, Yul/assembly authoring, revm integration in Rust,
+
+Ground every claim in the reference files or the actual code/bytecode — never
+speculate about gas costs, opcodes, or revm APIs you have not checked. Open the
+relevant file (or run `cast`/`forge`) before asserting how something behaves.
 and Foundry tooling.
+
+## Freshness & Source Discipline
+
+Load `skills/common/patterns/knowledge.md` for source hierarchy, freshness, and
+inference-labeling rules.
+
+EVM details change at fork boundaries and tool APIs change across releases. For
+answers that depend on current gas costs, opcode availability, revm types,
+Foundry flags, or evmole APIs:
+
+1. Load the relevant local reference first.
+2. State the assumed fork or tool version when it affects correctness.
+3. If the task asks for current behavior and the local reference does not name a
+   verification date or version, verify against primary sources before giving
+   production guidance: Ethereum EIPs/specs for protocol behavior, Solidity docs
+   for compiler/Yul semantics, and official crate/tool documentation for APIs.
+4. Never present guessed gas costs or unstable tool APIs as certain. If you are
+   inferring from known EVM rules, say that explicitly.
 
 ---
 

@@ -1,19 +1,15 @@
 ---
 name: brainstormers
 description: >-
-  Spawns 3–5 dialectical thinker sub-agents who debate any question or creative
-  challenge across multiple rounds, seeking the most beautiful and ideal form of
-  ideas. Each thinker embodies a distinct historical genius — Einstein, Tesla,
-  Socrates, Musk, Da Vinci — and must argue with the others, not past them.
-  Rounds continue until convergence or eight rounds elapse. Writes IDEAS.md in
-  the working directory; all intermediate debate files go to
-  /tmp/brainstormers-{session}/. TRIGGER on: "brainstorm", "brainstormers",
-  "/brainstormers", "debate this idea", "explore this together", "best ideas for",
-  "think through this deeply", "dialectic on", "multiple perspectives on",
-  "what are the most beautiful ideas for", "agents debate", "collective thinking",
-  "think tank this". SKIP on: direct code requests, factual lookups with known
-  answers, single-file edits, implementation tasks where creative exploration
-  isn't the goal.
+  Runs 3-5 dialectical thinker subagents across multiple rounds to debate a
+  creative question, score surviving ideas, and write IDEAS.md. Intermediate
+  debate files go to /tmp/brainstormers-{session}/. TRIGGER on: "brainstorm",
+  "brainstormers", "/brainstormers", "debate this idea", "explore this together",
+  "best ideas for", "think through this deeply", "dialectic on",
+  "multiple perspectives on", "agents debate", "collective thinking",
+  "think tank this". SKIP on: direct code requests, factual lookups, single-file
+  edits, implementation tasks without creative exploration, and startup/business
+  ideation (use startup-ideation).
 license: MIT
 metadata:
   author: 0xdewy
@@ -41,6 +37,14 @@ You do not contribute ideas yourself. You orchestrate, record, and recognize
 convergence. The ideas belong to the minds.
 
 ---
+
+## Shared Patterns
+
+Load `skills/common/patterns/orchestration.md`,
+`skills/common/patterns/quality.md`, and
+`skills/common/patterns/execution-contract.md` for the shared subagent contract,
+the convergence cap, and artifact validation. Follow them rather than redefining
+them.
 
 ## The Five Minds
 
@@ -84,6 +88,18 @@ Write `/tmp/{session-id}/debate.md` with only this header:
 ```
 
 Initialize `round_number = 1`, `convergence = false`.
+
+Create `/tmp/{session-id}/scorecard.md` with this header:
+
+```markdown
+# Brainstormers Scorecard — {session-id}
+
+| Round | Idea/Question | Truth | Surprise | Generativity | Specificity | Survived Objections? | Notes |
+|---|---|---:|---:|---:|---:|---|---|
+```
+
+The scorecard is not decorative. It is how the Moderator prevents the debate
+from becoming stylish agreement. Score 1-5 for each dimension after every round.
 
 ---
 
@@ -154,6 +170,10 @@ Collect responses. Append to `/tmp/{session-id}/debate.md`:
 Write `/tmp/{session-id}/round-{N}-summary.md`: one paragraph on what shifted
 this round (for your tracking as Moderator only).
 
+Update `/tmp/{session-id}/scorecard.md` with the recurring ideas or better
+questions from the round. Carry forward only ideas that score at least 4 in
+Truth and at least 3 in either Surprise or Generativity.
+
 ---
 
 ## Phase 3: Convergence Check
@@ -168,6 +188,15 @@ After each round (minimum 3 rounds), scan the latest round for these signals:
   rather than fundamental challenges, the ideas have survived their hardest test
 
 If 3+ signals present → `convergence = true`, proceed to Phase 4.
+
+Convergence also requires at least 3 candidate ideas or questions in
+`scorecard.md` with:
+- Truth >= 4
+- Specificity >= 4
+- Survived Objections? = yes
+
+If the conversational signals are present but the scorecard is weak, run another
+round with an explicit prompt to make claims more concrete and attackable.
 
 If none present and `round_number < 8` → increment, return to Phase 2.
 
@@ -191,6 +220,9 @@ TOPIC:
 THE FULL DEBATE:
 {full contents of /tmp/{session-id}/debate.md}
 
+THE SCORECARD:
+{full contents of /tmp/{session-id}/scorecard.md}
+
 Produce the IDEAS document in exactly this structure. Use ## for section headings,
 ### for idea names, and > for the central insight:
 
@@ -206,7 +238,8 @@ One paragraph — max 200 words. Describe the idea, why it matters, what makes i
 ### [Memorable Name 2]
 ...
 
-(3-5 ideas total — pick only the ones that survived real scrutiny.)
+(3-5 ideas total — pick only ideas that survived real scrutiny in the scorecard.
+For each idea, include one sentence naming the objection it survived.)
 
 ---
 
@@ -257,6 +290,7 @@ Ideas found: {count of core ideas in synthesis}
 
 IDEAS.md written to {absolute path}/IDEAS.md
 Full debate: /tmp/{session-id}/debate.md
+Scorecard: /tmp/{session-id}/scorecard.md
 ```
 
 Then print the Central Insight paragraph from the synthesis, so the user
@@ -285,6 +319,10 @@ DONE: brainstormers — {N}-round dialectic on "{topic}", {M} ideas in IDEAS.md
   assumption. There is always one."
 - **The minimum is 3 rounds.** Even if ideas seem stable after Round 2, run
   Round 3. Ideas that survive three rounds are real.
+- **No unscored synthesis.** `IDEAS.md` may only include ideas or questions that
+  appear in `scorecard.md` and meet the convergence thresholds. If fewer than
+  three survive, write the stronger question the dialectic uncovered instead of
+  padding weak ideas.
 - **Beautiful means alive.** An idea is beautiful not because it is polished
   but because it is true, surprising, and generative. It opens more questions
   than it closes. It makes the reader lean forward. This is the standard.

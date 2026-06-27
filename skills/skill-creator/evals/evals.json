@@ -15,7 +15,7 @@
     },
     {
       "id": 2,
-      "prompt": "improve my skill — the frontend-twerkin skill triggers too often on casual conversation",
+      "prompt": "improve my skill \u2014 the frontend-twerkin skill triggers too often on casual conversation",
       "expected_output": "Loads the target skill, analyzes its description for trigger/skip pattern quality, proposes specific description refinements to tighten activation.",
       "expectations": [
         "Reads the target skill's SKILL.md before proposing changes",
@@ -37,25 +37,27 @@
     },
     {
       "id": 4,
-      "prompt": "I have a useful skill for debugging Python imports — can you help me share it as a skill?",
+      "prompt": "I have a useful skill for debugging Python imports \u2014 can you help me share it as a skill?",
       "expected_output": "Recognizes this as a publishing request, validates the skill structure, guides through packaging steps.",
       "expectations": [
         "Recognizes 'share it as a skill' as a publishing trigger",
         "Validates SKILL.md frontmatter completeness before publishing guidance",
         "Guides through versioning, testing, and distribution steps",
         "Does NOT trigger on 'useful skill' as a casual phrase"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     },
     {
       "id": 5,
-      "prompt": "that's a useful skill you have there — can you explain what a skill is?",
+      "prompt": "that's a useful skill you have there \u2014 can you explain what a skill is?",
       "expected_output": "Does NOT trigger skill-creator. 'useful skill' is casual language, not a creation request. Explains skills conceptually without launching the creation workflow.",
       "expectations": [
         "Skill-creator is NOT triggered",
         "Response explains what skills are without entering a creation phase",
         "No SKILL.md file is generated",
         "No TRIGGER/SKIP analysis is performed"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     }
   ]
 }

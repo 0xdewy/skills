@@ -23,6 +23,14 @@ Thumbs.db
 skills/*/node_modules/
 skills/*/__pycache__/
 skills/*/*.pyc
+**/__pycache__/
+**/*.pyc
+
+# Local tool state / caches
+.pytest_cache/
+.venv/
+.claude/settings.local.json
+skills/**/.claude/settings.local.json
 
 # Episodic memory — per-installation runtime observations
 skills/*/learnings/

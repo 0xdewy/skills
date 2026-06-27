@@ -169,28 +169,82 @@ non-interactive contexts:
   files, later steps should detect and skip completed work rather than re-running
   from scratch.
 
-**Set up evals for measurable quality.** Once the skill has a testable
-behavior, encode it as `evals/evals.json` — an array of test cases. Write a
-`scripts/grade.py` that checks outputs against those assertions and emits a
-`grading.json` summary. This lets you run before/after comparisons when
-iterating.
+**Scale effort; restrain subagents.** If the skill can spawn agents or run a
+heavyweight pipeline, add an effort-scaling gate so a trivial input doesn't pay
+the full crew cost. Two findings make this important: multi-agent runs cost
+~15× a single chat, and current models (Opus 4.5+) over-spawn subagents where a
+direct action (a `grep`, a single-file read) is faster. See
+`skills/common/patterns/scaling.md` for the tier gate (lite/standard/full) and
+the four-part delegate-completeness checklist (objective, output format, tool
+guidance, boundaries). Default small tasks to "do it directly," not "spawn."
 
-Minimum viable `evals/evals.json` entry:
+**Tell Claude what to do, not what not to do.** Positive instructions steer
+more reliably than prohibitions. "Write in flowing prose paragraphs" works
+better than "Do not use bullet points." When you must forbid something, pair it
+with the reason — "never emit ellipses; the text-to-speech engine that reads
+this aloud can't pronounce them" generalizes better than a bare rule.
+
+**Investigate before answering.** For reference and review skills, add a clause
+like "Never speculate about code or docs you have not opened; read the relevant
+file before making a claim about it." This reliably cuts hallucinations on
+current models.
+
+**Avoid overengineering.** For skills that implement code, add scope discipline:
+make only the change requested, don't add abstractions/error-handling/docs for
+hypothetical future needs, and (for test-loop skills) don't hard-code to the
+test cases — tests verify correctness, they don't define the solution.
+
+**Prefer normal prompting over emphasis.** On Opus 4.5+, aggressive framing
+("CRITICAL: You MUST…", ALL-CAPS) tends to *over*trigger. Reach for plain
+language first; reserve emphasis for hard safety rules, and even there lead
+with the reason.
+
+**Set up evals for measurable quality.** Once the skill has a testable
+behavior, encode it as `evals/evals.json`. Prefer the object shape
+`{"skill_name": "...", "evals": [...]}` for new skills because it is
+self-describing, but accept legacy top-level arrays when improving existing
+skills. Write a `scripts/grade.py` that checks outputs against those assertions
+and emits a `grading.json` summary. This lets you run before/after comparisons
+when iterating.
+
+Minimum viable `evals/evals.json`:
 
 ```json
-[{
-  "id": 1,
-  "prompt": "A realistic user prompt that should trigger the skill",
-  "expected_output": "What good output looks like, described in prose",
-  "expectations": [
-    "Specific assertion grade.py can check programmatically",
-    "Another assertion"
+{
+  "skill_name": "my-skill",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "A realistic user prompt that should trigger the skill",
+      "expected_output": "What good output looks like, described in prose",
+      "expectations": [
+        "Specific assertion grade.py can check programmatically",
+        "Another assertion"
+      ],
+      "required_regex": ["DONE:"],
+      "forbidden_regex": ["git reset --hard"],
+      "manual_checks": []
+    }
   ]
-}]
+}
 ```
+
+Use structured fields such as `required_files`, `forbidden_files`,
+`required_regex`, `forbidden_regex`, `commands_run`, `max_lines`, and
+`manual_checks` where possible. Keep prose `expectations` for human judgment, but
+do not rely on prose alone when a check can be made deterministic.
 
 See `web-scraping/evals/evals.json` and `web-scraping/scripts/grade.py` for a
 complete implementation of this pattern.
+
+For skills whose output is free-form text or workflow behavior (most multi-agent
+skills), deterministic substring checks are too weak — use an LLM-as-judge
+grader instead: a single LLM call scoring each output 0.0–1.0 against a rubric
+(accuracy, completeness, process, efficiency) with a pass/fail verdict, written
+to `grading.json`. Anthropic's multi-agent team found a single LLM judge with
+one rubric prompt aligns best with human judgment and scales to hundreds of
+outputs. See `skills/skill-creator/scripts/llm_judge_grade.py` for a copy-and-
+adapt template; start small (~20 cases) and iterate.
 
 ---
 

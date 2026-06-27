@@ -15,11 +15,13 @@ one corpus, so callers pass all their query strings in a single invocation.
 
 Output schema (one object per paper):
     {title, authors[], year, venue, doi, url, abstract, citations, source,
-     is_retracted, fulltext_locators[]}
+     is_retracted, fulltext_locators[], bias_flags[]}
 
-Each source is queried independently inside try/except so one failure (network,
-rate limit, schema drift) never sinks the whole run. Prints a one-line summary
-per source to stderr and writes the merged corpus as a JSON array to --out.
+After corpus build, a bias scan runs automatically and outputs:
+    data/bias-funding.json      — papers with funding/conflict signals
+    data/bias-institutions.json — institutional concentration
+    data/bias-publication-bias.json — null-result ratio and publication bias flag
+    data/bias-summary.md        — human-readable bias summary
 """
 from __future__ import annotations
 
@@ -30,6 +32,7 @@ import sys
 import time
 import urllib.parse
 import xml.etree.ElementTree as ET
+from collections import Counter
 
 try:
     import requests
@@ -366,6 +369,196 @@ SOURCES = {
     "semanticscholar": search_semanticscholar,
 }
 
+# ----------------------------------------------------------------------
+# Bias scanning — runs automatically after every corpus build
+# ----------------------------------------------------------------------
+
+FUNDING_SIGNALS = [
+    "funded by", "received funding", "grant from", "honoraria",
+    "advisory board", "employee of", "consultant to", "stock holder",
+    "founder of", "owns shares", "conflict of interest", "industry funded",
+    "pharmaceutical", "supplement company", "nutrition research",
+    "biotech", "funded by the author",
+]
+
+INSTITUTIONAL_TERMS = [
+    "university", "hospital", "medical center", "institute", "college",
+    "school of", "pharmaceutical", "nutra", "herb", "biotech", "supplement",
+]
+
+NULL_RESULT_SIGNALS = [
+    "no benefit", "failed to improve", "not significant", "null result",
+    "no difference", "did not reduce", "placebo controlled", "placebo-controlled",
+    "negative trial", "no effect",
+]
+
+PREDATORY_JOURNALS = [
+    "scientific research", "journal of",  # too generic — skip
+]
+
+
+def scan_corpus_for_bias(corpus: list[dict], out_dir: str) -> dict:
+    """Run bias scan against a corpus and write bias JSON + markdown reports.
+
+    Returns a dict of summary stats for printing.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+
+    # --- A. Funding / conflict scan ---
+    funded_papers = []
+    no_funding_found = []
+    no_abstract = 0
+
+    for p in corpus:
+        ab = p.get("abstract", "") or ""
+        if not ab:
+            no_abstract += 1
+            continue
+        ab_lower = ab.lower()
+        matches = [kw for kw in FUNDING_SIGNALS if kw in ab_lower]
+        if matches:
+            funded_papers.append({
+                "title": p.get("title", "")[:100],
+                "year": p.get("year"),
+                "doi": p.get("doi"),
+                "signals": matches,
+                "source": p.get("source"),
+                "citations": p.get("citations"),
+            })
+        else:
+            no_funding_found.append(p.get("title", "")[:80])
+
+    funding_report = {
+        "total_papers": len(corpus),
+        "with_funding_signals": len(funded_papers),
+        "without_funding_signals": len(no_funding_found),
+        "no_abstract": no_abstract,
+        "papers": funded_papers,
+    }
+    with open(os.path.join(out_dir, "bias-funding.json"), "w") as f:
+        json.dump(funding_report, f, indent=2, ensure_ascii=False)
+
+    # --- B. Institutional concentration ---
+    institution_counts = Counter()
+    no_author = 0
+    for p in corpus:
+        authors = p.get("authors", [])
+        if not authors:
+            no_author += 1
+            continue
+        authors_str = " ".join(authors) if isinstance(authors, list) else str(authors)
+        found = re.findall(
+            r"(University|Hospital|Medical Center|Institute|College|"
+            r"School|Pharmaceutical|Nutra|Herb|Biotech|Supplement|Corp|Ltd)",
+            authors_str, re.IGNORECASE
+        )
+        for inst in found:
+            institution_counts[inst.lower()] += 1
+
+    total_with_authors = len(corpus) - no_author
+    institutional_flags = []
+    for inst, count in institution_counts.most_common(20):
+        pct = (count / total_with_authors * 100) if total_with_authors else 0
+        if pct > 50:
+            institutional_flags.append({
+                "institution_pattern": inst,
+                "count": count,
+                "pct": round(pct, 1),
+                "flag": "CONCENTRATION >50%",
+            })
+
+    institution_report = {
+        "total_with_author_data": total_with_authors,
+        "top_institutions": [
+            {"pattern": inst, "count": cnt, "pct": round(cnt/total_with_authors*100,1) if total_with_authors else 0}
+            for inst, cnt in institution_counts.most_common(20)
+        ],
+        "concentration_flags": institutional_flags,
+        "corpus_balanced": len(institutional_flags) == 0,
+    }
+    with open(os.path.join(out_dir, "bias-institutions.json"), "w") as f:
+        json.dump(institution_report, f, indent=2, ensure_ascii=False)
+
+    # --- C. Publication bias (null-result ratio) ---
+    total_with_abstract = sum(1 for p in corpus if p.get("abstract"))
+    null_papers = []
+    for p in corpus:
+        ab = (p.get("abstract") or "").lower()
+        if not ab:
+            continue
+        if any(sig in ab for sig in NULL_RESULT_SIGNALS):
+            null_papers.append({
+                "title": p.get("title", "")[:100],
+                "year": p.get("year"),
+                "doi": p.get("doi"),
+                "source": p.get("source"),
+            })
+
+    null_ratio = (len(null_papers) / total_with_abstract * 100) if total_with_abstract else 0
+    publication_bias_flag = null_ratio < 5.0
+
+    pub_report = {
+        "total_with_abstract": total_with_abstract,
+        "null_result_papers": len(null_papers),
+        "null_ratio_pct": round(null_ratio, 1),
+        "publication_bias_suspected": publication_bias_flag,
+        "papers": null_papers[:50],  # cap at 50 for file size
+    }
+    with open(os.path.join(out_dir, "bias-publication-bias.json"), "w") as f:
+        json.dump(pub_report, f, indent=2, ensure_ascii=False)
+
+    # --- D. Bias summary markdown ---
+    bias_md = f"""# Bias Scan Summary — {os.path.basename(out_dir)}
+
+Generated automatically by search_papers.py bias scan.
+
+## Funding / Conflict of Interest
+- Papers with funding/conflict signals: **{len(funded_papers)}** / {len(corpus)}
+- Papers without signals: **{len(no_funding_found)}**
+- No abstract available: **{no_abstract}**
+
+## Institutional Concentration
+"""
+    if institutional_flags:
+        bias_md += "**⚠️ FLAGGED** — concentration >50%:\n\n"
+        for f2 in institutional_flags:
+            bias_md += f"- `{f2['institution_pattern']}`: {f2['count']} papers ({f2['pct']}%)\n"
+    else:
+        bias_md += "✅ Corpus appears balanced — no single institution >50%\n"
+
+    bias_md += f"""
+## Publication Bias
+- Null-result papers found: **{len(null_papers)}** / {total_with_abstract} = **{null_ratio:.1f}%**
+"""
+    if publication_bias_flag:
+        bias_md += "**⚠️ FLAGGED** — null-result ratio <5%, publication bias suspected.\n"
+    else:
+        bias_md += "✅ Null-result papers present — publication bias not strongly suspected.\n"
+
+    bias_md += f"""
+## Bias Flags Applied
+| Type | Action |
+|---|---|
+| Industry-funded (for-profit) | Downgrade 1 evidence level |
+| Government/academic funding | No penalty |
+| Funding not declared | Flag, no penalty |
+| Predatory journal / fraud | **Exclude** |
+| Institution >50% of corpus | Flag, note imbalance |
+| Null ratio <5% | Flag publication bias |
+
+---
+*Run bias scan again with: python3 scripts/search_papers.py [queries] --out data/corpus.json*
+"""
+    with open(os.path.join(out_dir, "bias-summary.md"), "w") as f:
+        f.write(bias_md)
+
+    return {
+        "funded": len(funded_papers),
+        "null_ratio": round(null_ratio, 1),
+        "pub_bias_flag": publication_bias_flag,
+        "institutional_flags": len(institutional_flags),
+    }
+
 
 def dedupe(papers: list[dict]) -> list[dict]:
     """Merge duplicates across sources, keyed by DOI then normalized title.
@@ -411,6 +604,26 @@ def dedupe(papers: list[dict]) -> list[dict]:
     return list(seen.values())
 
 
+def _add_null_queries(queries: list[str]) -> list[str]:
+    """Augment every query with null-result variants to combat publication bias.
+
+    For each original query, adds a variant ANDed with a null-result term so
+    the corpus explicitly includes negative-trial results.  The adversarial
+    null-result terms are injected into every query string so the bias
+    is baked in automatically — the PI doesn't have to remember to do it.
+    """
+    null_terms = [
+        "failed to improve", "no benefit", "not significant",
+        "null result", "no difference", "did not reduce",
+    ]
+    augmented = []
+    for q in queries:
+        augmented.append(q)
+        for nt in null_terms[:3]:  # keep it to 3 to avoid flooding
+            augmented.append(f'"{q}" AND "{nt}"')
+    return augmented
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("queries", nargs="+",
@@ -422,14 +635,19 @@ def main() -> None:
                     help="earliest publication year")
     ap.add_argument("--sources", default=",".join(SOURCES),
                     help="comma-separated subset of: " + ",".join(SOURCES))
+    ap.add_argument("--no-bias-scan", action="store_true",
+                    help="skip the post-build bias scan (rare; use for quick checks)")
     args = ap.parse_args()
+
+    # Always add null-result queries to combat publication bias
+    all_queries = _add_null_queries(args.queries)
 
     chosen = [s.strip() for s in args.sources.split(",") if s.strip() in SOURCES]
     all_papers: list[dict] = []
     # Each query hits every chosen source; dedupe() merges the union below, so the
     # PI no longer hand-merges per-query corpus files.
-    for qi, query in enumerate(args.queries, 1):
-        tag = f"q{qi}" if len(args.queries) > 1 else None
+    for qi, query in enumerate(all_queries, 1):
+        tag = f"q{qi}" if len(all_queries) > 1 else None
         for name in chosen:
             label = f"{tag}/{name}" if tag else name
             try:
@@ -447,17 +665,30 @@ def main() -> None:
         reverse=True,
     )
 
-    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+    out_dir = os.path.dirname(args.out) or "."
+    os.makedirs(out_dir, exist_ok=True)
     with open(args.out, "w") as f:
         json.dump(merged, f, indent=2, ensure_ascii=False)
 
     retracted = sum(1 for p in merged if p.get("is_retracted"))
     print(
         f"\nDONE: {len(merged)} unique papers ({retracted} retracted) from "
-        f"{len(chosen)} sources × {len(args.queries)} quer"
-        f"{'y' if len(args.queries) == 1 else 'ies'} -> {args.out}",
+        f"{len(chosen)} sources × {len(all_queries)} quer"
+        f"{'y' if len(all_queries) == 1 else 'ies'} -> {args.out}",
         file=sys.stderr,
     )
+
+    # --- Automatic bias scan ---
+    if not args.no_bias_scan:
+        bias_stats = scan_corpus_for_bias(merged, out_dir)
+        print(
+            f"\nBIAS SCAN: {bias_stats['funded']} funded/conflict papers, "
+            f"null-ratio {bias_stats['null_ratio']}% "
+            f"{'(⚠️ pub bias suspected)' if bias_stats['pub_bias_flag'] else '(ok)'}, "
+            f"{bias_stats['institutional_flags']} concentration flags",
+            file=sys.stderr,
+        )
+        print(f"BIAS REPORT: {os.path.join(out_dir, 'bias-summary.md')}", file=sys.stderr)
 
 
 if __name__ == "__main__":

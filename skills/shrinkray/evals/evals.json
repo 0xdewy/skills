@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "prompt": "shrink this codebase — it's gotten really bloated",
+    "prompt": "shrink this codebase \u2014 it's gotten really bloated",
     "expected_output": "Four subagents run in parallel (dead code hunter, ghost file hunter, code consolidator, verbosity reducer), baseline LOC is measured, tests are run before any changes, findings are applied in safe batches, and a final report shows lines removed per category with before/after test counts.",
     "expectations": [
       "Skill triggers on 'shrink this codebase' phrasing",
@@ -50,7 +50,8 @@
     "expectations": [
       "Skill does NOT trigger on pure bug-finding requests",
       "Claude answers the review request directly or suggests code-smellz instead"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
   },
   {
     "id": 5,
@@ -59,6 +60,17 @@
     "expectations": [
       "Skill does NOT trigger on JS/CSS bundle minification requests",
       "Claude suggests using the appropriate build tool instead"
-    ]
+    ],
+    "prompt_type": "anti_trigger"
+  },
+  {
+    "id": 6,
+    "prompt": "Trim one verbose helper function in helpers.py \u2014 it's the only obvious bloat in the file.",
+    "expected_output": "Takes the lite tier: reviews that one function directly for verbosity, skipping the four-agent crew.",
+    "expectations": [
+      "Takes the lite tier \u2014 does not spawn all four agents to trim a single function",
+      "Shortens the helper without changing behavior"
+    ],
+    "manual_checks": []
   }
 ]

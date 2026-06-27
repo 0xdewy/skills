@@ -1,22 +1,16 @@
 ---
 name: implementer
 description: >-
-  Iteratively implements and refines work through an adversarial quality loop.
-  Runs Implementer → Correctness Reviewer → Succinctness Reviewer → Fixer until
-  the work passes. The Correctness Reviewer does a blind Skeptic pass plus a
-  scored correctness pass. The Succinctness Reviewer hunts duplication, dead
-  code, over-abstraction, and verbosity. Halted when both reviewers find no
-  remaining flaws or the loop cap is reached. TRIGGER on: "implement this
-  plan", "build it", "write the code", "start implementation", "implement the
-  feature", "implement it", "begin build", "start building", "carry out the
-  plan", "execute the plan", "stress-test this answer", "find flaws until none
-  remain", "adversarial refinement", "refine until right", "best possible
-  answer", "make this bulletproof", "keep iterating until solid",
-  "implement-with-review", "oracle-skeptic", "oracle skeptic".
-  SKIP on: casual mentions of implementation, questions about how to implement
-  without a plan to execute, single-line code generation requests, simple
-  factual lookups, direct code edits, formatting tasks, file reads, or anything
-  where one-shot answers are clearly sufficient.
+  Implements work through an adversarial quality loop: implement, correctness
+  review with blind Skeptic pass, succinctness review, fixer, repeat until both
+  reviewers pass or the loop cap is reached. TRIGGER on: "implement this plan
+  with review", "implement this with an adversarial loop", "iterate until
+  reviewers pass", "implementation plus correctness review", "execute this plan
+  with reviewer/fixer loops", "stress-test this answer", "find flaws until none
+  remain", "make this bulletproof", "implement-with-review", "oracle skeptic".
+  SKIP on: ordinary direct edits, simple factual lookups, formatting, file reads,
+  single-line code generation, greenfield projects needing competing approaches
+  (use one-shot-project), or tasks where a one-shot answer is sufficient.
 license: MIT
 metadata:
   author: opencode (Skeptic pass adapted from iamky1e's implement-with-review)
@@ -40,6 +34,32 @@ metadata:
 An iterative, subagent-driven refinement loop. Work is produced, reviewed
 by two independent reviewers (correctness then succinctness), fixed, and
 re-reviewed — repeating until both reviewers find nothing left to fix.
+
+Load `skills/common/patterns/orchestration.md`,
+`skills/common/patterns/activation.md`, and
+`skills/common/patterns/execution-contract.md`, and
+`skills/common/parallel-agents-guide.md` before starting. Follow the shared
+contract: create output directories before dispatch, give each role an owned
+artifact, validate completion signals and files at each phase boundary, and use
+patch-scoped rollback only.
+
+If subagents are unavailable, run the same roles sequentially inline, writing the
+same artifact files. State that the review was serialized rather than parallel.
+
+## Effort Scaling
+
+Load `skills/common/patterns/scaling.md`. Pick a tier and state it in one line:
+
+- **lite** — a single small, unambiguous change (one function, a bug fix with an
+  obvious cause): implement directly and run a single self-check against the
+  task. Skip the dual-reviewer loop.
+- **standard** — a normal task: the full Implementer → Correctness → Succinctness
+  → Fixer loop, one or two iterations.
+- **full** — complex or risky work, or an explicit "stress-test this": the full
+  loop to convergence.
+
+Don't run a four-role review loop on a one-line fix — current models (Opus 4.5+)
+over-spawn review subagents where a direct change plus a check is enough.
 
 ## Loop Architecture
 
@@ -77,7 +97,16 @@ Read whatever the user has provided. Capture:
 - Any existing files, specs, or context
 
 If no plan or question exists, ask the user to provide one before proceeding.
-Set `MAX_LOOPS=8`.
+Decide the delivery mode:
+- **Worktree mode** — use this when the task is an edit to the current repo or
+  an existing codebase. The implementer edits the real target files in place,
+  while all review artifacts stay under `/tmp/implementer-loop/`.
+- **Artifact mode** — use this when the task asks for a standalone answer,
+  prototype, or generated deliverable. The implementer writes the deliverable to
+  `/tmp/implementer-loop/implementer/`.
+
+Record `DELIVERY_MODE=worktree|artifact` in `outputs/summary.json`. Set
+`MAX_LOOPS=8`.
 
 ---
 
@@ -96,6 +125,7 @@ Initialize `outputs/summary.json`:
 {
   "loop_count": 1,
   "max_loops": 8,
+  "delivery_mode": "worktree|artifact",
   "verdict": "IN_PROGRESS",
   "correctness_score": null,
   "succinctness_score": null,
@@ -119,12 +149,20 @@ ORIGINAL TASK:
 {the user's request / plan description}
 
 WORKING DIRECTORY: /tmp/implementer-loop/
+DELIVERY MODE: {worktree|artifact}
 
 Read any existing context files in /tmp/implementer-loop/ before starting.
 
 Your job is to produce the best possible version of what was asked for.
 
-Produce:
+If DELIVERY MODE is `worktree`, edit the requested files in the actual repo or
+target directory. Also write these review artifacts under
+`/tmp/implementer-loop/implementer/`:
+1. CHANGES.md — files changed and why
+2. TEST_RESULTS.md — commands run and results
+3. IMPLEMENTATION_NOTES.md — key decisions and trade-offs
+
+If DELIVERY MODE is `artifact`, produce:
 1. All source code, scripts, configs needed
 2. A README.md explaining how to build and run
 3. A TEST_RESULTS.md documenting what was tested manually
@@ -134,7 +172,9 @@ If this is loop > 1, also read /tmp/implementer-loop/fixer/fix-plan.md to
 understand what the fixer identified and address those specific issues.
 Do NOT rewrite from scratch — fix only what was identified as broken.
 
-Output everything to /tmp/implementer-loop/implementer/
+In both modes, `/tmp/implementer-loop/implementer/` must contain enough
+information for reviewers to understand exactly what changed. In worktree mode,
+reviewers inspect both that directory and the actual changed files.
 
 IMPORTANT: Before declaring done, verify:
 - The code compiles or runs without errors
@@ -161,13 +201,18 @@ ORIGINAL TASK:
 {the user's request / plan description}
 
 WORKING DIRECTORY: /tmp/implementer-loop/
+DELIVERY MODE: {worktree|artifact}
 
-Read everything in /tmp/implementer-loop/implementer/ thoroughly.
+Read everything in /tmp/implementer-loop/implementer/ thoroughly. If DELIVERY
+MODE is `worktree`, also inspect the actual changed files and `git diff` for the
+task scope.
 
-MANDATORY CHECKS — execute all of them:
+Run every check below (completeness matters — skipping one lets defects slip
+through):
 
 SKEPTIC PASS (always run first — read only the implementation output in
-/tmp/implementer-loop/implementer/, NOT the original task above):
+`/tmp/implementer-loop/implementer/` plus the changed files/diff in worktree
+mode, NOT the original task above):
 0. Find the single strongest flaw, gap, internal contradiction, unsupported
    claim, or dangerous unstated assumption in this output. Quote the exact
    phrase. Explain why it is flawed in one sentence. If — after genuinely
@@ -189,9 +234,9 @@ For each applicable check: rate 0–10 with a one-sentence justification.
 Compute overall score as weighted average (correctness 30%, completeness 20%,
 runs 20%, tests 10%, edge cases 10%, code quality 5%, docs 5%).
 
-THE SKEPTIC PASS OVERRIDES: if Skeptic found a flaw (SKEPTIC=FLAW), your
-VERDICT MUST be NEEDS_WORK regardless of other scores. Only when
-SKEPTIC=CLEAN AND all dimensions score >= 7 can VERDICT=DONE.
+The Skeptic pass takes priority: a blind flaw (SKEPTIC=FLAW) means the output
+isn't defensible on its own, so set VERDICT to NEEDS_WORK regardless of other
+scores. Only SKEPTIC=CLEAN with all dimensions >= 7 earns VERDICT=DONE.
 
 Write your full assessment to:
 /tmp/implementer-loop/reviewer/assessment-loop{LOOP_COUNT}.md
@@ -219,14 +264,17 @@ Spawn a subagent:
 You are the Succinctness Reviewer for this iteration. Loop: {LOOP_COUNT}.
 
 WORKING DIRECTORY: /tmp/implementer-loop/
+DELIVERY MODE: {worktree|artifact}
 
 Read everything in /tmp/implementer-loop/implementer/ thoroughly.
 Also read /tmp/implementer-loop/reviewer/assessment-loop{LOOP_COUNT}.md
 to avoid re-flagging issues the Correctness Reviewer already found.
+If DELIVERY MODE is `worktree`, inspect the actual changed files and `git diff`
+before scoring duplication, dead code, and verbosity.
 
 Your job: make this code as minimal as possible without losing functionality.
 
-MANDATORY CHECKS:
+Run each check below:
 1. DUPLICATION — Is the same logic expressed in two or more places? Flag each
    instance with file:line pairs.
 2. DEAD CODE — Unused imports, unreachable branches, commented-out blocks,
@@ -237,7 +285,7 @@ MANDATORY CHECKS:
 4. VERBOSE IDIOMS — Multi-line boilerplate that a builtin or library function
    already provides. Redundant variable assignments. Unnecessary intermediate
    variables.
-5. FILE BLoat — Can any file be merged into another? Can any file be deleted
+5. FILE BLOAT — Can any file be merged into another? Can any file be deleted
    entirely without loss?
 
 For each check: rate 0–10 with a one-sentence justification.
@@ -285,17 +333,18 @@ Write to `outputs/summary.json`:
 - Set `correctness_score` to the correctness reviewer's score
 - Set `succinctness_score` to the succinctness reviewer's score
 - Set `summary` to a one-paragraph description of what was built
-- Set `files` to the list of files in /tmp/implementer-loop/implementer/
+- Set `files` to the list of actual changed files for worktree mode, or files
+  in `/tmp/implementer-loop/implementer/` for artifact mode
 
 Print:
 ```
 Implementation complete. Loops: {LOOP_COUNT}. Correctness: {X}/10. Succinctness: {Y}/10.
-Files at: /tmp/implementer-loop/implementer/
+Mode: {worktree|artifact}. Files: {changed files or /tmp/implementer-loop/implementer/}
 ```
 
 Output the parseable completion signal:
 ```
-DONE: implementer delivered after {LOOP_COUNT} loop(s), correctness {CX}/10, succinctness {SX}/10, status DONE, files at /tmp/implementer-loop/implementer/
+DONE: implementer delivered after {LOOP_COUNT} loop(s), correctness {CX}/10, succinctness {SX}/10, mode {worktree|artifact}, status DONE, files {changed files or /tmp/implementer-loop/implementer/}
 ```
 
 ### If VERDICT = NEEDS_WORK (either reviewer)
@@ -415,9 +464,6 @@ it runs every loop alongside the Correctness Reviewer.
 
 ## Completion Signal
 
-When the loop exits (DONE or PARTIAL), the last line of output is always:
-```
-DONE: implementer delivered after {N} loop(s), correctness {CX}/10, succinctness {SX}/10, status {DONE|PARTIAL}, files at /tmp/implementer-loop/implementer/
-```
-
-Orchestrators can parse this line to determine outcome without reading files.
+Per the execution contract, the last line of output is always the parseable
+`DONE:` line emitted in Phase 5 (DONE or PARTIAL form) — never emitted before the
+loop exits.

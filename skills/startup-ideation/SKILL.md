@@ -38,6 +38,18 @@ synthesize the survivors into a ranked report.
 You do not generate ideas yourself. You orchestrate, record, and gate the loop.
 The ideas belong to the agents.
 
+Load `skills/common/patterns/orchestration.md`,
+`skills/common/patterns/activation.md`, and
+`skills/common/patterns/execution-contract.md`, and
+`skills/common/parallel-agents-guide.md` before starting. Follow the shared
+contract: create every phase directory before dispatch, give each sub-agent a
+single owned output file, require its final message to end with
+`DONE: <output-path> — <summary>`, and validate that each expected file exists
+before advancing.
+
+If subagents are unavailable, run the same roles sequentially inline, writing the
+same artifact files. State that the run was serialized rather than parallel.
+
 ---
 
 ## Phase 0: Context Interview (CONDITIONAL)
@@ -72,6 +84,14 @@ in Phase 1 accordingly. If they don't, span engines broadly by default.
 **Setup:** Select 3 seeds and assign each a distinct archetype. The point of both
 choices is the same: keep the three synthesizers from converging on one idea shape.
 
+Create these directories before spawning agents:
+
+```bash
+mkdir -p docs/startup-ideation/round-{N}/phase-1-synthesis \
+  docs/startup-ideation/round-{N}/phase-2-dialectic \
+  docs/startup-ideation/round-{N}/phase-3-market
+```
+
 *Seed selection (span different engines, drawn from `references/idea-engines.md`):*
 
 1. The 3 seeds must come from **at least 2 different idea engines** (A–F). Do not
@@ -98,6 +118,8 @@ profitable B2B"), but the mandate is that all three differ.
 - The full user context (background, constraints, problem statement, interests)
 - The round number and any lessons-learned from prior rounds (if looping)
 - Output path: `docs/startup-ideation/round-{N}/phase-1-synthesis/synthesizer-{1,2,3}.md`
+- Required final line:
+  `DONE: docs/startup-ideation/round-{N}/phase-1-synthesis/synthesizer-{i}.md — <N> ideas generated`
 
 Each synthesizer must produce 3-5 ideas in this structure:
 ```
@@ -125,6 +147,8 @@ strawman — the structure is what makes the kill gate real.
 - The lenses reference `references/investor-lenses.md`
 - ALL ideas from Phase 1 (the complete pool)
 - Output path: `docs/startup-ideation/round-{N}/phase-2-dialectic/champion.md`
+- Required final line:
+  `DONE: docs/startup-ideation/round-{N}/phase-2-dialectic/champion.md — <N> ideas steelmanned`
 
 The Champion builds the strongest honest case for every idea — the secret, the
 desperate user, the why-now, and the single load-bearing bet. Wait for completion.
@@ -135,6 +159,8 @@ desperate user, the why-now, and the single load-bearing bet. Wait for completio
 - The lenses reference `references/investor-lenses.md`
 - ALL ideas from Phase 1 **plus the Champion's steelman cases** from Pass 2a
 - Output path: `docs/startup-ideation/round-{N}/phase-2-dialectic/assassin.md`
+- Required final line:
+  `DONE: docs/startup-ideation/round-{N}/phase-2-dialectic/assassin.md — <N> survived, <M> killed`
 
 The Assassin must defeat the Champion's strongest version of each idea, scoring the
 six dimensions, running the mandatory **tarpit screen**, and classifying every flaw
@@ -162,9 +188,12 @@ If no ideas survive → LOOP_AGAIN (go to Phase 5).
 - The market-researcher prompt from `references/market-researcher-prompt.md`
 - ALL surviving ideas from Phase 2
 - Output path: `docs/startup-ideation/round-{N}/phase-3-market/researcher-{1,2}.md`
+- Required final line:
+  `DONE: docs/startup-ideation/round-{N}/phase-3-market/researcher-{i}.md — <N> ideas researched`
 
-Each researcher MUST use available web research tools (webfetch, search) to
-gather real data. For each idea, produce:
+Each researcher uses the available web research tools (webfetch, search) to
+gather real data — lived market data is what separates this from speculation.
+For each idea, produce:
 
 - **Competitors** — who is doing this or something adjacent? Links and descriptions.
 - **Market size** — TAM, SAM, SOM estimates with source URLs. Flag if no data exists.
@@ -185,6 +214,8 @@ Wait for both to complete.
 - The evaluation framework from `references/evaluation-framework.md`
 - The IDEAS.md output template (see below)
 - Output: `docs/startup-ideation/round-{N}/phase-4-prime.md`
+- Required final line:
+  `DONE: docs/startup-ideation/round-{N}/phase-4-prime.md — <N> ranked ideas, LOOP_AGAIN=<true|false>`
 
 Synthesizer-Prime must:
 
@@ -225,7 +256,8 @@ LOOP_AGAIN: {true|false}
 
 ### IDEAS.md Template
 
-Synthesizer-Prime MUST use this exact structure for `docs/startup-ideation/IDEAS.md`:
+Synthesizer-Prime uses this exact structure for `docs/startup-ideation/IDEAS.md`
+(so downstream tooling can parse each section in place):
 
 ```markdown
 # Startup Ideas: {Topic / Domain Area}
@@ -317,6 +349,8 @@ Supporting analysis: {absolute path}/docs/startup-ideation/
 ```
 
 Then print the TL;DR line from IDEAS.md so the user immediately sees the top idea.
+End the conversation response with:
+`DONE: docs/startup-ideation/IDEAS.md — {count} ranked ideas across {N} rounds`
 
 ---
 

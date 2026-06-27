@@ -5,7 +5,10 @@
       "id": 1,
       "prompt": "Run code-smellz on this codebase",
       "expected_output": "Four subagents dispatched in parallel, findings merged and triaged with patches, STAGED_CHANGES.md written, changes applied via git apply (no commits), type-checker, linter, and formatter gates run, test suite run, final report with LOC delta emitted.",
-      "files": ["src/", "tests/"],
+      "files": [
+        "src/",
+        "tests/"
+      ],
       "expectations": [
         "stinky-output/ directory created before any subagents are launched",
         "static_analysis.py, detect_runner.py, and measure_loc.py are called in Phase 0",
@@ -39,7 +42,9 @@
       "id": 2,
       "prompt": "This code is getting pretty stinky, can you clean it up?",
       "expected_output": "Skill triggered by casual 'stinky' + 'clean up' language; full workflow runs including at least one iteration with changes applied.",
-      "files": ["src/"],
+      "files": [
+        "src/"
+      ],
       "expectations": [
         "Skill triggers on informal 'stinky' phrasing",
         ".stinkyignore is checked before source file enumeration",
@@ -59,8 +64,10 @@
     {
       "id": 3,
       "prompt": "Explain what this code does",
-      "expected_output": "Skill does NOT trigger — code is explained without spawning subagents or modifying anything.",
-      "files": ["src/"],
+      "expected_output": "Skill does NOT trigger \u2014 code is explained without spawning subagents or modifying anything.",
+      "files": [
+        "src/"
+      ],
       "expectations": [
         "Skill is NOT triggered",
         "No stinky-output/ directory is created",
@@ -68,7 +75,18 @@
         "No subagents are spawned",
         "No file edits are made",
         "Response is a plain explanation of the code's purpose and structure"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
+    },
+    {
+      "id": 4,
+      "prompt": "There's an off-by-one bug in parse_date() in dates.py \u2014 a single function, about 40 lines. Find and fix just that bug.",
+      "expected_output": "Takes the lite tier: reviews the single function directly or spawns only the Bug Hunter, not all four agents (bug/minimizer/arch/security).",
+      "expectations": [
+        "Takes the lite tier \u2014 does not spawn all four agents for a single-function bug fix",
+        "Fixes the off-by-one in parse_date"
+      ],
+      "manual_checks": []
     }
   ]
 }

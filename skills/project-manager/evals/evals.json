@@ -1,0 +1,82 @@
+{
+  "skill_name": "project-manager",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Act as my project manager and coordinate building a small markdown link-checker: a CLI that reads a .md file, extracts URLs, checks them with HEAD requests, and prints a report. There's a clear data/CLI/report split. Manage the coders and ship it.",
+      "expected_output": "The PM decomposes the mandate into slices (e.g. coder-a link extraction, coder-b HTTP checking, coder-c CLI+report), writes PLAN.md with acceptance criteria, spawns multiple coders in parallel in a single message, reviews their output, integrates, and ends with a parseable DONE: line. Coders are dispatched, not written inline by hand.",
+      "expectations": [
+        "Writes a PLAN.md with acceptance criteria and 2+ coder slices with disjoint scopes",
+        "Spawns coders in parallel (dispatched as sub-agents, not written inline)",
+        "Performs a review step producing per-coder ACCEPT/NEEDS_REVISION verdicts with cited evidence",
+        "Produces an integrated deliverable under /tmp/project-manager-*/ (final/ or the coders dirs)",
+        "Final line is a DONE: line naming the output path",
+        "Does not run an internal adversarial review loop itself (it reviews; coders do not)",
+        "Does not commit to git"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [
+        "git reset --hard",
+        "git commit"
+      ],
+      "manual_checks": []
+    },
+    {
+      "id": 2,
+      "prompt": "Manage a build that has a hard dependency: a shared types module must exist before the API client and the CLI can be written.",
+      "expected_output": "PM recognizes the dependency and runs in waves: wave 1 builds the types module, wave 2 dispatches the dependent coders in parallel after wave 1 is accepted. Plan documents the ordering.",
+      "expectations": [
+        "PLAN.md documents a dependency/ordering between slices",
+        "Dispatches the gating slice (types module) before the dependent coders",
+        "Does not spawn dependent coders in the same wave as the slice they depend on",
+        "Ends with a DONE: line"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 3,
+      "prompt": "Be the PM and red-team the deliverable too.",
+      "expected_output": "After integration, PM optionally hands off to red-team by dispatching a red-team sub-agent pointed at the integrated output, reads the findings, and spawns fix-coders for high-severity issues that map to unmet acceptance criteria.",
+      "expectations": [
+        "Dispatches a red-team sub-agent with OUTPUT_DIR under the PM workspace",
+        "Reads red-team REPORT.md or findings-*.json before declaring done",
+        "Spawns scoped fix-coders for high/critical findings (or states none were applicable)",
+        "Ends with a DONE: line"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 4,
+      "prompt": "Add a one-line comment to README.md.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Should recognize this as a single trivial edit that does not need PM coordination; either does it directly or dispatches a single coder, rather than decomposing into multiple slices.",
+      "expectations": [
+        "Does not decompose a one-line edit into multiple coder slices",
+        "Does not fabricate a multi-coder plan for a trivial single edit"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 5,
+      "prompt": "Add a print statement to main.py line 4. Manage it with the coworker skills.",
+      "expected_output": "Takes the lite tier: dispatches one coder (or does it directly), does not decompose into multiple slices.",
+      "expectations": [
+        "Takes the lite tier \u2014 dispatches a single coder or does it directly, not a multi-coder plan",
+        "Does not fabricate multiple slices for a one-line edit"
+      ],
+      "manual_checks": []
+    }
+  ]
+}

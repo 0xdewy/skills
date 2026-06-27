@@ -1,0 +1,99 @@
+{
+  "skill_name": "goal",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Iterate until `pytest tests/` passes with exit 0 in this repo. Keep going until it's green; don't stop until the goal is met. VERIFY: pytest tests/",
+      "expected_output": "Sets up /tmp/goal-<slug>/, derives success criteria (primary: the VERIFY command exits 0), then loops: plan an attempt, delegate code fixes to coders (or edit directly if trivial), run `pytest tests/`, judge each criterion PASS/FAIL with evidence, diagnose remaining failures, and refine. Stops as soon as the command exits 0 and all criteria PASS, emitting a DONE: line that claims success only because the verify command passed.",
+      "expectations": [
+        "Derives measurable success criteria in Phase 0, with the VERIFY command as the authoritative gate",
+        "Each iteration records a plan, attempt, a per-criterion verification table with cited evidence, and a verdict",
+        "Uses the verify command's exit code as authoritative (a self-judged PASS cannot override a non-zero exit)",
+        "Stops immediately when the command exits 0 and all criteria PASS",
+        "Ends with a parseable DONE: line",
+        "Does not git reset --hard, git checkout ., or git commit"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [
+        "git reset --hard",
+        "git commit"
+      ],
+      "manual_checks": []
+    },
+    {
+      "id": 2,
+      "prompt": "Goal: every section of README.md must contain a runnable code example. Loop until that's true.",
+      "expected_output": "A domain-agnostic (non-code-deliverable) goal run: derives one observable criterion per README section, works directly on the prose/examples (no coders delegation for the doc itself), self-judges each criterion PASS/FAIL by quoting the example present or absent in each section, and iterates until all sections have an example or the cap is hit.",
+      "expectations": [
+        "Treats this as a direct-execution (non-code) goal rather than delegating the doc edits to coders",
+        "Each criterion is observable (an example exists in section X) and judged with quoted evidence",
+        "No self-judged PASS without citing the actual example text",
+        "Ends with a DONE: line that is PARTIAL if any section still lacks an example at the cap"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 3,
+      "prompt": "Fix the typo on line 4 of utils.py.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Recognizes this as a single one-shot edit with no loop needed, and just makes the edit directly (possibly pointing out that the goal skill is overkill), rather than standing up a criteria/verify/iterate pipeline.",
+      "expectations": [
+        "Does not stand up a multi-iteration goal loop for a single typo",
+        "Makes the one edit directly"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 4,
+      "prompt": "Implement this feature and iterate on it until reviewers are happy with the quality.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Recognizes the gate here is 'passes adversarial review', which is the implementer skill's contract, not an external verifiable goal. Redirects to implementer rather than running a goal loop.",
+      "expectations": [
+        "Does not run a goal loop for a review-driven task",
+        "Points to the implementer skill for an implement->review->fix loop"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 5,
+      "prompt": "Iterate until the build script prints 'BUILD OK'. VERIFY: ./build.sh | grep -q 'BUILD OK'",
+      "expected_output": "A lite-tier goal with a single clear criterion and an authoritative verify command. Works directly, caps at a small number of iterations, and stops as soon as the command exits 0.",
+      "expectations": [
+        "Takes the lite tier for a single-criterion goal with a verify command",
+        "Does not delegate to coders or spawn a crew for a trivial build fix",
+        "Uses the verify command exit code as the sole gate",
+        "Ends with a DONE: line"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 6,
+      "prompt": "Goal: make this module compile under strict mode with zero warnings. VERIFY: make strict 2>warnings.txt; test ! -s warnings.txt. Keep iterating until it passes.",
+      "expected_output": "If the goal proves unreachable within the cap (e.g. a third-party dependency emits unavoidable warnings), the skill stops early per the anti-degeneration rules and emits a PARTIAL/BLOCKED DONE: line naming the unmet criterion and root cause, rather than claiming success or looping until the cap on identical attempts.",
+      "expectations": [
+        "On repeated identical failure, changes strategy or stops early rather than retrying identically",
+        "Never emits a DONE: claiming success when the verify command exits non-zero",
+        "At the cap or when blocked, emits PARTIAL or BLOCKED with the failing criterion and a one-line root cause"
+      ],
+      "required_regex": [
+        "DONE:"
+      ],
+      "forbidden_regex": [],
+      "manual_checks": []
+    }
+  ]
+}

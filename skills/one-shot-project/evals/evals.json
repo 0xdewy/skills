@@ -3,14 +3,14 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "build a CLI todo app in Python from scratch — it should support add, list, complete, and delete",
+      "prompt": "build a CLI todo app in Python from scratch \u2014 it should support add, list, complete, and delete",
       "expected_output": "Architect phase defines modules and contracts, PM dispatches 3 parallel implementers (minimal/robust/feature-complete), each reviewed, tester validates, PM iterates up to 5 rounds.",
       "expectations": [
         "Architect phase produces module definitions with input/output contracts",
         "3 implementer agents are spawned in parallel, each with a distinct philosophy",
         "Each implementer's output is reviewed before tester validation",
         "Tester runs the project and reports pass/fail status",
-        "PM loop iterates if tests fail — targeted revisions, not full rewrite",
+        "PM loop iterates if tests fail \u2014 targeted revisions, not full rewrite",
         "DONE: signal includes output path to the final project"
       ]
     },
@@ -21,21 +21,22 @@
       "expectations": [
         "Architect identifies distinct modules: HTTP fetching, HTML parsing, database storage, CLI interface",
         "Implementers receive contracts specifying exact function signatures and data types",
-        "Reviewers flag issues before tester runs — at least one revision per implementer",
+        "Reviewers flag issues before tester runs \u2014 at least one revision per implementer",
         "Tester verifies against acceptance criteria from the original prompt",
         "Final output includes a working project that builds and runs"
       ]
     },
     {
       "id": 3,
-      "prompt": "fix the typo in README.md line 42 — change 'recieve' to 'receive'",
-      "expected_output": "Does NOT trigger one-shot-project. This is a single-file, single-line edit — one obvious solution.",
+      "prompt": "fix the typo in README.md line 42 \u2014 change 'recieve' to 'receive'",
+      "expected_output": "Does NOT trigger one-shot-project. This is a single-file, single-line edit \u2014 one obvious solution.",
       "expectations": [
         "One-shot-project is NOT triggered",
         "No architect, PM, or implementer agents are spawned",
         "Fix is applied directly without orchestration",
         "Response is minimal: confirms the fix or shows the diff"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
     },
     {
       "id": 4,
@@ -43,9 +44,20 @@
       "expected_output": "Does NOT trigger one-shot-project. This is a code explanation question about existing code, not a build-from-scratch request.",
       "expectations": [
         "One-shot-project is NOT triggered",
-        "No project is generated — this is read-only explanation",
+        "No project is generated \u2014 this is read-only explanation",
         "Response is a direct explanation of the middleware's purpose and behavior"
-      ]
+      ],
+      "prompt_type": "anti_trigger"
+    },
+    {
+      "id": 5,
+      "prompt": "Build a single CLI: a 'hello-name' script that prints 'Hello, <name>' reading from argv. That's the whole project.",
+      "expected_output": "Takes the lite tier: builds it directly with one implementer and a self-check; does not spawn 3 competing approaches.",
+      "expectations": [
+        "Takes the lite tier \u2014 does not spawn 3 competing implementers for a trivial single-file CLI",
+        "Delivers a working script"
+      ],
+      "manual_checks": []
     }
   ]
 }
