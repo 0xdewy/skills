@@ -1,6 +1,0 @@
-interface:
-  display_name: "Pareto"
-  short_description: "Make every changed line earn its keep"
-  default_prompt: "Use $pareto to solve this with the smallest justified change."
-policy:
-  allow_implicit_invocation: false

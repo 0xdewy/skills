@@ -30,3 +30,23 @@ For any of the conditions above, if there is a three-day period during which the
 Becoming a quote asset is now permissionless on testnet, where the staking requirement is 50 HYPE for ease of testing. Once the requirements above are met, the token deployer sends an `enableQuoteToken` transaction to convert the token into a quote token. This deployer action is irreversible and has no gas cost.&#x20;
 
 Transfer fees for new accounts can be paid in 1 unit of a spot quote asset.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/permissionless-spot-quote-assets.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

@@ -3,15 +3,15 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Act as my project manager and coordinate building a small markdown link-checker: a CLI that reads a .md file, extracts URLs, checks them with HEAD requests, and prints a report. There's a clear data/CLI/report split. Manage the workers and ship it.",
-      "expected_output": "The PM writes durable plan/status files, decomposes disjoint slices, dispatches ready workers in parallel, validates and reviews their artifacts, integrates accepted work, and verifies the result.",
+      "prompt": "Act as my project manager and coordinate building a small markdown link-checker: a CLI that reads a .md file, extracts URLs, checks them with HEAD requests, and prints a report. There's a clear data/CLI/report split. Manage the coders and ship it.",
+      "expected_output": "The PM decomposes the mandate into slices (e.g. coder-a link extraction, coder-b HTTP checking, coder-c CLI+report), writes PLAN.md with acceptance criteria, spawns multiple coders in parallel in a single message, reviews their output, integrates, and ends with a parseable DONE: line. Coders are dispatched, not written inline by hand.",
       "expectations": [
-        "Writes PLAN.md and status.json with acceptance, dependencies, states, and next_action",
-        "Spawns ready workers in parallel with disjoint owned paths",
-        "Produces per-worker ACCEPT/NEEDS_REVISION verdicts with cited evidence",
-        "Checkpoints after the wave and integration",
+        "Writes a PLAN.md with acceptance criteria and 2+ coder slices with disjoint scopes",
+        "Spawns coders in parallel (dispatched as sub-agents, not written inline)",
+        "Performs a review step producing per-coder ACCEPT/NEEDS_REVISION verdicts with cited evidence",
+        "Produces an integrated deliverable under /tmp/project-manager-*/ (final/ or the coders dirs)",
         "Final line is a DONE: line naming the output path",
-        "Workers do not spawn subagents or broaden scope",
+        "Does not run an internal adversarial review loop itself (it reviews; coders do not)",
         "Does not commit to git"
       ],
       "required_regex": [
@@ -26,11 +26,11 @@
     {
       "id": 2,
       "prompt": "Manage a build that has a hard dependency: a shared types module must exist before the API client and the CLI can be written.",
-      "expected_output": "PM records the dependency graph and runs waves: shared types first, then dependent workers only after the gating slice is accepted.",
+      "expected_output": "PM recognizes the dependency and runs in waves: wave 1 builds the types module, wave 2 dispatches the dependent coders in parallel after wave 1 is accepted. Plan documents the ordering.",
       "expectations": [
         "PLAN.md documents a dependency/ordering between slices",
-        "Dispatches the gating types slice before dependent workers",
-        "Does not dispatch dependent workers in the same wave as their dependency",
+        "Dispatches the gating slice (types module) before the dependent coders",
+        "Does not spawn dependent coders in the same wave as the slice they depend on",
         "Ends with a DONE: line"
       ],
       "required_regex": [
@@ -42,11 +42,11 @@
     {
       "id": 3,
       "prompt": "Be the PM and red-team the deliverable too.",
-      "expected_output": "After integration, PM optionally dispatches red-team, reads its report, maps applicable findings to unmet criteria, and dispatches scoped fix workers.",
+      "expected_output": "After integration, PM optionally hands off to red-team by dispatching a red-team sub-agent pointed at the integrated output, reads the findings, and spawns fix-coders for high-severity issues that map to unmet acceptance criteria.",
       "expectations": [
         "Dispatches a red-team sub-agent with OUTPUT_DIR under the PM workspace",
         "Reads red-team REPORT.md or findings-*.json before declaring done",
-        "Spawns scoped fix workers for applicable high/critical findings (or states none apply)",
+        "Spawns scoped fix-coders for high/critical findings (or states none were applicable)",
         "Ends with a DONE: line"
       ],
       "required_regex": [
@@ -59,10 +59,10 @@
       "id": 4,
       "prompt": "Add a one-line comment to README.md.",
       "prompt_type": "anti_trigger",
-      "expected_output": "Recognizes a trivial edit does not need PM coordination and works directly or uses one worker.",
+      "expected_output": "Should recognize this as a single trivial edit that does not need PM coordination; either does it directly or dispatches a single coder, rather than decomposing into multiple slices.",
       "expectations": [
-        "Does not decompose a one-line edit into multiple slices",
-        "Does not fabricate a multi-worker plan for a trivial edit"
+        "Does not decompose a one-line edit into multiple coder slices",
+        "Does not fabricate a multi-coder plan for a trivial single edit"
       ],
       "required_regex": [],
       "forbidden_regex": [],
@@ -71,67 +71,12 @@
     {
       "id": 5,
       "prompt": "Add a print statement to main.py line 4. Manage it with the coworker skills.",
-      "expected_output": "Takes the lite tier: one worker or direct work, with no fake decomposition.",
+      "expected_output": "Takes the lite tier: dispatches one coder (or does it directly), does not decompose into multiple slices.",
       "expectations": [
-        "States the mode line (mode: lite ...; budget: ...) before any dispatch",
-        "Takes the lite tier \u2014 one worker or direct work, not a multi-worker plan",
+        "Takes the lite tier \u2014 dispatches a single coder or does it directly, not a multi-coder plan",
         "Does not fabricate multiple slices for a one-line edit"
       ],
-      "required_regex": [
-        "mode:"
-      ],
       "manual_checks": []
-    },
-    {
-      "id": 6,
-      "prompt": "Act as my project manager and coordinate building a small markdown link-checker CLI --quick \u2014 fast pass is fine. There's a clear data/CLI/report split.",
-      "expected_output": "The explicit --quick flag pins lite mode: one worker or direct work, one review checkpoint, integration, and verification.",
-      "expectations": [
-        "States the mode line (mode: lite (--quick); budget: ...) before any dispatch",
-        "The --quick flag is honored \u2014 lite tier pinned by the explicit flag, not by task-size auto-detection",
-        "Does NOT spawn multiple workers in parallel",
-        "Still reviews output against acceptance criteria and integrates a deliverable",
-        "Final line is a DONE: line naming the output path",
-        "Does not commit to git"
-      ],
-      "required_regex": [
-        "mode:",
-        "DONE:"
-      ],
-      "forbidden_regex": [
-        "git reset --hard",
-        "git commit"
-      ],
-      "manual_checks": []
-    },
-    {
-      "id": 7,
-      "prompt": "Resume the project-manager run at WORKSPACE=run. Keep accepted slice core, continue from next_action, and do not restart the project.",
-      "expected_output": "Validates the durable state, preserves the accepted core slice, marks the dependent CLI slice ready, and resumes wave 2 without archiving the matching run.",
-      "expectations": [
-        "Reads and validates run/status.json and accepted artifacts",
-        "Runs the shared project-manager state validator with WORKSPACE as root",
-        "Does not redo the accepted core slice",
-        "Resumes from next_action at wave 2",
-        "Dispatches only the now-ready dependent slice",
-        "Checkpoints state after the resumed wave"
-      ],
-      "fixture_files": {
-        "run/status.json": "{\"schema_version\":1,\"mandate\":\"build tool\",\"mode\":\"standard\",\"state\":\"in_progress\",\"current_wave\":1,\"acceptance\":[\"CLI works\"],\"integration_checks\":[\"pytest\"],\"next_action\":\"dispatch cli\",\"slices\":[{\"id\":\"core\",\"dependencies\":[],\"state\":\"accepted\",\"attempts\":1,\"artifact\":\"workers/core/SUMMARY.md\",\"evidence\":\"tests pass\"},{\"id\":\"cli\",\"dependencies\":[\"core\"],\"state\":\"pending\",\"attempts\":0}]}\n",
-        "run/workers/core/SUMMARY.md": "DONE: run/workers/core/SUMMARY.md \u2014 implemented, verification=passed\n"
-      }
-    },
-    {
-      "id": 8,
-      "prompt": "Use project-manager --compete to build two isolated parser implementations, run the same corpus against both, and select one with evidence.",
-      "expected_output": "Creates two isolated candidates with shared acceptance and checks, prevents cross-copying, tests both, and records an evidence-based selection and discarded tradeoffs.",
-      "expectations": [
-        "Uses the same acceptance criteria and verification corpus for both candidates",
-        "Keeps candidate paths isolated",
-        "Runs both candidates rather than selecting from prose",
-        "Documents the selected candidate and rejected tradeoffs",
-        "Does not treat aesthetic preference as verification"
-      ]
     }
   ]
 }

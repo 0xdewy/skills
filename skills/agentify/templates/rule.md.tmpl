@@ -1,0 +1,54 @@
+---
+paths:
+  - "{{glob_pattern_1 — e.g., src/api/** for all files under src/api/}}"
+  - "{{glob_pattern_2 — e.g., **/*.{ts,tsx} for TypeScript + TSX files via brace expansion}}"
+  - "{{glob_pattern_3 — remove extra lines if fewer patterns}}"
+# If this file has NO paths: field, it loads for ALL files in the project.
+# Use that sparingly — path-scoped rules save context.
+---
+
+# {{Domain}} Conventions
+
+{{1-sentence scope: "Rules for all {{domain}} code in this repo."}}
+
+{{DELETE sections that have no real content. Only include sections where you
+have observed actual conventions in the code. Do not invent rules.}}
+
+{{Use "IMPORTANT:" or "YOU MUST:" prefixes for critical conventions —
+Claude Code follows emphatic instructions more reliably.}}
+
+## Conventions
+
+{{List 3-6 conventions actually observed in this codebase. Use imperative language.
+Good: "Handlers must validate input before calling the service layer."
+Bad: "Input validation is important."}}
+
+- {{Convention 1}}
+- {{Convention 2}}
+- {{Convention 3}}
+
+## Patterns
+
+### {{Pattern Name 1}}
+
+{{Describe the pattern and WHY it is used. Include a short code example if it
+makes the pattern clearer (≤10 lines). The WHY is more valuable than the WHAT.}}
+
+### {{Pattern Name 2 — delete if only one pattern}}
+
+{{Pattern description and example.}}
+
+## Pitfalls
+
+{{2-3 common mistakes in this domain, sourced from git log or code review.
+Delete this section if nothing specific.}}
+
+- {{Pitfall 1 — what goes wrong and why}}
+- {{Pitfall 2}}
+
+## See Also
+
+{{Cross-references to related docs. Delete if nothing relevant.}}
+
+- {{Related doc or component → path}}
+- Memory tips → ~/.claude/projects/.../memory/MEMORY.md (auto memory, Claude-managed)

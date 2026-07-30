@@ -1,0 +1,6 @@
+# memory.jsonl — Append-only persistent memory store
+# Each line is one JSON record. Lines starting with # are comments.
+# Fields: id, timestamp, type, content, entities, tags, source, consolidated_into
+#
+# Example entry (this is a comment, not actual data):
+# {"id": "mem-2026-05-13-001", "timestamp": "2026-05-13T14:30:00Z", "type": "preference", "content": "User prefers dark mode in all editors", "entities": ["user"], "tags": ["preference", "editor", "theme"], "source": "user", "consolidated_into": null}
