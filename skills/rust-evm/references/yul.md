@@ -1,7 +1,6 @@
 # Yul Reference
 
-Source: https://docs.soliditylang.org/en/latest/yul.html
-Last verified: 2026-07-10 (Solidity latest documentation)
+Source: https://docs.soliditylang.org/en/v0.8.35/yul.html
 
 Yul is a low-level language that compiles to EVM bytecode (and can target
 other backends). It's used as Solidity's intermediate representation (`--via-ir`)

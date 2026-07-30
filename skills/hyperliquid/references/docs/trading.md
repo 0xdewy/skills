@@ -15,7 +15,7 @@ scrape_status: ok
 - [Contract specifications](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md)
 - [Margining](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md)
 - [Account abstraction modes](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/account-abstraction-modes.md)
-- [Portfolio margin](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md)
+- [Portfolio margin](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md): Alpha mode
 - [Margin tiers](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md)
 - [Robust price indices](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/robust-price-indices.md)
 - [Liquidations](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md)
@@ -33,3 +33,23 @@ scrape_status: ok
 - [Market making](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/market-making.md)
 - [Portfolio graphs](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-graphs.md)
 - [Miscellaneous UI](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/miscellaneous-ui.md)
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/trading.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

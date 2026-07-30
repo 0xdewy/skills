@@ -58,42 +58,29 @@ class _PyCollector(ast.NodeVisitor):
 
     def __init__(self, filepath: str):
         self.filepath = filepath
-        self.class_depth = 0
-        self.function_depth = 0
         self.defs: dict[str, tuple[str, int]] = {}   # name → (kind, lineno)
         self.refs: set[str] = set()                   # names referenced
         self.imports: dict[str, list[str]] = defaultdict(list)  # module → imported names
         self.import_used: dict[str, int] = defaultdict(int)     # module → use count
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        if self.class_depth == 0 and self.function_depth == 0 and not node.name.startswith('_'):
+        if not node.name.startswith('_') or node.name == '__init__':
             self.defs[node.name] = ('function', node.lineno)
-        self.function_depth += 1
         self.generic_visit(node)
-        self.function_depth -= 1
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
-        if self.class_depth == 0 and self.function_depth == 0 and not node.name.startswith('_'):
+        if not node.name.startswith('_') or node.name == '__init__':
             self.defs[node.name] = ('async_function', node.lineno)
-        self.function_depth += 1
         self.generic_visit(node)
-        self.function_depth -= 1
 
     def visit_ClassDef(self, node: ast.ClassDef):
-        if self.class_depth == 0 and self.function_depth == 0 and not node.name.startswith('_'):
+        if not node.name.startswith('_'):
             self.defs[node.name] = ('class', node.lineno)
-        self.class_depth += 1
         self.generic_visit(node)
-        self.class_depth -= 1
 
     def visit_Name(self, node: ast.Name):
         if isinstance(node.ctx, ast.Load):
             self.refs.add(node.id)
-
-    def visit_Attribute(self, node: ast.Attribute):
-        if isinstance(node.ctx, ast.Load):
-            self.refs.add(node.attr)
-        self.generic_visit(node)
 
     def visit_Import(self, node: ast.Import):
         for alias in node.names:

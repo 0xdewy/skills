@@ -1,0 +1,66 @@
+# docs/reviews/ — Review Findings
+
+This directory holds code reviews, design reviews, and audit findings.
+Review files are reference artifacts — agents can read them to understand
+historical decisions, recurring patterns, and known issues.
+
+**Important:** Files in this directory are agent work artifacts — agentify
+never overwrites them. Only this README.md is maintained by agentify.
+
+## How Agents Use This Directory
+
+When working on code that was previously reviewed:
+1. Check if a review file exists for the component or area
+2. Read findings to understand known issues and prior decisions
+3. Ensure new code does not re-introduce addressed findings
+
+## File Naming Convention
+
+`YYYY-MM-DD-type-scope.md`
+
+Examples: `2026-05-01-code-review-auth.md`, `2026-04-15-design-review-payments.md`
+
+Types: `code-review`, `design-review`, `security-audit`, `performance-review`
+
+## Review File Format
+
+```markdown
+---
+title: "Review title"
+type: code-review | design-review | security-audit | performance-review
+scope: "What was reviewed (component, PR #, date range)"
+reviewer: (name or agent)
+status: open | addressed | wont-fix
+created: YYYY-MM-DD
+---
+
+## Summary
+
+2-3 sentences: what was reviewed and overall assessment.
+
+## Findings
+
+### Critical
+
+- **FINDING-001**: Description of the issue
+  - Location: `path/to/file.ts` line N
+  - Status: open | addressed | wont-fix
+  - Recommendation: specific action to take
+
+### Major
+
+- **FINDING-002**: ...
+
+### Minor / Suggestions
+
+- **FINDING-003**: ...
+
+## Decisions Made
+
+(Design decisions or trade-offs agreed upon during the review)
+
+## See Also
+
+- Related component: docs/{component}.md
+- Related plan: docs/plans/{plan-file}.md
+```

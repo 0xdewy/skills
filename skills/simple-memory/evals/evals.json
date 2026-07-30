@@ -1,0 +1,39 @@
+{
+  "skill_name": "simple-memory",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Remember this for later: I prefer Rust examples over Python examples when both are equally good.",
+      "expected_output": "Stores a normalized preference memory in memory/memory.jsonl and reports the stored id/path.",
+      "expectations": [
+        "Skill triggers on explicit persisted-memory intent",
+        "scripts/store.py is used or the same JSONL schema is followed",
+        "Memory content resolves pronouns and is self-contained",
+        "Memory type is preference",
+        "Final response ends with a DONE: memory/memory.jsonl completion line"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What have you stored about my editor preferences?",
+      "expected_output": "Retrieves matching memories from the active skill memory file and summarizes them without reading unrelated skill memories.",
+      "expectations": [
+        "Skill triggers on saved-memory retrieval intent",
+        "Default memory path is memory/memory.jsonl for the invoking skill",
+        "Does not read another skill's memory without explicit permission",
+        "Reports retrieved count and memory file path"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Look up the latest Next.js docs for server actions.",
+      "expected_output": "Does not trigger simple-memory because this is a web/docs lookup, not saved memory retrieval.",
+      "expectations": [
+        "Skill does not trigger",
+        "No memory file is read or written",
+        "Response proceeds with the appropriate docs/web lookup workflow"
+      ],
+      "prompt_type": "anti_trigger"
+    }
+  ]
+}

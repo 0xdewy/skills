@@ -146,3 +146,23 @@ Spot collateral liquidations are classified as one of two types:
   <table data-header-hidden><thead><tr><th width="326.1376953125">Parameter</th><th>Value</th></tr></thead><tbody><tr><td><strong>Parameter</strong></td><td><strong>Value</strong></td></tr><tr><td>HYPE held</td><td>10</td></tr><tr><td>Initial HYPE price</td><td>$50</td></tr><tr><td>LTV</td><td>50%</td></tr><tr><td>Borrowed amount</td><td>10 × $50 × 0.5 = $250</td></tr><tr><td><strong>Scenario 1: HYPE price drops to $33</strong></td><td></td></tr><tr><td>Collateral value</td><td>10 × $33 = $330</td></tr><tr><td>Partial liquidation threshold</td><td>$330 × (0.5 + (1 - 0.5) × ½ ) = $330 × 75% = $247.50</td></tr><tr><td>Outcome (Scenario 1)</td><td>Borrowed $250 > threshold $247.50, partial borrow liquidation triggered</td></tr><tr><td><strong>Scenario 2: HYPE price drops to $30</strong></td><td></td></tr><tr><td>Collateral value</td><td>10 × $30 = $300</td></tr><tr><td>Full liquidation threshold</td><td>$300 × (0.5 + (1 - 0.5) × ⅔ ) = $300 × 83.3% = $249.90</td></tr><tr><td>Outcome (Scenario 2)</td><td>Borrowed $250 > threshold $249.90, full borrow liquidation triggered</td></tr></tbody></table>
 
 When a borrow liquidation occurs, the protocol takes over the user’s collateral (e.g. HYPE or BTC) along with the associated debt. For a full technical breakdown of PM liquidation mechanics, refer to the Portfolio Margin [liquidations](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin#liquidations) section.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/portfolio-margin.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

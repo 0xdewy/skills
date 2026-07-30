@@ -19,3 +19,23 @@ Referral rewards accrue for all quote assets and can be claimed once >$1. Claime
 ### How do I use a referral code?
 
 Enter a referral code on <https://app.hyperliquid.xyz/referrals> or use a friend's referral link. Using a referral code will give you a 4% discount on your fees for your first $25M in volume. Referral discounts do not apply to vaults or sub-accounts because those are treated as independent accounts in the clearinghouse.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/referrals.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

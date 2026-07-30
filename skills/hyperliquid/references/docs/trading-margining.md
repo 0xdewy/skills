@@ -41,3 +41,23 @@ Here, "transferring" includes any action that removes margin from a position, ot
 Cross positions are liquidated when the account value (including unrealized pnl) is less than the *maintenance margin* times the total open notional position. The maintenance margin is currently set to half of the initial margin at max leverage.&#x20;
 
 Isolated positions are liquidated by the same maintenance margin logic, but the only inputs to the computation are the isolated margin and the notional value of the isolated position.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

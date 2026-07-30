@@ -3,9 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt_type": "forced",
-      "prompt": "Red-team this build at /tmp/sample-slugify/ \u2014 it's supposed to be a Python slugify(text) function. Stress-test it from the user/hacker/red-team angles.",
-      "expected_output": "Spawns the three personas (user, hacker, redteam) in parallel, each writing its own findings-*.json under the resolved WORKSPACE, then consolidates into REPORT.md with a prioritized, deduplicated list and cross-persona signals, ending in a parseable DONE: line.",
+      "prompt": "Red-team this build at /tmp/coders-slugify/ \u2014 it's supposed to be a Python slugify(text) function. Stress-test it from the user/hacker/red-team angles.",
+      "expected_output": "Spawns the three personas (user, hacker, redteam) in parallel, each writing its own findings-*.json under /tmp/red-team-*/, then consolidates into REPORT.md with a prioritized, deduplicated list and cross-persona signals, ending in a parseable DONE: line.",
       "expectations": [
         "Spawns 3 personas in parallel (dispatched as sub-agents, not serialized)",
         "Produces findings-user.json, findings-hacker.json, findings-redteam.json (each a valid JSON array, possibly [])",
@@ -45,10 +44,10 @@
       "id": 3,
       "prompt": "Implement a slugify function and test it.",
       "prompt_type": "anti_trigger",
-      "expected_output": "Should recognize this as an implementation task, not an adversarial review. Handles it directly or uses goal/project-manager rather than spawning red-team personas on a non-existent deliverable.",
+      "expected_output": "Should recognize this as an implementation task, not an adversarial review. Points the user to coders/implementer rather than spawning red-team personas on a non-existent deliverable.",
       "expectations": [
         "Does not spawn red-team personas to implement code",
-        "Redirects to direct work, goal, or project-manager for the implementation task"
+        "Redirects to coders or implementer for the implementation task"
       ],
       "required_regex": [],
       "forbidden_regex": [],
@@ -58,10 +57,10 @@
       "id": 4,
       "prompt": "Do a full EVM/Solidity security audit of this smart contract.",
       "prompt_type": "anti_trigger",
-      "expected_output": "Should redirect deep smart-contract security auditing to the appropriate dedicated domain/security audit workflow rather than running the broader, shallower red-team personas.",
+      "expected_output": "Should redirect deep smart-contract security auditing to evm-auditor (or rust-evm for revm/foundry specifics) rather than running the broader, shallower red-team personas.",
       "expectations": [
         "Does not run red-team personas as a substitute for a dedicated EVM audit",
-        "References a dedicated domain/security audit workflow for smart-contract security auditing"
+        "References evm-auditor for smart-contract security auditing"
       ],
       "required_regex": [],
       "forbidden_regex": [],
@@ -70,35 +69,10 @@
     {
       "id": 5,
       "prompt": "Red-team this single ~20-line function for bugs only: /tmp/snippet.py.",
-      "expected_output": "Takes the lite tier: reviews the ~20-line function directly \u2014 no personas spawned. A single small function meets none of the Hard Spawn Gate criteria (not parallel, no isolated context needed), so even one persona is not spawned.",
+      "expected_output": "Takes the lite tier: runs just the Hacker persona on a single small function, not all three personas.",
       "expectations": [
-        "States the mode line (mode: lite ...; budget: 0 personas) before reviewing",
-        "Takes the lite tier \u2014 spawns NO personas for a one-function bug review (meets no Hard Spawn Gate criterion)",
-        "Reviews the function directly and reports findings (or none)"
-      ],
-      "required_regex": [
-        "mode:"
-      ],
-      "manual_checks": []
-    },
-    {
-      "id": 6,
-      "prompt": "Red-team this build at /tmp/sample-slugify/ --quick \u2014 just a fast pass, it's a small slugify(text) function.",
-      "expected_output": "The explicit --quick flag pins the lite tier regardless of target size: the orchestrator reviews directly through the highest-risk lens (no persona sub-agents spawned), writes one findings file, and consolidates into REPORT.md ending in a DONE: line.",
-      "expectations": [
-        "States the mode line (mode: lite (--quick); budget: 0 personas) before reviewing",
-        "The --quick flag is honored \u2014 lite tier is pinned by the explicit flag, not by task-size auto-detection",
-        "Does NOT spawn all three personas in parallel (runs a single inline read instead)",
-        "Still produces a REPORT.md and a parseable DONE: line",
-        "Does not commit to git or edit the deliverable"
-      ],
-      "required_regex": [
-        "mode:",
-        "DONE:"
-      ],
-      "forbidden_regex": [
-        "git reset --hard",
-        "git commit"
+        "Takes the lite tier \u2014 runs a single persona (Hacker), not all three, for a one-function bug review",
+        "Produces hacker findings (or [] if none)"
       ],
       "manual_checks": []
     }
