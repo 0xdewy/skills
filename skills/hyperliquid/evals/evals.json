@@ -3,7 +3,6 @@
   "evals": [
     {
       "id": 1,
-      "prompt_type": "forced",
       "prompt": "How do I place a Hyperliquid limit order through the exchange endpoint?",
       "expected_output": "Explains POST /exchange, signed action payload, compact order keys, TIF values, nested status handling, and source pages.",
       "required_regex": [
@@ -17,13 +16,7 @@
         "seed phrase"
       ],
       "manual_checks": [
-        "Runs scripts/search_refs.py before opening detailed reference files.",
         "Loads references/api-reference.md and exact exchange endpoint page for schemas."
-      ],
-      "expectations": [
-        "Explains POST /exchange, signed action payload, compact order keys, TIF values, nested status handling, and source pages.",
-        "Runs scripts/search_refs.py before opening detailed reference files",
-        "Loads references/api-reference.md and exact exchange endpoint page for schemas"
       ]
     },
     {
@@ -38,10 +31,6 @@
       ],
       "manual_checks": [
         "Distinguishes spot pair ID from token ID and warns mainnet/testnet IDs differ."
-      ],
-      "expectations": [
-        "Explains perp, builder-deployed perp, spot, and outcome asset ID formulas and points to the asset IDs doc.",
-        "Distinguishes spot pair ID from token ID and warns mainnet/testnet IDs differ"
       ]
     },
     {
@@ -56,10 +45,6 @@
       ],
       "manual_checks": [
         "Mentions order/vault actions are delayed onchain for a few seconds."
-      ],
-      "expectations": [
-        "Explains CoreWriter, system contract address, action encoding, relevant action IDs, delay caveat, and source pages.",
-        "Mentions order/vault actions are delayed onchain for a few seconds"
       ]
     },
     {

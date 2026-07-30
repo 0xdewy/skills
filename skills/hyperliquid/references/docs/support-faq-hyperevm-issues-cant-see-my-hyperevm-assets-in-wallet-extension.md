@@ -29,3 +29,23 @@ Follow the steps below or using Chainlist: <https://chainlist.org/chain/999>
 * To do this manually, you can add the contract address for a token directly to your wallet extension. You can find the contract address for a given token using a HyperEVM explorer, such as <https://www.hyperscan.com/token/0x9b498C3c8A0b8CD8BA1D9851d40D186F1872b44E> or <https://purrsec.com/address/0x9b498c3c8a0b8cd8ba1d9851d40d186f1872b44e> for PURR &#x20;
 
 If you have tried the above, but your wallet extension does not support the HyperEVM as a custom network, consider using Rabby, which supports the HyperEVM as an integrated network: <https://support.rabby.io/en/articles/14120403-migrating-from-metamask-or-other-wallets>
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/cant-see-my-hyperevm-assets-in-wallet-extension.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

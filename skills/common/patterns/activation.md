@@ -16,20 +16,11 @@ Read this at activation. Append discovered patterns at completion.
 
 ---
 
-### Activation Modes
-- **Discovered by:** skills review, 2026-07-09
-- **Tags:** routing, metadata, token-efficiency
-- **Pattern:** Declare `metadata.activation` as `namespace`, `intent`, or
-  `explicit`; only intent-routed skills need `TRIGGER`/`SKIP` lists.
-- **Why:** Distinctive domains route from their names, explicit workflows need
-  one hard gate, and only ambiguous natural-language intents benefit from
-  spending tokens on positive and negative phrase boundaries.
-
 ### Dual-Gate Activation
 - **Discovered by:** stakeholder-of-last-resort, 2026-05-11
 - **Tags:** trigger, skip, false-positive, activation
-- **Pattern:** For `intent` mode, use TRIGGER/SKIP in frontmatter (gate 1), plus
-  a concrete condition check inside the skill body (gate 2).
+- **Pattern:** Use two activation gates: TRIGGER/SKIP in frontmatter (gate 1),
+  plus a concrete condition check inside the skill body (gate 2).
 - **Why:** Frontmatter triggers match on language, not context. A second gate
   evaluates whether the *situation* warrants activation. The skill fires
   linguistically but stays silent contextually when conditions aren't met.
@@ -52,12 +43,3 @@ Read this at activation. Append discovered patterns at completion.
   unless the surrounding user request clearly supplies that domain.
 - **Why:** Shared vocabulary across domains causes false positives when the
   metadata relies on bare nouns.
-
-## Mode Contract
-
-- `namespace`: unique technical/product domain; description names the domain,
-  with no trigger synonym list.
-- `intent`: ambiguous natural-language workflow; description includes concise
-  `TRIGGER` and `SKIP` boundaries.
-- `explicit`: costly workflow or persona; description says it is used only when
-  explicitly requested, with no synonym list.

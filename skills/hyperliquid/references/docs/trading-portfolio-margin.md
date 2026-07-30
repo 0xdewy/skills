@@ -14,20 +14,20 @@ Portfolio margin unlocks functionality such as the carry trade where a spot bala
 
 Users can supply eligible quote assets to earn yield. This synergizes and composes with HyperEVM lending protocols. In a future upgrade, CoreWriter will expose the same supply action for smart contracts. Portfolio margin intentionally does not bring a full-fledged lending market to HyperCore, as that is best built by independent teams on the EVM. For example, HyperCore lending is not tokenized, but an EVM protocol could do so by launching a fully onchain yield-bearing ERC20 token contract through CoreWriter and precompiles. Portfolio margin introduces organic demand to borrow and should expand the value proposition of teams building on the HyperEVM.
 
-IMPORTANT: Portfolio margin is a complex technical upgrade and requires bootstrapping the supply side for borrowable assets. Portfolio margin accounts will fall back to non-portfolio margin behavior when caps are hit. The following requirements apply:&#x20;
+IMPORTANT: Portfolio margin is a complex technical upgrade and requires bootstrapping the supply side for borrowable assets. Portfolio margin accounts will fall back to non-portfolio margin behavior when caps are hit. During alpha mode, the following requirements apply:&#x20;
 
-* Master account >$5M in weighted volume or account value >$10k
-* Account value <$25M
+* Master account >$5M in weighted volume
 * USDT: 50M USDT global supply cap, 10M USDT global borrow cap, 5M USDT user supply cap, 1M USDT user borrow cap
-* USDC: 1B USDC global supply cap, 500M USDC global borrow cap, 250M USDC user supply cap, 50M USDC user borrow cap
-* HYPE: 10M HYPE global supply cap, 1M HYPE user supply cap
-* BTC: 2k BTC global supply cap, 200 BTC user supply cap
+* USDH: 500M USDH global supply cap, 100M USDH global borrow cap, 5M USDH user supply cap, 1M USDH user borrow cap
+* USDC: 1B USDC global supply cap, 200M USDC global borrow cap, 50M USDC user supply cap, 10M USDC user borrow cap
+* HYPE: 10M HYPE global supply cap, 500k HYPE user supply cap
+* BTC: 4k BTC global supply cap, 200 BTC user supply cap
 
 ### LTV and borrowing
 
-Under portfolio margin, eligible collateral assets have an LTV (loan-to-value) ratio between 0 and 1. HYPE and BTC have an LTV of 0.5. When placing spot and perp orders under portfolio margin, insufficient balance will automatically borrowed against eligible collateral up to `token_balance * borrow_oracle_price * ltv` , where price is denominated in the asset being borrowed.
+Under portfolio margin, eligible collateral assets have an LTV (loan-to-value) ratio between 0 and 1. During pre-alpha, HYPE will have an LTV of 0.5. When placing spot and perp orders under portfolio margin, insufficient balance will automatically borrowed against eligible collateral up to `token_balance * borrow_oracle_price * ltv` , where price is denominated in the asset being borrowed.
 
-Borrowed assets accrue interest continuously, and are indexed hourly to match the perp funding interval. Portfolio margin users pay interest on borrowed assets and earn interest on idle assets according to the same rate. The borrow interest rate for stablecoins is set at `0.05 + 4.75 * max(0, utilization - 0.8)` APY, compounded continuously depending on the instantaneous value of `utilization = total_borrowed_value / total_supplied_value` . Earned interest is accrued proportionally to all suppliers. The protocol retains 10% of borrowed interest as a buffer for future liquidations.
+Borrowed assets accrue interest continuously, and are indexed hourly to match the perp funding interval. Portfolio margin users pay interest on borrowed assets and earn interest on idle assets according to the same rate. During pre-alpha, the borrow interest rate for stablecoins is set at `0.05 + 4.75 * max(0, utilization - 0.8)` APY, compounded continuously depending on the instantaneous value of `utilization = total_borrowed_value / total_supplied_value` . Earned interest is accrued proportionally to all suppliers. The protocol retains 10% of borrowed interest as a buffer for future liquidations.
 
 ### Example: Carry trade
 
@@ -67,6 +67,26 @@ min_borrow_offset = 20 USDC
 
 The account becomes liquidatable when portfolio\_margin\_ratio > 0.95. All notional values in the above definition are converted to USDC using `borrow_oracle_price(token)` .
 
-After borrow caps are hit, additional margin used must be supplied by the user using the settlement asset regardless of whether portfolio margin is active.&#x20;
+During mainnet pre-alpha, the caps per user will begin at `borrow_cap(USDC) = 1000` and `supply_cap(HYPE) = 200`. After borrow caps are hit, additional margin used must be supplied by the user using the settlement asset regardless of whether portfolio margin is active. Therefore, the best way to test the full portfolio margin behavior is to use small test accounts.
 
 Depending on the order of oracle price updates, either perp positions or spot borrows may be liquidated first. In other words, once portfolio margin ratio is liquidatable, users should not expect a deterministic liquidation sequence.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

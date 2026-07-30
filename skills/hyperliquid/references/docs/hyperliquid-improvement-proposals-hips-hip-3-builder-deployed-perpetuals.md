@@ -74,3 +74,23 @@ Despite the system-level protection, users still take greater risk when using cr
 Each HIP-3 DEX is associated with a fully onchain strategy at `0x400..00 + {dex_index}` that takes over backstop liquidatable positions from the designated HIP-3 DEX. The onchain backstop liquidators only accept assets where cross margin is enabled, making those assets significantly less likely to experience ADL going forward during high volatility events. Each DEX’s onchain backstop liquidator is an independent user and falls back to ADL to mathematically guarantee solvency of the DEX.
 
 There is no action item for users. Once scaled out, the backstop liquidators will absorb undercollateralized positions while simultaneously avoiding bad debt and reducing the need for ADL.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

@@ -162,7 +162,7 @@ the answer depends on exact request schemas, examples, constants, or current wor
 - [Contract specifications](docs/trading-contract-specifications.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md))
 - [Margining](docs/trading-margining.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md))
 - [Account abstraction modes](docs/trading-account-abstraction-modes.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/account-abstraction-modes.md))
-- [Portfolio margin](docs/trading-portfolio-margin.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md))
+- [Portfolio margin](docs/trading-portfolio-margin.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md)) - Alpha mode
 - [Margin tiers](docs/trading-margin-tiers.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md))
 - [Robust price indices](docs/trading-robust-price-indices.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/robust-price-indices.md))
 - [Liquidations](docs/trading-liquidations.md) ([source](https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md))

@@ -31,3 +31,23 @@ As an example: Alice has 100k staked HYPE, which gives a trading fee discount of
 <table><thead><tr><th width="140.3671875">VIP tier</th><th width="208.53515625">14d weighted volume ($)</th><th width="265.47265625">Amount kept by builder or referrer</th></tr></thead><tbody><tr><td>0</td><td></td><td>100%</td></tr><tr><td>1</td><td>>5M</td><td>90%</td></tr><tr><td>2</td><td>>25M</td><td>80%</td></tr><tr><td>3</td><td>>100M</td><td>70%</td></tr><tr><td>4</td><td>>500M</td><td>60%</td></tr><tr><td>5</td><td>>2B</td><td>50%</td></tr><tr><td>6</td><td>>7B</td><td>40%</td></tr></tbody></table>
 
 *Note these tiers correspond to the fee schedules in* [Fees](/hyperliquid-docs/trading/fees.md)
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/referrals/proposal-staking-referral-program.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

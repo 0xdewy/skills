@@ -28,3 +28,23 @@ Each Hyperliquidity strategy has a price range defined recursively `px_0 = start
 2. Each fully filled tranche is modified to an order of size `orderSz` on the side with available balance, with the exception of the single partial order from (1) if it exists.
 
 The resulting strategy guarantees a 0.3% spread every 3 seconds. Like smart-contract based pools on general-purpose chains, Hyperliquidity requires no maintenance in the form of user transactions. One key improvement is that Hyperliquidity participates in a general-purpose order book. Active liquidity providers can join in liquidity provision alongside Hyperliquidity at any time, allowing markets to adapt to increasing demand for liquidity.
+
+
+---
+
+# Agent Instructions
+This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
+
+## Querying This Documentation
+If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
+
+Perform an HTTP GET request on the current page URL with the `ask` query parameter:
+
+```
+GET https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-2-hyperliquidity.md?ask=<question>
+```
+
+The question should be specific, self-contained, and written in natural language.
+The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
+
+Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.
