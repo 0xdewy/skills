@@ -4,9 +4,9 @@
     {
       "id": 1,
       "prompt": "Iterate until `pytest tests/` passes with exit 0 in this repo. Keep going until it's green; don't stop until the goal is met. VERIFY: pytest tests/",
-      "expected_output": "Sets up /tmp/goal-<slug>/, derives success criteria (primary: the VERIFY command exits 0), then loops: plan an attempt, delegate code fixes to coders (or edit directly if trivial), run `pytest tests/`, judge each criterion PASS/FAIL with evidence, diagnose remaining failures, and refine. Stops as soon as the command exits 0 and all criteria PASS, emitting a DONE: line that claims success only because the verify command passed.",
+      "expected_output": "Sets fixed criteria with the VERIFY command authoritative, records durable status, loops through attempt/evidence/diagnosis, optionally dispatches one scoped worker, and stops immediately when the command and all criteria pass.",
       "expectations": [
-        "Derives measurable success criteria in Phase 0, with the VERIFY command as the authoritative gate",
+        "Derives fixed measurable success criteria during setup, with the VERIFY command as the authoritative gate",
         "Each iteration records a plan, attempt, a per-criterion verification table with cited evidence, and a verdict",
         "Uses the verify command's exit code as authoritative (a self-judged PASS cannot override a non-zero exit)",
         "Stops immediately when the command exits 0 and all criteria PASS",
@@ -25,9 +25,9 @@
     {
       "id": 2,
       "prompt": "Goal: every section of README.md must contain a runnable code example. Loop until that's true.",
-      "expected_output": "A domain-agnostic (non-code-deliverable) goal run: derives one observable criterion per README section, works directly on the prose/examples (no coders delegation for the doc itself), self-judges each criterion PASS/FAIL by quoting the example present or absent in each section, and iterates until all sections have an example or the cap is hit.",
+      "expected_output": "A domain-agnostic goal run that derives one observable criterion per README section, works directly, and judges each criterion with quoted evidence until all pass or the cap is hit.",
       "expectations": [
-        "Treats this as a direct-execution (non-code) goal rather than delegating the doc edits to coders",
+        "Treats this as direct work rather than dispatching a worker for prose edits",
         "Each criterion is observable (an example exists in section X) and judged with quoted evidence",
         "No self-judged PASS without citing the actual example text",
         "Ends with a DONE: line that is PARTIAL if any section still lacks an example at the cap"
@@ -54,11 +54,12 @@
     {
       "id": 4,
       "prompt": "Implement this feature and iterate on it until reviewers are happy with the quality.",
-      "prompt_type": "anti_trigger",
-      "expected_output": "Recognizes the gate here is 'passes adversarial review', which is the implementer skill's contract, not an external verifiable goal. Redirects to implementer rather than running a goal loop.",
+      "expected_output": "Uses goal with an explicit review gate: implements, obtains one evidence-backed independent review, fixes concrete defects, and still runs objective acceptance checks.",
       "expectations": [
-        "Does not run a goal loop for a review-driven task",
-        "Points to the implementer skill for an implement->review->fix loop"
+        "Declares review as one gate alongside objective criteria",
+        "Gives the reviewer task, criteria, diff or artifact, and verification evidence",
+        "Fixes only cited defects and reruns objective verification",
+        "Does not treat reviewer approval as overriding a failed check"
       ],
       "required_regex": [],
       "forbidden_regex": [],
@@ -69,12 +70,14 @@
       "prompt": "Iterate until the build script prints 'BUILD OK'. VERIFY: ./build.sh | grep -q 'BUILD OK'",
       "expected_output": "A lite-tier goal with a single clear criterion and an authoritative verify command. Works directly, caps at a small number of iterations, and stops as soon as the command exits 0.",
       "expectations": [
+        "States the mode line (mode: lite ...; budget: ...) before iterating",
         "Takes the lite tier for a single-criterion goal with a verify command",
-        "Does not delegate to coders or spawn a crew for a trivial build fix",
+        "Does not dispatch workers for a trivial build fix (0 agents)",
         "Uses the verify command exit code as the sole gate",
         "Ends with a DONE: line"
       ],
       "required_regex": [
+        "mode:",
         "DONE:"
       ],
       "forbidden_regex": [],
@@ -94,6 +97,23 @@
       ],
       "forbidden_regex": [],
       "manual_checks": []
+    },
+    {
+      "id": 7,
+      "prompt": "Resume this goal run from WORKSPACE=run. Do not repeat criteria already marked passed; continue from next_action until `sh verify.sh` exits zero.",
+      "expected_output": "Validates the unfinished status and artifacts, resumes at iteration 3, preserves the passed parse criterion, and executes only the recorded next action and remaining verification.",
+      "expectations": [
+        "Reads and validates run/status.json before planning",
+        "Runs the shared goal state validator",
+        "Does not archive or restart the matching unfinished run",
+        "Does not repeat the already passed parse criterion",
+        "Continues from next_action and increments the iteration",
+        "Updates durable state before the next attempt"
+      ],
+      "fixture_files": {
+        "run/status.json": "{\"schema_version\":1,\"goal\":\"make verifier pass\",\"mode\":\"standard\",\"state\":\"in_progress\",\"cap\":8,\"gate_type\":\"command\",\"current_iteration\":2,\"criteria\":[{\"id\":\"parse\",\"state\":\"passed\",\"evidence\":\"iteration 2\"},{\"id\":\"verify\",\"state\":\"failed\",\"evidence\":\"exit 1\"}],\"attempts\":2,\"last_evidence\":\"exit 1\",\"blockers\":[],\"next_action\":\"fix serializer boundary\"}\n",
+        "verify.sh": "#!/bin/sh\nexit 1\n"
+      }
     }
   ]
 }

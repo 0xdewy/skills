@@ -1,0 +1,124 @@
+[
+  {
+    "id": 1,
+    "prompt_type": "forced",
+    "prompt": "Run vfs-docs on this codebase.",
+    "context": "A small TypeScript Node service with no documentation beyond a one-line README.",
+    "fixture_files": {
+      "package.json": "{\"name\":\"fixture-service\",\"scripts\":{\"build\":\"tsc\",\"test\":\"node --test\",\"start\":\"node dist/index.js\"}}\n",
+      "src/index.ts": "import { health } from './services/health';\nconsole.log(health());\n",
+      "src/services/health.ts": "export const health = () => ({ ok: true });\n",
+      "tests/health.test.ts": "import { health } from '../src/services/health';\n",
+      "README.md": "# Fixture Service\n"
+    },
+    "expected_output": "The skill analyzes the repo, designs the tree as text first, writes a self-describing docs/ tree whose filenames are readable claims, verifies it with the lint script, and prints the final tree with a DONE line.",
+    "expectations": [
+      "Runs scripts/analyze_repo.py before designing the tree",
+      "Creates docs/ files with kebab-case names that state their content, readable from tree output alone",
+      "Creates no README.md, index.md, NAVIGATION.md, or context-map inside docs/",
+      "Every directory under docs/ has a same-named sibling summary file and at least two entries",
+      "Runs scripts/lint_tree.py and reports it clean in the final DONE: vfs-docs line"
+    ]
+  },
+  {
+    "id": 2,
+    "prompt": "Restructure our existing docs with vfs-docs so the layout is self-describing.",
+    "context": "A Python CLI whose docs/ folder has an index file and one large multi-topic architecture doc.",
+    "fixture_files": {
+      "pyproject.toml": "[project]\nname = \"fixture-cli\"\nversion = \"0.1.0\"\n[project.scripts]\nfixture = \"fixture.main:main\"\n",
+      "src/fixture/main.py": "def main():\n    print('ok')\n",
+      "docs/index.md": "# Docs\n\n- [Architecture](ARCHITECTURE.md)\n",
+      "docs/ARCHITECTURE.md": "# Architecture\n\n## Command parsing\n\nArgs are parsed with argparse in main.py.\n\n## Config loading\n\nConfig comes from ~/.fixture.toml and env vars override it.\n\n## Error handling\n\nAll errors exit with code 1 and a one-line message.\n",
+      "README.md": "# Fixture CLI\n\nSee docs/index.md.\n"
+    },
+    "expected_output": "Splits the multi-topic architecture doc along its headings into named files, removes the index file after its links are represented by tree names, updates the README pointer, and verifies with the lint script.",
+    "expectations": [
+      "Preserves all content from docs/ARCHITECTURE.md, relocated into files whose names state each topic",
+      "Deletes docs/index.md and creates no replacement index or navigation file",
+      "Updates the README.md link that pointed at docs/index.md",
+      "Uses git mv where a file maps one-to-one so history follows",
+      "Runs scripts/lint_tree.py docs/ and fixes every violation before the DONE line"
+    ]
+  },
+  {
+    "id": 3,
+    "prompt_type": "anti_trigger",
+    "prompt": "Fix the off-by-one token expiry check in src/api/users.ts.",
+    "context": "A TypeScript project with one narrow implementation bug.",
+    "fixture_files": {
+      "src/api/users.ts": "export const expired = (now: number, expiry: number) => now > expiry + 1;\n"
+    },
+    "expected_output": "Does not invoke vfs-docs or touch documentation; addresses the implementation bug directly.",
+    "expectations": [
+      "Does not run vfs-docs analysis or lint scripts",
+      "Does not create or restructure docs/",
+      "Does not emit DONE: vfs-docs",
+      "Addresses src/api/users.ts directly"
+    ]
+  },
+  {
+    "id": 4,
+    "prompt": "Run vfs-docs --quick on this repo.",
+    "context": "A repo whose docs/ tree mostly follows the conventions but has a generic filename and a single-child directory. Quick mode must fix violations only, without regenerating the tree.",
+    "fixture_files": {
+      "package.json": "{\"name\":\"fixture-lint\",\"scripts\":{\"test\":\"node --test\"}}\n",
+      "src/index.js": "export const ready = true;\n",
+      "docs/what-this-service-does.md": "# What this service does\n\nA short, accurate orientation.\n",
+      "docs/notes.md": "# Notes\n\nRetries are idempotent because every write carries a request id.\n",
+      "docs/operations.md": "# Operations\n\nDeploys and alerts.\n",
+      "docs/operations/deploys.md": "# Deploys\n\nShip via CI on tag push.\n"
+    },
+    "expected_output": "Runs the lint script, renames the generic file to state its claim, folds the single-child operations/ directory back into its summary, and changes nothing else.",
+    "expectations": [
+      "Runs scripts/lint_tree.py docs/ before editing anything",
+      "Renames docs/notes.md to a name that states its content, preserving the content",
+      "Resolves the single-child docs/operations/ directory by folding it back to one level",
+      "Does not rewrite or rename the already-conforming files",
+      "Spawns no subagents and ends with DONE: vfs-docs reporting lint clean"
+    ]
+  },
+  {
+    "id": 5,
+    "prompt": "Use vfs-docs to document this monorepo so the docs tree mirrors how the packages fit together.",
+    "context": "A Node workspaces monorepo with api, web, and shared packages.",
+    "fixture_files": {
+      "package.json": "{\"name\":\"fixture-mono\",\"workspaces\":[\"packages/*\"],\"scripts\":{\"test\":\"node --test\"}}\n",
+      "packages/api/package.json": "{\"name\":\"@fixture/api\"}\n",
+      "packages/api/src/index.ts": "export const api = true;\n",
+      "packages/web/package.json": "{\"name\":\"@fixture/web\"}\n",
+      "packages/web/src/index.ts": "export const web = true;\n",
+      "packages/shared/package.json": "{\"name\":\"@fixture/shared\"}\n",
+      "packages/shared/src/index.ts": "export const shared = true;\n"
+    },
+    "expected_output": "Detects the monorepo and builds a docs/ tree whose top level mirrors the package layout, with depth increasing detail and summary files pairing with detail directories.",
+    "expectations": [
+      "Detects the monorepo from the real package manifests",
+      "Top-level docs/ names mirror the package layout plus a how-they-fit-together orientation file",
+      "Any directory created under docs/ pairs with a same-named sibling summary file",
+      "Root-level files stay within one screen, with detail pushed into deeper levels",
+      "Runs scripts/lint_tree.py and ends with DONE: vfs-docs"
+    ]
+  },
+  {
+    "id": 6,
+    "prompt": "Run vfs-docs --quick on this repo.",
+    "context": "A repo whose docs/ tree mostly follows the conventions but has a date-prefixed filename (names the occasion, not the content) and a dangling cross-reference. Quick mode must fix both, changing nothing else.",
+    "fixture_files": {
+      "package.json": "{\"name\":\"fixture-dates\",\"scripts\":{\"test\":\"node --test\"}}\n",
+      "src/index.js": "export const ready = true;\n",
+      "docs/what-this-service-does.md": "# What this service does\n\nA short, accurate orientation.\n",
+      "docs/2026-03-01-retries-are-idempotent.md": "# Retries are idempotent\n\nEvery write carries a request id, so retrying is safe.\n",
+      "docs/operations.md": "# Operations\n\nDeploys and alerts.\n",
+      "docs/operations/deploys.md": "# Deploys\n\nShip via CI on tag push. See `operations/rollback.md` for the undo path.\n",
+      "docs/operations/alerts-and-what-they-mean.md": "# Alerts and what they mean\n\nPage only on the red ones.\n"
+    },
+    "expected_output": "Runs the lint script, renames the date-prefixed file so its name leads with the claim (content preserved), verifies cross-references with the --links pass and resolves the dangling operations/rollback.md reference, and changes nothing else.",
+    "expectations": [
+      "Runs scripts/lint_tree.py docs/ before editing anything",
+      "Renames the date-prefixed file so the name leads with the claim, preserving the content",
+      "Verifies cross-references with scripts/lint_tree.py docs/ --links and resolves the dangling operations/rollback.md reference",
+      "Does not rewrite or rename the already-conforming files",
+      "Spawns no subagents and ends with DONE: vfs-docs reporting lint clean"
+    ]
+  }
+]

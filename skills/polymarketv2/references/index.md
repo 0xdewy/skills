@@ -1,5 +1,7 @@
 # References index
 
+Source: https://docs.polymarket.com/llms.txt
+
 Routing table only — load the one file that matches the task. For a targeted
 lookup across all files, run `python scripts/search_refs.py "<terms>"`.
 (last verified: 2026-06-09)

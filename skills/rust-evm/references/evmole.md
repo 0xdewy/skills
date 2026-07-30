@@ -1,205 +1,93 @@
-# evmole Reference
+# EVMole Reference
 
 Source: https://github.com/cdump/evmole
+Last verified: 2026-07-10 (evmole 0.8.5)
 
-evmole extracts structured information from EVM bytecode using **symbolic
-execution** — it actually traces CALLDATA flow through the dispatcher rather
-than static pattern matching. Works on unverified contracts, handles complex
-dispatchers, proxy patterns, and Vyper/Solidity differences.
+EVMole symbolically follows calldata through EVM bytecode to recover function
+selectors, argument types, state mutability, storage layout, CBOR metadata, and
+control-flow information. Results are inference, not a substitute for a verified
+ABI or source.
 
-**foundry integration:** `cast selectors <bytecode>` calls evmole internally.
+## Prefer the Existing Tool
 
----
+Foundry's `cast selectors` uses EVMole internally:
 
-## What it extracts
+```bash
+BYTECODE=$(cast code "$ADDRESS" --rpc-url "$RPC_URL")
+cast selectors "$BYTECODE"
+cast selectors --resolve "$BYTECODE"
+```
 
-| Feature | Accuracy (1000 largest contracts) |
-|---------|----------------------------------|
-| Function selectors (4-byte) | 0 false negatives |
-| Function state mutability | 0% error rate |
-| Function arguments | 14% error rate (best-in-class) |
-| Storage layout | Supported via `contract_info()` |
+Use the library API only when structured integration or additional analyses are
+required.
 
-Speed: 18ms for 24,427 functions across 1,000 contracts.
-
----
-
-## Rust API
+## Rust
 
 ```toml
-# Cargo.toml
-evmole = "0.6"
+[dependencies]
+evmole = "0.8.5"
+hex = "0.4"
 ```
 
 ```rust
-use evmole::{contract_info, ContractInfoArgs, ContractInfo, Function, StorageRecord};
-
-// Full analysis in one call
-let bytecode: Vec<u8> = hex::decode("608060405260...").unwrap();
-let info: ContractInfo = contract_info(ContractInfoArgs::new(&bytecode)
-    .with_selectors()
-    .with_arguments()
-    .with_state_mutability()
-    .with_storage()
-);
-
-for func in &info.functions {
-    println!(
-        "selector={} args={:?} mutability={:?}",
-        hex::encode(func.selector),  // [u8; 4]
-        func.arguments,              // Option<String> e.g. "uint256,address"
-        func.state_mutability,       // Option<StateMutability>
-    );
-}
-
-for record in &info.storage {
-    println!("slot={} offset={} type={:?}", record.slot, record.offset, record.type_);
-}
-```
-
-**StateMutability variants:**
-```rust
-pub enum StateMutability {
-    Pure,       // no state read or write
-    View,       // reads state, no write
-    NonPayable, // writes state, no ETH accepted
-    Payable,    // writes state, accepts ETH (CALLVALUE check present)
-}
-```
-
-**StorageRecord fields:**
-```rust
-pub struct StorageRecord {
-    pub slot: U256,          // storage slot number
-    pub offset: u8,          // byte offset within slot (for packed values)
-    pub type_: StorageType,  // Uint(bits), Bool, Address, Bytes(n), etc.
-    pub reads: Vec<[u8;4]>,  // selectors that read this slot
-    pub writes: Vec<[u8;4]>, // selectors that write this slot
-}
-```
-
----
-
-## Python API
-
-```bash
-pip install evmole
-```
-
-```python
-from evmole import contract_info, ContractInfoArgs
-
-bytecode = bytes.fromhex("608060405260...")
-
-info = contract_info(
-    ContractInfoArgs(bytecode)
-    .with_selectors()
-    .with_arguments()
-    .with_state_mutability()
-    .with_storage()
-)
-
-for func in info.functions:
-    print(f"0x{func.selector.hex()} ({func.arguments}) [{func.state_mutability}]")
-
-for record in info.storage:
-    print(f"slot={record.slot} offset={record.offset} type={record.type_}")
-```
-
----
-
-## CLI usage
-
-```bash
-# Install
-pip install evmole   # or: cargo install evmole
-
-# Analyze bytecode from hex string
-evmole selectors 0x608060405260...
-evmole arguments 0x608060405260... a9059cbb  # args for one selector
-evmole state-mutability 0x608060405260...
-evmole all 0x608060405260...    # full report
-
-# From file
-evmole all --file contract.bin  # raw binary
-evmole all --hex-file contract.hex
-
-# JSON output
-evmole all 0x... --json
-```
-
----
-
-## Integration patterns
-
-### Fetch + analyze a deployed contract
-
-```bash
-# Get bytecode
-BYTECODE=$(cast code 0xUniswapV2Router --rpc-url $RPC)
-# Extract selectors
-cast selectors $BYTECODE
-# Resolve to signatures
-cast selectors $BYTECODE | awk '{print $1}' | xargs -I{} cast 4byte {}
-```
-
-```python
-import subprocess, json
-from evmole import contract_info, ContractInfoArgs
-
-# Get bytecode via cast
-result = subprocess.run(
-    ["cast", "code", addr, "--rpc-url", rpc],
-    capture_output=True, text=True
-)
-bytecode = bytes.fromhex(result.stdout.strip().removeprefix("0x"))
-info = contract_info(ContractInfoArgs(bytecode).with_selectors().with_arguments())
-```
-
-### Reconstruct ABI from unverified contract
-
-```python
-from evmole import contract_info, ContractInfoArgs
-
-def reconstruct_abi(bytecode_hex: str) -> list[dict]:
-    bytecode = bytes.fromhex(bytecode_hex.removeprefix("0x"))
-    info = contract_info(
-        ContractInfoArgs(bytecode)
+let code = hex::decode(bytecode.trim_start_matches("0x"))?;
+let info = evmole::contract_info(
+    evmole::ContractInfoArgs::new(&code)
         .with_selectors()
         .with_arguments()
-        .with_state_mutability()
-    )
-    abi = []
-    for func in info.functions:
-        sel = func.selector.hex()
-        args = func.arguments or ""
-        arg_list = [{"type": t.strip()} for t in args.split(",") if t.strip()]
-        mut = {
-            "pure": "pure", "view": "view",
-            "nonpayable": "nonpayable", "payable": "payable"
-        }.get(str(func.state_mutability).lower(), "nonpayable")
-        abi.append({
-            "type": "function",
-            "selector": f"0x{sel}",
-            "inputs": arg_list,
-            "stateMutability": mut,
-        })
-    return abi
+        .with_state_mutability(),
+);
+println!("{info:?}");
 ```
 
----
+Confirm the exact builder methods in the pinned crate's rustdoc before adding
+less common analyses such as storage layout or CFG extraction.
 
-## How it works (internals)
+## Python
 
-evmole implements a custom EVM interpreter that runs in "symbolic mode":
-- CALLDATA bytes are represented as **symbolic variables** rather than concrete values
-- The interpreter traces which symbolic calldata bytes flow into which comparison operations
-- By tracking how `CALLDATALOAD(0)` is shifted and compared, it identifies the 4-byte selector
-- Argument extraction follows the same approach: tracks how remaining calldata offsets map to ABI types
-- State mutability: presence of SSTORE or CALLVALUE check determines write/payable status
+```bash
+python -m pip install --upgrade evmole
+```
 
-This beats regex/pattern matching approaches on:
-- Non-standard dispatchers (binary search, jump tables)
-- Proxy contracts that forward selectors
-- Compiler versions that generate unusual dispatcher patterns
-- Vyper contracts (different dispatch structure than Solidity)
+```python
+from evmole import contract_info
+
+info = contract_info(
+    bytecode,
+    selectors=True,
+    arguments=True,
+    state_mutability=True,
+)
+```
+
+## Go and JavaScript
+
+The official repository maintains Go and JavaScript bindings. Follow its current
+README for installation and signatures; do not translate the Rust types by hand.
+
+## Interpretation Rules
+
+1. Strip an optional `0x` prefix and reject malformed hex.
+2. Confirm whether the bytecode is creation or deployed runtime code.
+3. For proxies, analyze the implementation bytecode as well as the proxy shell.
+4. Keep selector, argument, mutability, storage, and CFG confidence separate.
+5. Resolve selectors against a signature database only as candidate names;
+   four-byte collisions are possible.
+6. Compare inferred output with verified ABI/source when available.
+
+Compiler versions, handcrafted dispatchers, unreachable code, metadata, and
+proxy patterns can change inference quality. Report uncertainty instead of
+inventing an ABI.
+
+## Minimal Output
+
+For each recovered function, retain:
+
+- selector and bytecode offset;
+- inferred argument types and mutability;
+- resolved signature candidate, if any;
+- source of corroboration;
+- uncertainty or ambiguity.
+
+For security work, pair EVMole with concrete disassembly/trace evidence before
+claiming reachability or exploitability.

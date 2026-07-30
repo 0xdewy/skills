@@ -9,6 +9,8 @@ auditable.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import re
 import sys
@@ -205,6 +207,8 @@ def main() -> int:
     write_index(out_dir, mirrored)
     manifest = {
         "source": LLMS_URL,
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "llms_sha256": hashlib.sha256(llms_text.encode()).hexdigest(),
         "page_count": len(mirrored),
         "ok_count": sum(1 for page in mirrored if page["status"] == "ok"),
         "error_count": sum(1 for page in mirrored if page["status"] != "ok"),

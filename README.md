@@ -1,10 +1,8 @@
 # Skills
 
-AI behavior packs that coding agents can load for specialized roles — spawning a
-dialectic council to debate an implementation, or a Playwright tester that
-exercises every feature of an app without writing a single assertion. Skills
-are closer to workflows than prompt templates: they define phases, roles, and
-completion signals, not just what to say.
+AI behavior packs that coding agents can load for specialized roles. Skills are
+closer to workflows than prompt templates: they define activation boundaries,
+tooling, verification, and completion signals.
 
 ---
 
@@ -16,7 +14,8 @@ First, install the `skill` CLI to your system:
 ./install.sh
 ```
 
-This copies `skill` to a directory on your PATH so you can use it from anywhere.
+This symlinks `skill` into a directory on your PATH so the installed command
+stays synchronized with the repository source.
 
 ```bash
 skill install-all            # install every skill in this repo
@@ -24,22 +23,37 @@ skill install <path|url>     # install one skill from a local dir or git URL
 skill remove  <name>         # remove one
 skill list                   # list installed skills
 skill update  <name>         # pull latest for git-cloned skills
+skill repair                 # repair links and prune broken managed links
+skill -y reinstall-all       # non-interactive full relink for scripts/CI
 ```
+
+Local skills are linked through a central store into Codex, Claude, OpenCode,
+Agents, and Hermes discovery directories. `skills/common/` is linked alongside
+them so sibling-relative `../common/...` references work after installation.
+`skill repair` removes only broken links that point into that managed store;
+unrelated user-managed links are preserved.
 
 See [INSTALL.md](INSTALL.md) for Python and system requirements.
 
 ---
 
 
-Every skill declares when it activates and when it stays silent:
+Every skill declares one activation mode under `metadata`:
 
 ```yaml
+metadata:
+  activation: intent
 description: Does X. TRIGGER on: "audit my design", "fix the UI".
              SKIP on: "performance issues", "add a backend endpoint".
 ```
 
-When your message matches a TRIGGER phrase, the agent loads that skill.
-When it matches a SKIP phrase, the agent ignores it. That's the idea.
+- `namespace`: a distinctive product/protocol domain; the short description is
+  enough to route it.
+- `intent`: natural-language requests can overlap; use concise `TRIGGER` and
+  `SKIP` boundaries.
+- `explicit`: costly workflows or personas; say they run only when explicitly
+  requested. Human-only skills also set `disable-model-invocation: true`;
+  coordinator-callable exceptions set `metadata.composable: true`.
 
 ```
 You: "audit my app's design"
@@ -55,28 +69,37 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [implementer](skills/implementer/SKILL.md) | Implement → blind Skeptic pass + scored Review → Fix loop until 10/10 quality |
-| [one-shot-project](skills/one-shot-project/SKILL.md) | Full project builder: Architect, PM, parallel implementers, tester |
-| [code-smellz](skills/code-smellz/SKILL.md) | Parallel bug-hunter, simplifier, optimizer, and security auditor |
-| [shrinkray](skills/shrinkray/SKILL.md) | Reduces codebase to its smallest correct form: dead code, ghost files, duplication, verbosity |
-| [brainstormers](skills/brainstormers/SKILL.md) | Dialectical thinker sub-agents debate ideas until convergence |
-| [startup-ideation](skills/startup-ideation/SKILL.md) | Parallel idea engines + Champion-vs-Assassin dialectic rank startup concepts |
-| [researcher](skills/researcher/SKILL.md) | Rigorous literature research with adversarial Proponent/Falsifier and cited synthesis |
+| [goal](skills/goal/SKILL.md) | Iterates toward fixed criteria, executable checks, or explicit review gates |
+| [project-manager](skills/project-manager/SKILL.md) | Runs resumable multi-slice builds, integration, and optional competing candidates |
+| [red-team](skills/red-team/SKILL.md) | Adversarial findings report for an existing deliverable |
+| [code-smellz](skills/code-smellz/SKILL.md) | Correctness, security, architecture, and maintainability cleanup |
+| [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped PR review with changed-line findings and targeted checks |
+| [shrinkray](skills/shrinkray/SKILL.md) | Size/dead-code/duplication reduction while preserving behavior |
+| [researcher](skills/researcher/SKILL.md) | Scientific literature review with cited synthesis |
 
 **Quality** — skills that demand excellence through adversarial refinement:
 
 | Skill | What it does |
 |---|---|
-| [student-counsel](skills/student-counsel/SKILL.md) | Student works, philosophers review in dialectic rounds until consensus |
+| [student-counsel](skills/student-counsel/SKILL.md) | Correctness-first refinement using an evidence-backed beauty rubric |
+| [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
 | Skill | What it does |
 |---|---|
-| [frontend-twerkin](skills/frontend-twerkin/SKILL.md) | Starts the app, tests every feature with Playwright, auto-fixes failures |
-| [frontend-ux-designer](skills/frontend-ux-designer/SKILL.md) | Design audit: layout, typography, color, spacing; produces critique + fixes |
+| [frontend-twerkin](skills/frontend-twerkin/SKILL.md) | Playwright workflow QA with scoped auto-fixes |
+| [frontend-ux-designer](skills/frontend-ux-designer/SKILL.md) | Rendered UI/UX audit and targeted visual fixes |
 
-**Knowledge & Reference** — skills that bring deep domain expertise:
+**Contract Analysis** — discovers behavioral properties and cross-artifact drift:
+
+| Skill | What it does |
+|---|---|
+| [invariant-miner](skills/invariant-miner/SKILL.md) | Mines implied behavioral properties and tries to falsify them with generative tests |
+| [spec-reconciler](skills/spec-reconciler/SKILL.md) | Reconciles source-anchored claims using repository-declared authority |
+
+**Knowledge & Integration** — skills that bring deep domain expertise or
+operate a named system:
 
 | Skill | What it does |
 |---|---|
@@ -84,8 +107,9 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
 | [hyperliquid](skills/hyperliquid/SKILL.md) | Hyperliquid developer reference: HyperCore/HyperEVM APIs, signing, HIPs |
 | [polymarketv2](skills/polymarketv2/SKILL.md) | Polymarket v2 APIs and SDKs: Gamma, Data, CLOB, auth, orders |
-| [web-scraping](skills/web-scraping/SKILL.md) | Playwright, httpx, anti-bot evasion, pagination, structured extraction |
-| [simple-memory](skills/simple-memory/SKILL.md) | Persistent factual memory for skills in an append-only JSONL store |
+| [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, authentication, SDKs, models, and provider-specific constraints |
+| [myco](skills/myco/SKILL.md) | Native Myco identity, groups, messaging, ACL, and Kanban operations |
+| [web-scraping](skills/web-scraping/SKILL.md) | Compliant Playwright/httpx scraping, pagination, structured extraction |
 
 **Voice** — skills that shape how the agent speaks:
 
@@ -97,32 +121,92 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [skill-creator](skills/skill-creator/SKILL.md) | Create, test, and publish new skills |
-| [agentify](skills/agentify/SKILL.md) | Layered agent-doc system for a repo: CLAUDE.md, .claude/rules/, context-map, docs hierarchy |
+| [skill-lab](skills/skill-lab/SKILL.md) | Create, refine, evaluate, and publish skills |
+| [agentify](skills/agentify/SKILL.md) | Live read-only repo map for lazy code navigation |
+| [vfs-docs](skills/vfs-docs/SKILL.md) | Self-describing docs/ trees: names carry the meaning, depth is zoom, `tree docs/` is the index |
+
+---
+
+## Retired and Replaced Skills
+
+Retired skills remain recoverable from Git history; they are deliberately not
+installed or exposed as active routes. Do not restore one merely to preserve a
+name—restore it only if its behavior is not covered by the replacement.
+
+| Retired skill | Current route |
+|---|---|
+| `implementer` | `goal` for one bounded implementation loop |
+| `one-shot-project` | `project-manager` for dependency-aware multi-slice builds |
+| `coders` | Direct implementation or a `project-manager` worker slice |
+| `brainstormers` | `project-manager --compete` when genuine competing candidates are required |
+| `startup-ideation` | `project-manager --compete` plus `researcher` when market evidence is required |
+| `simple-memory` | Retired from active discovery; persisted memory is user data and must use a purpose-built, consented store |
+| `skill-creator` | `skill-lab` for repository-authored skills; the platform system skill remains separate |
+
+`agentify` and `vfs-docs` are both active: `agentify` maps code for lazy
+navigation, while `vfs-docs` builds self-describing documentation trees. They
+are not aliases and neither should be deleted as part of the split.
+
+## Plugin Compatibility
+
+This repository installs skills, not Codex plugins. A plugin pack that embeds
+these skills must keep its own manifest and marketplace validation in its
+native toolchain. Validate archived Claude plugin packs with
+`claude plugin validate <pack-root>`; validate Codex plugins with the Codex
+plugin manifest validator. Do not treat marketplace availability as an
+installation—verify installed status separately.
 
 ---
 
 ## Design Principles
 
-A few things I've found useful when building skills:
+- **Routing before weight.** Frontmatter catches user language; `../common/ROUTING.md`
+  catches task shape. If a task is one direct action, do it directly.
+- **Cheap first.** Skills with modes start at `--quick`/lite unless the task
+  genuinely needs parallelism, isolated context, or multiple workstreams.
+- **Lazy context.** Keep `SKILL.md` small. Put long prompts, examples, scripts,
+  and domain facts in lazy-loaded resources.
+- **Evidence-backed completion.** `DONE:` is earned by checks, artifacts, or
+  cited evidence, not by reviewer enthusiasm.
 
-> **Composable.** Skills can call skills. Every skill emits a `DONE:` completion
-> signal so orchestrators know when a sub-agent has finished and what it
-> produced. One skill can spawn another — `code-smellz` dispatches four parallel
-> auditors, each of which is itself a skill-like role.
+## Validation
 
-> **Dialectic.** Structured disagreement often surfaces what agreement misses. Several
-> skills use adversarial review — sub-agents that genuinely argue with each
-> other — to surface flaws a single pass would miss. `student-counsel` won't
-> accept work until a council of philosophers reaches consensus that it is
-> beautiful. `implementer` includes a blind Skeptic pass that reviews the
-> output without seeing the original question — flaws that survive context
-> collapse under it.
+Run the lightweight repo validator after skill edits:
 
-> **Self-critical.** Several skills — `skill-creator`, `code-smellz`,
-> `student-counsel` — include mechanisms for revising not just the output
-> but the process itself. A skill that can't improve itself misses its own
-> potential.
+```bash
+python3 scripts/validate_skills.py
+```
+
+It checks skill frontmatter, size limits, stale forbidden strings, meta-skill
+routing references, activation-mode contracts, token budgets, and eval JSON.
+
+To execute evals against a live agent backend and grade the results:
+
+```bash
+python3 scripts/run_evals.py --skill goal                 # run one skill's evals
+python3 scripts/run_evals.py --skill goal --id 3          # one eval
+python3 scripts/run_evals.py --all --dry-run              # plan only (no invocations)
+```
+
+The runner auto-detects `claude`/`codex`/`opencode` (prefer claude), captures
+artifacts per eval into the results dir, and grades via the skill's own
+`evals/grade.py` or the canonical generic grader. Use `--backend`, `--model`,
+`--grader`, and `--timeout` to override defaults.
+
+For evals with outcome-only assertions, compare the skill against direct work:
+
+```bash
+python3 scripts/run_ablation.py --skill invariant-miner --id 3
+```
+
+Pass `--grader-model codex:<model>` to judge with Codex instead of the default
+Anthropic/Claude path.
+
+Check volatile domain references without network access:
+
+```bash
+python3 scripts/check_domain_freshness.py
+```
 
 ---
 
@@ -135,11 +219,14 @@ description, and activation contract:
 ---
 name: my-skill
 description: What it does. TRIGGER on: "these phrases". SKIP on: "those phrases".
+metadata:
+  activation: intent
 ---
 
-## Phase 0: Understand the problem
-## Phase 1: Do the work
-## Phase 2: Verify
+## Workflow
+1. Understand the problem.
+2. Do the work.
+3. Verify.
 
 DONE: <output> — <summary>
 ```
@@ -147,10 +234,10 @@ DONE: <output> — <summary>
 To create one properly, use the skill that knows how:
 
 ```
-Use the skill-creator skill
+Use the skill-lab skill
 ```
 
-Or read [skills/skill-creator/SKILL.md](skills/skill-creator/SKILL.md) directly.
+Or read [skills/skill-lab/SKILL.md](skills/skill-lab/SKILL.md) directly.
 
 ---
 

@@ -386,7 +386,7 @@
     {
       "title": "Portfolio margin",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/portfolio-margin.md",
-      "description": "Alpha mode",
+      "description": "",
       "slug": "trading-portfolio-margin",
       "section": "trading",
       "local_path": "references/docs/trading-portfolio-margin.md",
@@ -998,7 +998,7 @@
     {
       "title": "Connected via wallet",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/connectivity-issues/connected-via-wallet.md",
-      "description": "Description: I can\u2019t connect my wallet to Hyperliquid / I'm stuck in a loop when trying to sign / My wallet isn\u2019t responding. What should I do?",
+      "description": "Description: I can’t connect my wallet to Hyperliquid / I'm stuck in a loop when trying to sign / My wallet isn’t responding. What should I do?",
       "slug": "support-faq-connectivity-issues-connected-via-wallet",
       "section": "support",
       "local_path": "references/docs/support-faq-connectivity-issues-connected-via-wallet.md",
@@ -1106,7 +1106,7 @@
     {
       "title": "Transfer or deposit to USDC (Perps) missing",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/transfer-or-deposit-to-usdc-perps-missing.md",
-      "description": "Description: You transferred USDC from your Spot to Perps balance or deposited USDC via Arbitrum and can\u2019t figure out where it went or why you are not able to use the USDC in your Perps balance.",
+      "description": "Description: You transferred USDC from your Spot to Perps balance or deposited USDC via Arbitrum and can’t figure out where it went or why you are not able to use the USDC in your Perps balance.",
       "slug": "support-faq-deposit-or-transfer-issues-missing-lost-transfer-or-deposit-to-usdc-perps-missing",
       "section": "support",
       "local_path": "references/docs/support-faq-deposit-or-transfer-issues-missing-lost-transfer-or-deposit-to-usdc-perps-missing.md",
@@ -1169,7 +1169,7 @@
     {
       "title": "How does margining work?",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/how-does-margining-work.md",
-      "description": "Description: You have open cross margin positions and don\u2019t understand how margin is attributed to positions",
+      "description": "Description: You have open cross margin positions and don’t understand how margin is attributed to positions",
       "slug": "support-faq-trade-outcome-looks-incorrect-how-does-margining-work",
       "section": "support",
       "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-how-does-margining-work.md",
@@ -1187,7 +1187,7 @@
     {
       "title": "I can't sell leftover spot assets",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/trade-outcome-looks-incorrect/i-cant-sell-leftover-spot-assets.md",
-      "description": "Description:  I have a small amount of a spot asset that I can\u2019t sell",
+      "description": "Description:  I have a small amount of a spot asset that I can’t sell",
       "slug": "support-faq-trade-outcome-looks-incorrect-i-cant-sell-leftover-spot-assets",
       "section": "support",
       "local_path": "references/docs/support-faq-trade-outcome-looks-incorrect-i-cant-sell-leftover-spot-assets.md",
@@ -1214,16 +1214,16 @@
     {
       "title": "Accidentally transferred to HyperEVM",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/accidentally-transferred-to-hyperevm.md",
-      "description": "Description: You clicked the \u201cTransfer to/from EVM\u201d button and can\u2019t figure out what happened",
+      "description": "Description: You clicked the “Transfer to/from EVM” button and can’t figure out what happened",
       "slug": "support-faq-hyperevm-issues-accidentally-transferred-to-hyperevm",
       "section": "support",
       "local_path": "references/docs/support-faq-hyperevm-issues-accidentally-transferred-to-hyperevm.md",
       "status": "ok"
     },
     {
-      "title": "Can\u2019t see my HyperEVM assets in wallet extension",
+      "title": "Can’t see my HyperEVM assets in wallet extension",
       "url": "https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/hyperevm-issues/cant-see-my-hyperevm-assets-in-wallet-extension.md",
-      "description": "Description: You are using the EVM and don\u2019t see your assets on the EVM in your wallet extension",
+      "description": "Description: You are using the EVM and don’t see your assets on the EVM in your wallet extension",
       "slug": "support-faq-hyperevm-issues-cant-see-my-hyperevm-assets-in-wallet-extension",
       "section": "support",
       "local_path": "references/docs/support-faq-hyperevm-issues-cant-see-my-hyperevm-assets-in-wallet-extension.md",
@@ -1310,5 +1310,7 @@
       "local_path": "references/docs/support-faq-i-got-scammed-hacked.md",
       "status": "ok"
     }
-  ]
+  ],
+  "generated_at": "2026-07-10T15:15:25Z",
+  "llms_sha256": "8d871d329d3d2f6b1361bd691c888492457db5e89f85d1a0328952cff874ec52"
 }

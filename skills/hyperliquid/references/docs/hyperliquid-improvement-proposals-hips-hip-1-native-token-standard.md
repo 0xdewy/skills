@@ -71,23 +71,3 @@ For legacy tokens that were deployed before the deployer fee share was implement
 Spot dusting occurs once a day at 00:00 UTC. All spot balances that are less than 1 lot size with notional value <= 1 USD will be dusted. Here, the notional value is computed as the prevailing mid price of the token against USDC, times the token balance. All users’ dust across a token is aggregated, and a market sell order is automatically submitted to the book. If the aggregate dust is smaller than one lot size, then that dust is burned. Otherwise, the USDC from the successfully converted dust will be allocated back to all dusted users on a weighted basis, where the weighting is equal to the user’s fraction of the aggregate dust.&#x20;
 
 Dusting will not occur if 1) the book is one-sided or 2) the amount of notional dust is too high such that the book would be impacted by this operation. For PURR, this is 10000 USDC; for all other tokens, this is 3000 USDC. Note: the amount of USDC received may be less than the notional amount computed from the mid because of slippage incurred while dusting or if there was insufficient liquidity to convert the total dust across all users.&#x20;
-
-
----
-
-# Agent Instructions
-This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
-
-## Querying This Documentation
-If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
-
-Perform an HTTP GET request on the current page URL with the `ask` query parameter:
-
-```
-GET https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-1-native-token-standard.md?ask=<question>
-```
-
-The question should be specific, self-contained, and written in natural language.
-The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
-
-Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 """Grade agent answers for the polymarketv2 skill against evals/evals.json.
 
-Each eval case has:
-  - id, prompt
-  - required:  list of substrings/regexes that MUST appear (case-insensitive)
-  - forbidden: list of substrings/regexes that must NOT appear
-
-`required`/`forbidden` entries are either:
-  - a plain string (case-insensitive substring match), or
-  - an object {"regex": "..."} (case-insensitive regex search).
+Each eval case has `required_regex` and `forbidden_regex` lists. Legacy
+`required`/`forbidden` lists are also accepted for older fixtures.
 
 Forbidden matching uses regex word boundaries where given, so e.g.
 `\\bpy-clob-client\\b(?!-v2)` does NOT false-fail on the valid `py-clob-client-v2`.
@@ -35,12 +29,14 @@ def matches(answer: str, rule) -> bool:
     """True if `rule` matches `answer` (case-insensitive)."""
     if isinstance(rule, dict) and "regex" in rule:
         return re.search(rule["regex"], answer, re.IGNORECASE) is not None
-    return str(rule).lower() in answer.lower()
+    return re.search(str(rule), answer, re.IGNORECASE) is not None
 
 
 def grade_case(case: dict, answer: str) -> dict:
-    missing = [r for r in case.get("required", []) if not matches(answer, r)]
-    present_forbidden = [f for f in case.get("forbidden", []) if matches(answer, f)]
+    required = case.get("required_regex", case.get("required", []))
+    forbidden = case.get("forbidden_regex", case.get("forbidden", []))
+    missing = [r for r in required if not matches(answer, r)]
+    present_forbidden = [f for f in forbidden if matches(answer, f)]
     ok = not missing and not present_forbidden
     return {
         "id": case["id"],

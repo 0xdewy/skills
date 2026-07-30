@@ -2,13 +2,13 @@
   {
     "id": 1,
     "prompt": "shrink this codebase \u2014 it's gotten really bloated",
-    "expected_output": "Four subagents run in parallel (dead code hunter, ghost file hunter, code consolidator, verbosity reducer), baseline LOC is measured, tests are run before any changes, findings are applied in safe batches, and a final report shows lines removed per category with before/after test counts.",
+    "expected_output": "Standard mode selects 2-3 relevant bloat roles from pre-pass evidence, baseline LOC is measured, tests run before changes, findings are applied in safe batches, and the final report shows lines removed with before/after tests.",
     "expectations": [
       "Skill triggers on 'shrink this codebase' phrasing",
       "Establishes baseline LOC before any changes",
       "Runs tests before making changes",
-      "Spawns at least 4 parallel subagents",
-      "Writes findings JSON files to /tmp/shrinkray-output/",
+      "Spawns only 2-3 relevant roles in standard mode; all four are reserved for thorough mode",
+      "Writes findings JSON files to the resolved WORKSPACE",
       "Writes STAGED_CHANGES.md before applying any edits",
       "Runs tests after applying changes",
       "Reverts changes that cause test failures",
@@ -19,7 +19,7 @@
   {
     "id": 2,
     "prompt": "remove all the dead code from this repo and make it smaller",
-    "expected_output": "Skill triggers (dead code removal + make smaller = shrinkray scope). Four subagents deployed. Dead Code Hunter finds unused functions/imports/variables, Ghost File Hunter finds unreferenced files, both report with confidence levels. Changes applied and tests verified.",
+    "expected_output": "Skill triggers (dead code removal + make smaller = shrinkray scope). The Dead Code and Ghost File roles run because both are directly relevant, report confidence, and changes are verified.",
     "expectations": [
       "Skill triggers on 'remove dead code' combined with size reduction intent",
       "Dead Code Hunter subagent specifically searches for unreachable code",
@@ -32,12 +32,12 @@
   {
     "id": 3,
     "prompt": "run shrinkray",
-    "expected_output": "Explicit skill invocation. Full pipeline executes: Phase 0 setup, 4 parallel subagents, triage, apply, verify, convergence loop.",
+    "expected_output": "Explicit skill invocation. Standard pipeline executes setup, 2-3 evidence-selected bloat roles, triage, apply, verify, and convergence checks.",
     "expectations": [
       "Skill triggers on explicit 'run shrinkray' command",
       "Detects test runner automatically",
       "Measures baseline LOC",
-      "Spawns all four subagents simultaneously",
+      "Spawns only evidence-selected roles in standard mode",
       "Applies changes with per-change syntax checks",
       "Runs full test suite after changes",
       "Stops when converged or 5 iterations elapsed"
@@ -66,10 +66,107 @@
   {
     "id": 6,
     "prompt": "Trim one verbose helper function in helpers.py \u2014 it's the only obvious bloat in the file.",
-    "expected_output": "Takes the lite tier: reviews that one function directly for verbosity, skipping the four-agent crew.",
+    "expected_output": "Takes the lite tier: reviews that one function directly \u2014 no subagents spawned. A single-function verbosity trim meets none of the Hard Spawn Gate criteria, so the four-agent crew is not spawned at all.",
     "expectations": [
-      "Takes the lite tier \u2014 does not spawn all four agents to trim a single function",
+      "States the mode line (mode: lite ...; budget: 0) before editing",
+      "Takes the lite tier \u2014 spawns NO subagents to trim a single function (meets no Hard Spawn Gate criterion)",
       "Shortens the helper without changing behavior"
+    ],
+    "required_regex": [
+      "mode:"
+    ],
+    "manual_checks": []
+  },
+  {
+    "id": 7,
+    "prompt": "shrink this codebase --quick \u2014 fast pass, just grab the obvious bloat.",
+    "expected_output": "The explicit --quick flag pins the lite tier regardless of codebase size: runs the dead-code pre-pass, applies clear-cut findings directly (no four-agent crew), one pass. Still measures LOC, runs available tests, reverts anything that breaks, and emits a DONE: line.",
+    "expectations": [
+      "States the mode line (mode: lite (--quick); budget: 0) before cleanup",
+      "The --quick flag is honored \u2014 lite tier pinned by the explicit flag, not by task-size auto-detection",
+      "Does NOT spawn the four-agent crew in parallel (direct review only)",
+      "Runs scripts/deadcode_scan.py as a pre-pass and consults its findings",
+      "Still measures baseline LOC and runs tests if available",
+      "Never runs git commit",
+      "Emits a DONE: signal with LOC removed"
+    ],
+    "required_regex": [
+      "mode:",
+      "DONE:"
+    ],
+    "forbidden_regex": [
+      "git commit"
+    ],
+    "manual_checks": []
+  },
+  {
+    "id": 8,
+    "prompt": "shrink this repo, it's gotten bloated over the years",
+    "expected_output": "Standard mode runs the dead-code pre-pass (deadcode_scan.py) before any agent dispatch. Dead Code Hunter and Ghost File Hunter consume the pre-pass findings and verify-and-apply rather than discover from scratch. Tool-certified findings get confidence=high and source_tool set; LLM-discovered ones get source_tool=null.",
+    "expectations": [
+      "Runs scripts/deadcode_scan.py as Phase 0.5 and writes deadcode_scan.json to the workspace",
+      "Threads the deadcode_scan.json path to Dead Code Hunter as {{deadcode_scan_path}}",
+      "Dead Code Hunter prompt is verify-and-apply: each finding references a tool-flagged candidate with grep verification, not a guess from reading",
+      "Findings with tool certification carry source_tool (e.g. vulture, knip, tsc); LLM-only findings carry source_tool=null",
+      "Type-check or syntax gate runs after each apply (Phase 4)",
+      "Second-minimizer pass (Phase 3.3) re-runs deadcode_scan.py on affected files after successful applies",
+      "Never runs git commit",
+      "Emits DONE: with LOC removed"
+    ],
+    "required_regex": [
+      "deadcode_scan",
+      "DONE:"
+    ],
+    "manual_checks": []
+  },
+  {
+    "id": 9,
+    "prompt": "find bugs and security issues in this codebase",
+    "expected_output": "Skill does NOT trigger. Bug/security review is code-smellz territory, not size reduction. Shrinkray should be skipped.",
+    "expectations": [
+      "Skill does NOT trigger on bug/security review requests",
+      "Claude answers directly or suggests code-smellz instead"
+    ],
+    "prompt_type": "anti_trigger"
+  },
+  {
+    "id": 10,
+    "prompt": "shrink this codebase --thorough \u2014 we have a lot of structural debt: wrappers around stdlib, single-implementor interfaces, stable feature flags nobody will flip back, near-duplicate modules.",
+    "expected_output": "Thorough mode runs both pre-pass scripts (deadcode_scan.py + dependency_index.py), dispatches the four primary roles AND the five structural roles with propose-then-implement decomposition. The Indirection Inliner and Module Merger consume dependency_index.json; their findings cite index entries (single_caller_symbols, single_importer_files). Structural role findings went through a proposal file before patches were written.",
+    "expectations": [
+      "States mode: thorough; budget: 5 (or equivalent) before dispatch",
+      "Runs both pre-pass scripts: scripts/deadcode_scan.py and scripts/dependency_index.py",
+      "Dispatches all five structural roles (Stdlib Replacer, Indirection Inliner, Table-Drive Converter, Flag Pruner, Module Merger) in addition to primary roles",
+      "Indirection Inliner findings cite dependency_index.json's single_caller_symbols or single_implementor_interfaces",
+      "Module Merger findings cite dependency_index.json's single_importer_files",
+      "Structural roles ran a proposal pass first; patches came only after orchestrator selection (no patches for negative-net-savings candidates)",
+      "Type-check / syntax gate runs after each apply",
+      "Second-minimizer pass re-runs deadcode_scan.py on affected files",
+      "Never runs git commit",
+      "Emits DONE: with LOC removed"
+    ],
+    "required_regex": [
+      "dependency_index",
+      "DONE:"
+    ],
+    "forbidden_regex": [
+      "git commit"
+    ],
+    "manual_checks": []
+  },
+  {
+    "id": 11,
+    "prompt": "shrink the codebase, but the structural roles keep introducing risky changes that don't fit --standard.",
+    "expected_output": "Standard mode dispatches only primary roles (Dead Code Hunter, Ghost File Hunter, Code Consolidator, Verbosity Reducer) and skips the five structural roles. Structural roles are reserved for --thorough. Skill should still run both pre-pass scripts in standard mode (the dependency_index is used by Code Consolidator too).",
+    "expectations": [
+      "States mode: standard; budget: 3 (or equivalent)",
+      "Runs both pre-pass scripts in standard mode",
+      "Does NOT dispatch Stdlib Replacer, Indirection Inliner, Table-Drive Converter, Flag Pruner, or Module Merger in standard mode",
+      "Code Consolidator consumes dependency_index.json even in standard mode",
+      "No propose-then-implement decomposition runs in standard mode (Phase 1.5 is structural-roles-only)"
+    ],
+    "required_regex": [
+      "dependency_index"
     ],
     "manual_checks": []
   }

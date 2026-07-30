@@ -57,10 +57,10 @@ find_target() {
 TARGET_DIR=$(find_target)
 TARGET="$TARGET_DIR/skill"
 
-cp "$SKILL_SRC" "$TARGET"
-chmod +x "$TARGET"
+# Symlink (not copy) so the installed CLI never drifts from the repo source.
+ln -sfn "$SKILL_SRC" "$TARGET"
 
-echo "Installed skill to $TARGET"
+echo "Installed skill to $TARGET -> $SKILL_SRC"
 
 # Check if the target dir is on PATH
 if [[ ":$PATH:" != *":$TARGET_DIR:"* ]]; then

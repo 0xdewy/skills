@@ -5,14 +5,33 @@ CENTRAL_STORE="${XDG_DATA_HOME:-$HOME/.local/share}/skills"
 TOOL_PATHS=(
     "$HOME/.codex/skills"
     "$HOME/.claude/skills"
+    "$HOME/.config/opencode/skills"
     "$HOME/.agents/skills"
     "$HOME/.config/agents/skills"
     "$HOME/.local/share/hermes/skills"
 )
+ASSUME_YES=0
 
 _green()  { printf '\033[32m%s\033[0m\n' "$*"; }
 _yellow() { printf '\033[33m%s\033[0m\n' "$*"; }
 _red()    { printf '\033[31m%s\033[0m\n' "$*" >&2; }
+
+# Print prompt $1, read a yes/no answer, honor ASSUME_YES for non-interactive use.
+# $2 = "yes" requires the exact word; "y" accepts y/Y. Returns 0 on yes, 1 on no.
+_confirm() {
+    local prompt="$1" mode="$2" answer
+    if [[ "$ASSUME_YES" == 1 ]]; then
+        answer="$mode"
+    else
+        printf '%s' "$prompt"
+        read -r answer
+    fi
+    if [[ "$mode" == "yes" ]]; then
+        [[ "$answer" == "yes" ]]
+    else
+        [[ "$answer" =~ ^[Yy]$ ]]
+    fi
+}
 
 usage() {
     cat <<EOF
@@ -24,9 +43,12 @@ Usage:
   skill remove       <name>           Remove an installed skill
   skill remove-all                    Remove all installed skills
   skill reinstall-all [repo-path]     Remove all then reinstall from repo
-  skill repair                        Replace stale real directories in tool paths with symlinks
+  skill repair                        Repair managed links and prune broken managed links
   skill list                          List all installed skills
   skill update       <name>           Pull latest (git-cloned skills) or no-op (symlinked)
+
+Options:
+  -y, --yes          Answer all confirmations non-interactively (for scripts/CI)
 
 Examples:
   skill install ./my-skill
@@ -34,6 +56,8 @@ Examples:
   skill install git@github.com:user/my-skill.git
   skill install-all
   skill install-all /path/to/repo
+  skill reinstall-all /path/to/repo
+  skill -y reinstall-all           non-interactive reinstall (scripts/CI)
   skill remove  my-skill
   skill remove-all
   skill list
@@ -97,6 +121,28 @@ _unlink_from_tools() {
     done
 }
 
+# Link the shared common/ directory (skills/common) into the central store and
+# every tool path so installed skills can resolve their ../common/... references.
+# Idempotent. No-op if the source directory does not exist.
+_link_shared_common() {
+    local common_src="$1"
+    [[ -d "$common_src" ]] || return 0
+
+    mkdir -p "$CENTRAL_STORE"
+    local central="$CENTRAL_STORE/common"
+
+    if [[ -L "$central" ]]; then
+        rm "$central"
+    elif [[ -d "$central" ]]; then
+        rm -rf "$central"
+    elif [[ -e "$central" ]]; then
+        rm "$central"
+    fi
+    ln -s "$common_src" "$central"
+    _link_to_tools "common" true > /dev/null
+    _green "  ✓ common (shared)"
+}
+
 cmd_install() {
     local source="${1:-}"
     if [[ -z "$source" ]]; then
@@ -133,13 +179,9 @@ cmd_install() {
         if [[ "$is_real_dir" == true ]]; then
             _red "WARNING: \"$name\" is a git-cloned skill with real files at $central"
             _red "Overwriting will PERMANENTLY DELETE all those files."
-            printf 'Type "yes" to permanently delete and overwrite: '
-            read -r answer
-            [[ "$answer" == "yes" ]] || { echo "Aborted."; exit 0; }
+            _confirm 'Type "yes" to permanently delete and overwrite: ' yes || { echo "Aborted."; exit 0; }
         else
-            printf 'Skill "%s" is already installed. Overwrite? [y/N] ' "$name"
-            read -r answer
-            [[ "$answer" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
+            _confirm "Skill \"$name\" is already installed. Overwrite? [y/N] " y || { echo "Aborted."; exit 0; }
         fi
 
         _unlink_from_tools "$name"
@@ -158,6 +200,10 @@ cmd_install() {
     fi
 
     _link_to_tools "$name" > /dev/null
+    # Provision shared common/ if it sits beside the installed skill's source.
+    if [[ "$is_git" != true ]]; then
+        _link_shared_common "$(dirname "$source")/common"
+    fi
     _green "✓ Installed $name"
     echo "  central : $central"
     for tool_dir in "${TOOL_PATHS[@]}"; do
@@ -259,12 +305,7 @@ cmd_install_all() {
 
     echo "Found ${#skills[@]} skills in $repo_path"
     echo ""
-    printf 'Install all of them? [y/N] '
-    read -r answer
-    if [[ ! "$answer" =~ ^[Yy]$ ]]; then
-        echo "Aborted."
-        exit 0
-    fi
+    _confirm 'Install all of them? [y/N] ' y || { echo "Aborted."; exit 0; }
 
     mkdir -p "$CENTRAL_STORE"
 
@@ -280,6 +321,9 @@ cmd_install_all() {
         _install_one "$dir" "$name"
         (( ++count )) || true
     done
+
+    # Provision the shared common/ directory so ../common/... references resolve.
+    _link_shared_common "$(realpath "$repo_path/common" 2>/dev/null || true)"
 
     echo ""
     _green "Installed $count skills."
@@ -303,12 +347,7 @@ cmd_remove_all() {
     fi
 
     echo "This will permanently remove ${#installed[@]} installed skills."
-    printf 'Type "yes" to confirm: '
-    read -r answer
-    if [[ "$answer" != "yes" ]]; then
-        echo "Aborted."
-        exit 0
-    fi
+    _confirm 'Type "yes" to confirm: ' yes || { echo "Aborted."; exit 0; }
 
     local count=0
     for name in "${installed[@]}"; do
@@ -340,6 +379,23 @@ cmd_repair() {
     fi
 
     local count=0
+
+    # Remove orphaned tool links only when they point into this central store
+    # and their central entry no longer exists. Leave unrelated user-managed
+    # links untouched.
+    for tool_dir in "${TOOL_PATHS[@]}"; do
+        [[ -d "$tool_dir" ]] || continue
+        while IFS= read -r -d '' link; do
+            local target
+            target=$(readlink "$link" 2>/dev/null || true)
+            if [[ "$target" == "$CENTRAL_STORE/"* && ! -e "$target" && ! -L "$target" ]]; then
+                _yellow "Pruning broken managed link: $link"
+                rm "$link"
+                (( ++count )) || true
+            fi
+        done < <(find "$tool_dir" -maxdepth 1 -mindepth 1 -type l -print0)
+    done
+
     while IFS= read -r -d '' entry; do
         local name
         name=$(basename "$entry")
@@ -351,9 +407,30 @@ cmd_repair() {
                 ln -s "$CENTRAL_STORE/$name" "$link"
                 _green "  ✓ $name → $tool_dir"
                 (( ++count )) || true
+            elif [[ -L "$link" ]]; then
+                local target
+                target=$(readlink "$link" 2>/dev/null || true)
+                if [[ "$target" != "$CENTRAL_STORE/$name" ]]; then
+                    _yellow "Replacing stale link: $link"
+                    rm "$link"
+                    ln -s "$CENTRAL_STORE/$name" "$link"
+                    _green "  ✓ $name → $tool_dir"
+                    (( ++count )) || true
+                fi
+            elif [[ ! -e "$link" ]]; then
+                mkdir -p "$tool_dir"
+                ln -s "$CENTRAL_STORE/$name" "$link"
+                _green "  ✓ $name → $tool_dir"
+                (( ++count )) || true
             fi
         done
     done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 \( -type d -o -type l \) -print0 | sort -z)
+
+    # Recreate shared common/ tool-path links if common is provisioned centrally.
+    if [[ -e "$CENTRAL_STORE/common" || -L "$CENTRAL_STORE/common" ]]; then
+        _link_to_tools "common" true > /dev/null
+        (( ++count )) || true
+    fi
 
     if [[ $count -eq 0 ]]; then
         _green "No stale skill directories found — all tool paths look clean."
@@ -380,6 +457,16 @@ _install_one() {
 }
 
 # ── dispatch ──────────────────────────────────────────────────────────────────
+
+# Strip -y/--yes from any position so it works before or after the subcommand.
+ARGS=()
+for _a in "$@"; do
+    case "$_a" in
+        -y|--yes) ASSUME_YES=1 ;;
+        *) ARGS+=("$_a") ;;
+    esac
+done
+set -- "${ARGS[@]}"
 
 case "${1:-}" in
     install)   shift; cmd_install "$@" ;;
