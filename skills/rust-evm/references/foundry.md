@@ -1,6 +1,7 @@
 # Foundry Reference (forge / cast / anvil / chisel)
 
 Source: https://github.com/foundry-rs/foundry | https://getfoundry.sh
+Last verified: 2026-07-10 (Foundry 1.7.1)
 
 Install: `curl -L https://foundry.paradigm.xyz | bash && foundryup`
 

@@ -1,7 +1,10 @@
 # EVM Opcode Reference
 
-Complete opcode table with hex values, stack effects, gas costs, and descriptions.
-Gas costs reflect post-Berlin/London/Cancun rules where applicable.
+Sources: https://github.com/ethereum/execution-specs | https://eips.ethereum.org/EIPS/eip-7939
+Last verified: 2026-07-10 (Osaka)
+
+Opcode table with hex values, stack effects, gas costs, and descriptions. Gas
+costs are fork-dependent; values below reflect Osaka where applicable.
 
 ## Arithmetic (0x00–0x0B)
 
@@ -38,6 +41,7 @@ Gas costs reflect post-Berlin/London/Cancun rules where applicable.
 | 0x1B | SHL | 3 | shift,val → val<<shift | Left shift (EIP-145) |
 | 0x1C | SHR | 3 | shift,val → val>>shift | Logical right shift |
 | 0x1D | SAR | 3 | shift,val → val>>shift | Arithmetic (sign-preserving) right shift |
+| 0x1E | CLZ | 5 | val → count | Leading zero bits; zero returns 256 (EIP-7939, ≥Osaka) |
 
 ## SHA3 (0x20)
 
@@ -189,6 +193,7 @@ Gas costs reflect post-Berlin/London/Cancun rules where applicable.
 | 0x08 | bn128Pairing | 45000 + 34000*k |
 | 0x09 | blake2f | rounds * 1 |
 | 0x0A | point eval (KZG) | 50000 (EIP-4844) |
+| 0x100 | P256VERIFY | 6900 (EIP-7951, ≥Osaka) |
 
 ---
 

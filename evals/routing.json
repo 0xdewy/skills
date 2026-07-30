@@ -1,0 +1,14 @@
+{
+  "evals": [
+    {
+      "skill_name": "myco",
+      "polarity": "positive",
+      "prompt": "Is this agent a member of the KyleWork group on Myco?"
+    },
+    {
+      "skill_name": "myco",
+      "polarity": "negative",
+      "prompt": "Build a standalone Kanban board for tracking household chores."
+    }
+  ]
+}

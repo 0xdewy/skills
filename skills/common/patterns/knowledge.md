@@ -64,6 +64,18 @@ completion.
   upstream before relying on it.
 - **Why:** A local reference file is a cache, not the source of truth.
 
+### Domain Router
+- **Discovered by:** skills review, 2026-07-01
+- **Tags:** routing, domain, handoff, scope
+- **Pattern:** A domain reference skill loads only the narrow authoritative
+  source for its own domain, states the facts or answer, and hands execution
+  back to the caller or a direct edit. It does not grow into a general router
+  across unrelated domains ("load any API/spec/dataset").
+- **Why:** One "load any reference" skill false-triggers everywhere and drifts
+  into an overbroad dispatcher. Correctness comes from a *scoped* source selected
+  by that domain's own triggers, not from a broad dispatcher. See
+  `skills/common/ROUTING.md` for the domain-skill row.
+
 ### Compliance Before Collection
 - **Discovered by:** web-scraping hardening, 2026-06-17
 - **Tags:** scraping, compliance, data

@@ -3,55 +3,56 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Do a deep research dive on whether intermittent fasting improves insulin sensitivity in non-diabetic adults.",
-      "expected_output": "PI frames a sharp research question, builds a paper corpus via search_papers.py across multiple sources, spawns hypothesis-generator sub-agents, tests each hypothesis with a Proponent/Falsifier pair, synthesizes, and writes RESEARCH.md with real citations.",
+      "prompt": "Do a deep research review on whether intermittent fasting improves insulin sensitivity in non-diabetic adults.",
+      "expected_output": "Frames an answerable question, searches primary scholarship, records methods and limitations, separates supporting and falsifying evidence, and writes a cited RESEARCH.md.",
       "expectations": [
-        "Restates the topic as a specific, answerable research question",
-        "Runs scripts/search_papers.py with one or more query strings to build corpus.json",
-        "Creates a durable workspace folder research/{slug}/ with a README status board, 00-question.md, and data/ before spawning sub-agents",
-        "Parallel sub-agents each write their own file (e.g. 04-evidence/H1-falsifier.md); the PI is the sole writer of the README, 02-hypotheses.md, and 05-decision-log.md (no shared-file clobbering)",
-        "Spawns 3-5 hypothesis-generator sub-agents in parallel, each with a distinct stance",
-        "Fetches full text (scripts/fetch_fulltext.py) for the papers the surviving hypotheses cite, producing a manifest.json that marks each paper full_text / abstract_only / failed",
-        "Each surviving hypothesis is tested by a matched Proponent and Falsifier sub-agent (adversarial, not confirmation-only) that read full text where available",
-        "Assigns a Supported/Refuted/Inconclusive verdict per hypothesis calibrated to evidence quality and read depth",
-        "Verdicts are recorded in 05-decision-log.md as PROPOSED, then RATIFIED only after a red-team pass challenges the synthesis (06-red-team.md)",
-        "RESEARCH.md is written at the workspace root with a TL;DR, novel insight, hypotheses table, and a References list of real corpus papers (DOIs/URLs) tagged [full text] or [abstract only]",
-        "No fabricated citations \u2014 every cited paper appears in the corpus",
-        "Ends with a DONE: research/{slug}/RESEARCH.md completion line"
-      ]
+        "Defines search queries, inclusion/exclusion criteria, and target evidence types",
+        "Uses scripts/search_papers.py and fetches useful open full text when available",
+        "Records source metadata, methods, limitations, and read depth",
+        "Separates supporting from falsifying evidence",
+        "Synthesizes consensus, controversy, evidence quality, and residual risk without fabricated citations",
+        "Writes research/{slug}/RESEARCH.md and ends with DONE"
+      ],
+      "required_regex": ["DONE:"]
     },
     {
       "id": 2,
-      "prompt": "What does the science say about microplastics crossing the blood-brain barrier? Research this topic for me.",
-      "expected_output": "Triggers on 'what does the science say' + 'research this topic'. Prioritizes biomedical sources, runs the hypothesis -> test -> synthesis pipeline, reports honest confidence given likely thin/emerging evidence.",
+      "prompt": "What does the scientific literature say about microplastics crossing the blood-brain barrier? Use standard mode.",
+      "expected_output": "Prioritizes biomedical primary sources, weights full text over abstracts, and calibrates conclusions to emerging evidence.",
       "expectations": [
-        "Triggers the researcher skill",
-        "Builds corpus emphasizing biomedical sources (europepmc/openalex) given the topic",
-        "Falsifier phase genuinely attempts to refute, mining full-text Methods/Results for confounds and methodological weaknesses where open-access full text is available",
-        "Paywalled papers with no open-access copy are marked abstract_only and weighted lower rather than dropped or overstated",
-        "Confidence is calibrated; an 'Inconclusive' verdict is treated as a valid result, not a failure",
-        "RESEARCH.md includes a 'Novel Insight' section and a best open question"
+        "Prioritizes relevant trials, experiments, reviews, and official reports",
+        "Marks abstract-only evidence and weights it lower",
+        "Collects both supporting and falsifying evidence",
+        "Treats inconclusive evidence as a valid result",
+        "Clearly labels speculation and open questions"
       ]
     },
     {
       "id": 3,
+      "prompt_type": "anti_trigger",
       "prompt": "What's the capital of Australia?",
-      "expected_output": "Does NOT trigger researcher. A quick factual lookup with a known answer \u2014 no literature search, hypotheses, or sub-agents.",
-      "expectations": [
-        "Does NOT invoke the researcher skill",
-        "Answers directly without spawning sub-agents or building a corpus"
-      ],
-      "prompt_type": "anti_trigger"
+      "expected_output": "Answers directly without a literature-review workflow.",
+      "expectations": ["Does not build a corpus or spawn research roles", "Answers Canberra directly"]
     },
     {
       "id": 4,
-      "prompt": "Summarize this paper I'm pasting below: [abstract text...]",
-      "expected_output": "Does NOT trigger researcher. The user supplied a single source to summarize; there is no literature search or hypothesis-testing pipeline to run.",
+      "prompt_type": "anti_trigger",
+      "prompt": "Summarize this supplied abstract: [abstract text].",
+      "expected_output": "Summarizes the one supplied source directly.",
+      "expectations": ["Does not search for a literature corpus", "Summarizes only the supplied text"]
+    },
+    {
+      "id": 5,
+      "prompt": "Do a quick literature check --quick on intermittent fasting and insulin sensitivity.",
+      "expected_output": "Honors quick mode with a focused 5-10 source scan, no subagents, honest limitations, and a concise cited report.",
       "expectations": [
-        "Does NOT invoke the researcher skill for a single user-supplied paper",
-        "Summarizes the provided text directly"
+        "Honors quick mode",
+        "Uses 5-10 key scholarly sources",
+        "Does not spawn subagents",
+        "Includes evidence limitations and residual risk",
+        "Writes RESEARCH.md and ends with DONE"
       ],
-      "prompt_type": "anti_trigger"
+      "required_regex": ["DONE:"]
     }
   ]
 }

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+skill_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+myco_checkout="${MYCO_ROOT:-/home/user/code/myco}"
+myco_agent_dir="${myco_checkout}/myco-agent"
+tsx_package="${myco_agent_dir}/node_modules/tsx"
+tsx_loader="${tsx_package}/dist/loader.mjs"
+
+if [[ ! -f "${tsx_loader}" ]]; then
+  echo "myco: missing ${tsx_loader}" >&2
+  echo "Set MYCO_ROOT to the Myco checkout or install myco-agent dependencies." >&2
+  exit 2
+fi
+
+exec node --import "${tsx_loader}" "${skill_script_dir}/myco.ts" "$@"

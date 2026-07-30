@@ -3,56 +3,50 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I have a React + Vite task management app running at localhost:5173. It has routes for / (home), /tasks, /tasks/new, /tasks/:id, and /profile. Users can create, edit, delete, and complete tasks. Run adversarial tests on it.",
-      "expected_output": "Detects React + Vite stack, generates Playwright test files for happy path flows (CRUD tasks), CSS visual audit at 3 viewports, and adversarial attacks (double-submit, input boundary, XSS probes, rapid toggle, etc.). Produces a structured markdown report with screenshots and severity classifications.",
-      "files": [],
+      "prompt": "Run adversarial browser QA on my React task app at localhost:5173. Cover create, edit, complete, and delete, fix failures, and retest.",
+      "expected_output": "Detects the stack, exercises the requested workflows with Playwright, applies scoped functional fixes, re-runs failures, and writes a workspace QA report with evidence.",
       "expectations": [
-        "Detects the stack as React with Vite",
-        "Writes Playwright test files to the project",
-        "Tests happy path flows for task CRUD operations",
-        "Runs adversarial attacks including XSS/SQL injection probes",
-        "Produces a structured markdown report with severity classifications",
-        "Captures screenshots during testing"
+        "Runs scripts/detect_stack.sh before choosing tools",
+        "Tests the four requested task workflows",
+        "Captures browser, console, and network failure evidence",
+        "Re-runs workflows after scoped fixes",
+        "Writes WORKSPACE/qa-report.md with screenshot paths and unresolved external dependencies"
       ]
     },
     {
       "id": 2,
-      "prompt": "My SvelteKit e-commerce site at localhost:5173 has some weird layout issues on mobile. The checkout flow at /checkout has a multi-step form. Can you check the CSS and try to break the checkout?",
-      "expected_output": "Detects SvelteKit stack, runs CSS audit at mobile/tablet/desktop viewports with focus on mobile layout issues, tests the checkout flow as a happy path, runs adversarial attacks targeting the multi-step form (mid-action navigation, session expiry, input boundary). Produces report focused on mobile visual issues and checkout vulnerabilities.",
-      "files": [],
+      "prompt": "Check the mobile checkout flow at localhost:5173/checkout in standard mode. Focus on multi-step state, validation, and broken navigation.",
+      "expected_output": "Scopes testing to checkout, covers desktop and mobile browser states, attacks multi-step state transitions, and reports verified fixes.",
       "expectations": [
-        "Detects the stack as Svelte/SvelteKit",
-        "Runs CSS visual audit at 375px, 768px, 1280px viewports",
-        "Tests the checkout flow as a happy path",
-        "Runs adversarial attacks targeting the multi-step checkout form",
-        "Flags mobile-specific layout issues",
-        "Produces a structured markdown report"
+        "Scopes the workflow checklist to checkout",
+        "Uses Playwright at mobile and desktop sizes",
+        "Tests validation, back/forward navigation, and repeat submission",
+        "Does not redesign unrelated UI",
+        "Writes a QA report and final pass count"
       ]
     },
     {
       "id": 3,
-      "prompt": "I just finished an Expo React Native app for tracking habits. It's running on iOS simulator. Run adversarial QA on it \u2014 I'm especially worried about the habit streak counter and the settings screen.",
-      "expected_output": "Detects Expo/React Native native app, reads native-testing.md reference, sets up Detox, runs mobile-specific adversarial attacks (device rotation, background/foreground, touch stress) with focus on the habit streak counter and settings screen. Produces a report with mobile-specific severity classifications.",
-      "files": [],
+      "prompt": "Run frontend-twerkin on my Expo habit app in the iOS simulator. Test rotation, background/resume, streak updates, and settings.",
+      "expected_output": "Detects native Expo, loads the native guide, uses existing native tooling for native behavior, and does not claim Expo web proves iOS behavior.",
       "expectations": [
-        "Detects the stack as React Native / Expo",
-        "Reads the native-testing.md reference file",
-        "Tests mobile-specific adversarial attacks like device rotation and background/foreground",
-        "Focuses testing on habit streak counter and settings screen",
-        "Produces a structured markdown report with native-specific findings"
+        "Detects React Native or Expo and reads references/native-testing.md",
+        "Uses existing Detox or simulator tooling for native behavior",
+        "Asks before installing missing dependencies",
+        "Tests rotation, background/resume, streak updates, and settings",
+        "Separates native evidence from any Expo web checks"
       ]
     },
     {
       "id": 4,
       "prompt_type": "anti_trigger",
-      "prompt": "Run my pytest suite and show me which tests fail.",
-      "expected_output": "Should NOT trigger frontend-twerkin. This is a unit-test runner request, not a browser-driven app QA loop. Run pytest directly.",
+      "prompt": "Run my pytest suite and show me which unit tests fail.",
+      "expected_output": "Does not invoke frontend-twerkin; runs the unit-test command directly.",
       "expectations": [
-        "Does not start a local server or launch Playwright",
-        "Does not enter the auto-fix 100%-actions loop",
-        "Runs pytest directly or points the user to the test runner"
-      ],
-      "manual_checks": []
+        "Does not start a frontend server or Playwright",
+        "Does not enter a browser fix loop",
+        "Runs pytest directly or explains the direct test command"
+      ]
     }
   ]
 }

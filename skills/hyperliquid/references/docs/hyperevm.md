@@ -33,23 +33,3 @@ Second, a gradual roll-out is the safest way to upgrade a complex system doing b
 Third, shipping an MVP and iterating live with user feedback allows development to adjust more nimbly. Testnets are useful for technical testing, but systems can only be hardened through real economic use.&#x20;
 
 As such, higher throughput and write system contracts are not live on mainnet yet, but will be in due time.&#x20;
-
-
----
-
-# Agent Instructions
-This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
-
-## Querying This Documentation
-If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
-
-Perform an HTTP GET request on the current page URL with the `ask` query parameter:
-
-```
-GET https://hyperliquid.gitbook.io/hyperliquid-docs/hyperevm.md?ask=<question>
-```
-
-The question should be specific, self-contained, and written in natural language.
-The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
-
-Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

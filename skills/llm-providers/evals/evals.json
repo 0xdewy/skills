@@ -1,0 +1,148 @@
+{
+  "skill_name": "llm-providers",
+  "evals": [
+    {
+      "id": 1,
+      "prompt_type": "forced",
+      "prompt": "I want to call DeepSeek from Python. What base URL and auth do I use, and which SDK should I install?",
+      "expected_output": "Tells the user to install the openai SDK, point base_url at https://api.deepseek.com/v1, set DEEPSEEK_API_KEY, and use a chat.completions.create call. Cites references/deepseek.md.",
+      "required_regex": [
+        "api\\.deepseek\\.com/v1",
+        "DEEPSEEK_API_KEY",
+        "openai",
+        "Bearer"
+      ],
+      "forbidden_regex": [
+        "your.*api.*key.*here",
+        "sk-1234"
+      ],
+      "manual_checks": [
+        "Runs scripts/search_refs.py before opening detailed reference files.",
+        "Loads references/deepseek.md for the exact base URL and model ids.",
+        "Code sample reads the key from the env, not a literal."
+      ],
+      "expectations": [
+        "Explains base URL https://api.deepseek.com/v1 with Bearer auth",
+        "Uses the openai SDK at the compat URL",
+        "Reads DEEPSEEK_API_KEY from the environment"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "How do I authenticate to the Anthropic Claude API? The auth header isn't standard Bearer, right?",
+      "expected_output": "Explains x-api-key header plus anthropic-version: 2023-06-01, ANTHROPIC_API_KEY env var, native anthropic SDK preferred; mentions OpenAI-compat shim exists. Cites references/anthropic.md.",
+      "required_regex": [
+        "x-api-key",
+        "anthropic-version",
+        "2023-06-01",
+        "ANTHROPIC_API_KEY"
+      ],
+      "forbidden_regex": [
+        "Authorization: Bearer"
+      ],
+      "manual_checks": [
+        "Does not tell the user to use Authorization: Bearer for the native Messages endpoint.",
+        "Notes max_tokens is required by Anthropic."
+      ],
+      "expectations": [
+        "Names the x-api-key header and anthropic-version: 2023-06-01",
+        "Recommends the native @anthropic-ai/sdk / anthropic SDK",
+        "Mentions max_tokens is required"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Stream GLM-4.6 with thinking enabled on Zhipu and capture the chain of thought separately from the answer.",
+      "expected_output": "Uses https://open.bigmodel.cn/api/paas/v4, ZHIPU_API_KEY, thinking={'type':'enabled'}, and reads delta.reasoning_content separately from delta.content. Cites references/zhipu-glm.md.",
+      "required_regex": [
+        "open\\.bigmodel\\.cn/api/paas/v4",
+        "ZHIPU_API_KEY",
+        "reasoning_content",
+        "thinking"
+      ],
+      "manual_checks": [
+        "Mentions the international (z.ai) base URL as an alternative.",
+        "Streams via openai SDK at the compat URL or native zhipuai SDK."
+      ],
+      "expectations": [
+        "Uses open.bigmodel.cn/api/paas/v4 as base URL",
+        "Reads reasoning_content and content separately",
+        "Sets thinking mode"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What's the difference between MiniMax international and MiniMax China? I want to integrate from the US.",
+      "expected_output": "Tells the user to use api.minimaxi.com/v1 (international) and the international console at platform.minimaxi.com, not api.minimax.chat. Cites references/minimax.md.",
+      "required_regex": [
+        "api\\.minimaxi\\.chat/v1",
+        "MINIMAX_API_KEY",
+        "platform\\.minimaxi\\.com"
+      ],
+      "manual_checks": [
+        "Calls out that mainland and international keys are not interchangeable.",
+        "Uses the openai SDK against the compat URL.",
+        "Does NOT claim the international URL is api.minimaxi.com (that host rejects intl keys)."
+      ],
+      "expectations": [
+        "Recommends api.minimaxi.com/v1 for international use",
+        "Notes keys are not interchangeable across stacks",
+        "Cites references/minimax.md"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Connect to Xiaomi MiMo. Where do I get an API key?",
+      "expected_output": "Explains that MiMo is open-weights only — there is no hosted Xiaomi API key. The path is to deploy XiaomiMiMo/MiMo-7B-RL with vLLM or SGLang, then call it through the OpenAI-compat surface at your server's URL. Cites references/xiaomi-mimo.md.",
+      "required_regex": [
+        "vllm|sglang",
+        "XiaomiMiMo/MiMo-7B-RL",
+        "open[- ]?weight|self[- ]?host"
+      ],
+      "forbidden_regex": [
+        "XIAOMI_API_KEY",
+        "console\\.xiaomi"
+      ],
+      "manual_checks": [
+        "Does not invent a hosted Xiaomi endpoint or key registry.",
+        "Mentions base_url is whatever the inference server exposes."
+      ],
+      "expectations": [
+        "States MiMo has no first-party hosted API",
+        "Recommends deploying with vLLM or SGLang",
+        "Uses OpenAI SDK against the local/hosted inference server URL"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I have one Python codebase and want to switch between OpenAI, DeepSeek, GLM, Moonshot, and Qwen with minimal code changes. What's the pattern?",
+      "expected_output": "Explains the OpenAI-compatible endpoint pattern: same openai SDK, swap base_url and api_key per provider. Points to references/concepts.md which has a compat base URL table.",
+      "required_regex": [
+        "openai",
+        "base_url",
+        "compatible"
+      ],
+      "manual_checks": [
+        "References references/concepts.md or the compat URL table.",
+        "Does not write five separate vendor SDK setups."
+      ],
+      "expectations": [
+        "Recommends the openai SDK with per-provider base_url",
+        "Cites references/concepts.md",
+        "Covers at least 3 of the 5 named providers"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt_type": "anti_trigger",
+      "prompt": "How do I write a list comprehension that flattens a list of lists in Python?",
+      "expected_output": "Should NOT trigger llm-providers — answer the Python question directly. The skill is about wiring up LLM provider APIs, not general Python.",
+      "expectations": [
+        "Answers the Python question directly",
+        "Does not load any references/*.md",
+        "Does not mention base URLs, API keys, or any provider"
+      ],
+      "manual_checks": []
+    }
+  ]
+}

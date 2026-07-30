@@ -66,23 +66,3 @@ With perpetual contracts, you use USDC as collateral to long or short the token 
 
 1. On [https://app.hyperliquid.xyz/trade](https://hyperliquid.xyz/trade), click the “Withdraw” button in the bottom right.
 2. Enter the amount of USDC you would like to withdraw and click “Withdraw to Arbitrum.” This transaction does not cost gas. There is a $1 withdrawal fee instead.
-
-
----
-
-# Agent Instructions
-This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
-
-## Querying This Documentation
-If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
-
-Perform an HTTP GET request on the current page URL with the `ask` query parameter:
-
-```
-GET https://hyperliquid.gitbook.io/hyperliquid-docs/onboarding/how-to-start-trading.md?ask=<question>
-```
-
-The question should be specific, self-contained, and written in natural language.
-The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
-
-Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

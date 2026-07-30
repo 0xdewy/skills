@@ -13,23 +13,3 @@ scrape_status: ok
   * If you sent the right token on the right chain and deposited more than the minimum amount, but your VIRTUAL still shows up as “Failed", reach out to the Unit team, which manages Base network deposits & withdrawals: <https://app.hyperunit.xyz/support>​
 * There is a minimum deposit of 25 VIRTUAL. Deposits below 25 VIRTUAL will result in a loss of funds.
 * Note that Base deposits take \~6 minutes to arrive in your wallet. You can check the time estimate in the same deposit pop-up where you copied the deposit address.
-
-
----
-
-# Agent Instructions
-This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
-
-## Querying This Documentation
-If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
-
-Perform an HTTP GET request on the current page URL with the `ask` query parameter:
-
-```
-GET https://hyperliquid.gitbook.io/hyperliquid-docs/support/faq/deposit-or-transfer-issues-missing-lost/deposited-via-base-network.md?ask=<question>
-```
-
-The question should be specific, self-contained, and written in natural language.
-The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
-
-Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

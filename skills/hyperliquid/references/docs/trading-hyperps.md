@@ -35,23 +35,3 @@ Funding rate premium samples are computed as 1% of the usual clamped interest ra
 The mark price of Hyperps incorporate the weighted median of pre-launch perp prices from CEXs as a component in the usual mark price formula. Despite the often significantly different contract specifications between hyperps and other venues' pre-launch perp markets, they are nonetheless included as mark price inputs to provide greater mark price stability during volatility.&#x20;
 
 The mark price of hyperps are capped at 3x the 8-hour mark price EMA. Hyperps with external prelaunch perp listings have mark price capped to 1.5x the median external perp price (the third component of the mark price). The oracle price is also restricted to be at most 4 times the one month average mark price as an additional safeguard against manipulation.
-
-
----
-
-# Agent Instructions
-This documentation is published with GitBook. GitBook is the documentation platform designed so that both humans and AI agents can read, navigate, and reason over technical content effectively. Learn more at gitbook.com.
-
-## Querying This Documentation
-If you need additional information that is not directly available in this page, you can query the documentation dynamically by asking a question.
-
-Perform an HTTP GET request on the current page URL with the `ask` query parameter:
-
-```
-GET https://hyperliquid.gitbook.io/hyperliquid-docs/trading/hyperps.md?ask=<question>
-```
-
-The question should be specific, self-contained, and written in natural language.
-The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
-
-Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.

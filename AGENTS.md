@@ -15,7 +15,10 @@ be read-only in managed environments, so do not assume it can be edited.
 - For a skill change, read that skill's `SKILL.md` first.
 - Read referenced files only when the selected skill points to them for the
   current task.
-- Use `skills/common/` for shared guidance that affects multiple skills.
+- Use `skills/common/` for shared guidance that affects multiple skills. In
+  skill text, reference it sibling-relative as `../common/...` so paths resolve
+  both from the repo and from an installed skill directory (the `skill` CLI
+  links `common/` as a sibling of each installed skill).
 - Use `evals/evals.json` when changing triggers, output contracts, safety rules,
   or behavior that should be tested.
 

@@ -4,61 +4,56 @@
     {
       "id": 1,
       "prompt": "Run code-smellz on this codebase",
-      "expected_output": "Four subagents dispatched in parallel, findings merged and triaged with patches, STAGED_CHANGES.md written, changes applied via git apply (no commits), type-checker, linter, and formatter gates run, test suite run, final report with LOC delta emitted.",
+      "expected_output": "Standard mode dispatches only the 2-3 roles justified by pre-pass evidence, merges and triages findings, writes STAGED_CHANGES.md, applies scoped fixes without commits, runs available gates/tests, and emits a final report.",
       "files": [
         "src/",
         "tests/"
       ],
       "expectations": [
-        "stinky-output/ directory created before any subagents are launched",
-        "static_analysis.py, detect_runner.py, and measure_loc.py are called in Phase 0",
-        "dead_code.json, dupes.json, tools.json, exclusions.txt generated in Phase 0",
+        "States the mode line before setup or dispatch",
+        "Resolved WORKSPACE is created before any subagents are launched",
+        "detect_runner.py and measure_loc.py are used during setup",
+        "Optional static/dependency analysis is recorded when available",
         ".stinkyignore is checked and loaded if present",
-        "Dependency CVE scanner is detected and run in Phase 0 (dep-audit-raw.json)",
-        "All four subagents (bugs, simplify, arch, security) are launched simultaneously in Phase 1",
-        "Security Auditor receives dep-audit-raw.json as pre-computed data (does NOT run its own scans)",
-        "stinky-output/findings-bugs.json exists and contains valid JSON with patch field after Phase 1",
-        "stinky-output/findings-simplify.json exists and contains valid JSON with patch field after Phase 1",
-        "stinky-output/findings-arch.json exists and contains valid JSON after Phase 1",
-        "stinky-output/security-audit.json exists and contains valid JSON after Phase 1",
-        "STAGED_CHANGES.md is written before any edits are applied in Phase 2",
-        "Triage summary is printed before Phase 3 changes are applied",
-        "git diff checkpoint is saved as pre-iter-N.diff before Phase 3 edits",
-        "Patches are applied with git apply --check before git apply in Phase 3",
-        "Type checker runs after each individual change in Phase 3 (if available)",
-        "Second minimizer pass runs on architect-modified files in Phase 3.3",
-        "Type-checker gate runs in Phase 4 (if available) before test suite",
-        "Linter gate runs in Phase 4 (if available)",
-        "Formatter gate runs in Phase 4 (if available)",
-        "Test suite is run in Phase 4 and result is recorded",
+        "Dependency CVE scanner is detected and run when available",
+        "Standard mode launches only 2-3 roles justified by pre-pass evidence; all four are reserved for thorough mode",
+        "Findings JSON files exist and contain valid JSON with patch fields where applicable",
+        "STAGED_CHANGES.md is written before any edits are applied",
+        "Triage summary is printed before changes are applied",
+        "git diff checkpoint is saved before edits",
+        "Patches are checked before application when patch files are used",
+        "Type-checker gate runs if available before the test suite",
+        "Linter gate runs if available",
+        "Formatter gate runs if available",
+        "Test suite is run and result is recorded",
         "Failed changes are reverted with git apply -R (not git commit/revert)",
         "No git commit is made at any point",
-        "Session.json tracks category_stats, quarantine state, and patch_file paths",
-        "Final report includes format status and 'review with git diff' note",
+        "Session state tracks applied, skipped, and reverted findings",
+        "Final report includes verification status",
         "DONE: signal emitted with iteration count and LOC delta"
       ]
     },
     {
       "id": 2,
       "prompt": "This code is getting pretty stinky, can you clean it up?",
-      "expected_output": "Skill triggered by casual 'stinky' + 'clean up' language; full workflow runs including at least one iteration with changes applied.",
+      "expected_output": "Skill triggered by casual 'stinky' + 'clean up' language; mode is chosen via scaling and at least one safe cleanup pass runs when findings exist.",
       "files": [
         "src/"
       ],
       "expectations": [
         "Skill triggers on informal 'stinky' phrasing",
         ".stinkyignore is checked before source file enumeration",
-        "Static analysis pre-pass runs and dead code / dupes / tools are detected",
+        "Optional static analysis runs when available",
         "Dependency CVE scanner is detected and run if available",
         "Codebase goal is read from README or project manifest before spawning agents",
-        "stinky-output/session.json is created with baseline_loc, dead_code_count, dupe_block_count, format_cmd populated",
-        "Subagents receive dead_code.json, dupes.json, and dep-audit-raw.json as pre-computed data",
-        "At least one change is applied via git apply with --check",
+        "WORKSPACE/session.json records baseline and runner/check information",
+        "Subagents receive available pre-computed analysis data",
+        "At least one safe change is applied when findings exist",
         "STAGED_CHANGES.md is written before edits",
         "Type-check, lint, and format gates run (or noted as unavailable)",
         "No git commit is made",
         "Final LOC is measured",
-        "Final report shows starting vs ending LOC, changes-applied count, quarantine state, and format status"
+        "Final report shows verification status and changes-applied count"
       ]
     },
     {
@@ -70,7 +65,7 @@
       ],
       "expectations": [
         "Skill is NOT triggered",
-        "No stinky-output/ directory is created",
+        "No code-smellz WORKSPACE is created",
         "No static analysis is run",
         "No subagents are spawned",
         "No file edits are made",
@@ -81,10 +76,35 @@
     {
       "id": 4,
       "prompt": "There's an off-by-one bug in parse_date() in dates.py \u2014 a single function, about 40 lines. Find and fix just that bug.",
-      "expected_output": "Takes the lite tier: reviews the single function directly or spawns only the Bug Hunter, not all four agents (bug/minimizer/arch/security).",
+      "expected_output": "Takes the lite tier: reviews the single function directly \u2014 no subagents spawned. A 40-line single-function bug fix meets none of the Hard Spawn Gate criteria (not parallel, no isolated context needed, not an independent workstream), so the crew is not spawned at all.",
       "expectations": [
-        "Takes the lite tier \u2014 does not spawn all four agents for a single-function bug fix",
-        "Fixes the off-by-one in parse_date"
+        "States the mode line (mode: lite ...; budget: 0) before editing",
+        "Takes the lite tier \u2014 spawns NO subagents for a single-function bug fix (meets no Hard Spawn Gate criterion)",
+        "Reviews parse_date directly and fixes the off-by-one"
+      ],
+      "required_regex": [
+        "mode:"
+      ],
+      "manual_checks": []
+    },
+    {
+      "id": 5,
+      "prompt": "Run code-smellz on this codebase --quick \u2014 fast pass, just the most relevant cleanup.",
+      "expected_output": "The explicit --quick flag pins the lite tier regardless of codebase size: works directly or spawns only 1\u20132 relevant agents (not all four), one iteration, no quarantine loop. Still writes findings, applies safe changes, runs available gates, and emits a DONE: line.",
+      "expectations": [
+        "States the mode line (mode: lite (--quick); budget: ...) before cleanup",
+        "The --quick flag is honored \u2014 lite tier pinned by the explicit flag, not by task-size auto-detection",
+        "Does NOT spawn all four agents in parallel (direct work or 1\u20132 relevant agents only)",
+        "No quarantine loop runs",
+        "No git commit is made at any point",
+        "Emits a DONE: signal with iteration count and LOC delta"
+      ],
+      "required_regex": [
+        "mode:",
+        "DONE:"
+      ],
+      "forbidden_regex": [
+        "git commit"
       ],
       "manual_checks": []
     }
