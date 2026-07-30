@@ -29,13 +29,8 @@ skills/*/*.pyc
 # Local tool state / caches
 .pytest_cache/
 .venv/
-.aider.chat.history.md
-.aider.tags.cache.v4/
 .claude/settings.local.json
 skills/**/.claude/settings.local.json
 
 # Episodic memory — per-installation runtime observations
 skills/*/learnings/
-
-# Preserved user data from the retired simple-memory skill
-skills/.retired-simple-memory/
