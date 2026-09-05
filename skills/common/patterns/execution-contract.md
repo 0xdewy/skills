@@ -14,14 +14,33 @@ Before doing heavyweight work, confirm the situation still matches the skill:
 
 If any condition fails, ask one focused question or use the documented fallback.
 
+## Workspace
+
+Do not hardcode `/tmp/<skill>-output/` in skill bodies; the temp directory
+differs across runtimes. Resolve `WORKSPACE` once, in this order, and reuse it:
+
+1. **Caller-supplied path.** An explicit `OUTPUT_DIR` / `WORKSPACE` parameter
+   or env var from the user or a parent orchestrator, used verbatim. A parent
+   dispatching sub-agents always sets this so children write into its run dir.
+2. **Temp dir.** `${TMPDIR:-/tmp}/<skill>-<slug>/`, with `<slug>` derived from
+   the task.
+3. **Project-local fallback.** `./.<skill>-workspace/` when no temp dir is
+   writable.
+
+Use a path inside the target repo only when the user explicitly asked for
+durable output there. Cleanup skills that edit the repo still keep their review
+artifacts (staged-change lists, patches, session log) in `WORKSPACE`.
+
+If `WORKSPACE` already exists from a prior run, archive it
+(`mv "$WORKSPACE" "$WORKSPACE.prev"`) rather than deleting, unless the skill's
+resume rules say to continue it.
+
 ## Phase Setup
 
 At the start of a run:
 
 1. Write down the observable acceptance criteria.
-2. Choose the workspace:
-   - `/tmp/<skill>/` for scratch artifacts.
-   - A task-specific repo directory only when the user asked for durable output.
+2. State the resolved `WORKSPACE` in one line so the run is auditable.
 3. Create every output directory before dispatching agents or scripts.
 4. Record the phase state in one place: `status.json`, `README.md`, or a clearly
    named status section.
@@ -30,15 +49,19 @@ At the start of a run:
 
 Every subagent gets:
 
-- One role and one owned output file or directory.
-- Read/write scope stated explicitly.
-- Input files listed by path.
+- One role, one objective, and one owned output file or directory.
+- Read/write scope and boundaries stated explicitly.
+- Input files listed by path, plus any tool or source guidance.
 - Output schema or Markdown structure.
 - A required final line naming its artifact:
   `DONE: <artifact-path> — <summary>`
 
-Parallel agents never write the same file. Shared coordination files have a
-single writer, normally the orchestrator.
+Missing any of these means the task is not ready to delegate.
+
+`WORKSPACE` is owned by the orchestrator. Parallel agents never write the same
+file; each gets its own subdir or owned file. Coordination files
+(`status.json`, `session.json`, staged-change lists, debate logs) have exactly
+one writer, normally the orchestrator.
 
 ## Artifact Validation Gate
 

@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-IGNORED_PARTS = {".git", ".venv", ".pytest_cache", "__pycache__", "learnings"}
+IGNORED_PARTS = {".git", ".venv", ".pytest_cache", "__pycache__"}
 
 
 def included(path: Path) -> bool:
@@ -28,7 +28,6 @@ def main() -> int:
         ast.parse(path.read_text(), filename=str(path.relative_to(ROOT)))
 
     json_files = list((ROOT / "skills").glob("*/evals/evals.json"))
-    json_files.append(ROOT / "evals" / "routing.json")
     for path in json_files:
         json.loads(path.read_text())
 

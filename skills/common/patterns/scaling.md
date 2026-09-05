@@ -15,13 +15,13 @@ work cannot affect acceptance criteria; treat a no-op as success.
 
 | Tier | Use When | Behavior |
 |---|---|---|
-| `lite` / `--quick` | One obvious action, one file, one narrow review, or a direct command can solve it | Work directly. No subagents. Verify and finish. |
-| `standard` / `--standard` | A few independent parts or one real implementation/review cycle | Spawn only the useful roles, usually 1-3 agents, one review wave. |
-| `full` / `--thorough` | Large/open-ended work with independent sub-goals or explicit request for depth | Run the full skill pipeline with the documented cap. |
+| `--quick` | One obvious action, one file, one narrow review, or a direct command can solve it | Work directly. No subagents. Verify and finish. |
+| `--standard` | A few independent parts or one real implementation/review cycle | Spawn only the useful roles, usually 1-3 agents, one review wave. |
+| `--thorough` | Large/open-ended work with independent sub-goals or explicit request for depth | Run the full skill pipeline with the documented cap. |
 
 Resolution order: explicit user flag → parent `MODE` param → obvious trivial
-case = `lite` → skill's non-interactive default. Prompt only when the human is
-interactive, no flag/param exists, and mode materially changes cost.
+case = `--quick` → skill's non-interactive default. Prompt only when the human
+is interactive, no flag/param exists, and mode materially changes cost.
 
 Before work, state one line:
 
@@ -43,13 +43,5 @@ agents than the budget, explicitly escalate mode or re-plan.
 Default to one dispatch wave. Give each role only its task slice and required
 evidence, not the full conversation or another role's transcript. Add a role or
 wave only when independent work, adversarial isolation, or a failed criterion
-justifies its coordination cost.
-
-## Delegation Contract
-
-Every spawned role gets: objective, owned output path, exact output format,
-input paths, tool/source guidance, and boundaries. Missing any of these means
-the task is not ready to delegate.
-
-Skills that support modes should include at least one `--quick` eval proving the
-crew is skipped for trivial work.
+justifies its coordination cost. What each spawned role must receive is the
+Subagent Contract in `execution-contract.md`.

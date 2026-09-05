@@ -7,7 +7,7 @@ Common variables:
 
 - `{{target}}` — path to the deliverable/repo/spec under review.
 - `{{mandate}}` — the original mandate and acceptance criteria, if known.
-- `{{output_dir}}` — the resolved workspace from `workspace.md`.
+- `{{output_dir}}` — the resolved `WORKSPACE` from `execution-contract.md`.
 
 ---
 

@@ -25,9 +25,8 @@ metadata:
 
 Adversarially review one deliverable and produce a prioritized findings report.
 
-Load `../common/patterns/execution-contract.md`, `../common/patterns/workspace.md`,
-and `../common/patterns/scaling.md`. Load persona prompts only
-when spawning.
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Load persona prompts only when spawning.
 
 ## Activation
 

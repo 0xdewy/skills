@@ -21,7 +21,6 @@ def write_repo(
     invocation_policy="manual"
 ):
     skills = root / "skills"
-    (root / "evals").mkdir()
     skill = skills / "demo"
     (skill / "evals").mkdir(parents=True)
     (skills / "common").mkdir()
@@ -57,13 +56,6 @@ def write_repo(
             "prompt_type": "anti_trigger",
         })
     (skill / "evals" / "evals.json").write_text(json.dumps(cases))
-    routing_cases = [
-        {"skill_name": "demo", "polarity": "positive", "prompt": "do demo work"},
-        {"skill_name": "demo", "polarity": "negative", "prompt": "unrelated work"},
-    ]
-    if mode == "explicit" and invocation_policy == "manual":
-        routing_cases = []
-    (root / "evals" / "routing.json").write_text(json.dumps({"evals": routing_cases}))
     return skills
 
 
@@ -81,7 +73,7 @@ class ValidatorTests(unittest.TestCase):
             skills = write_repo(Path(tmp), fixtures={"src/app.py": "x = 1\n"})
             result, output = self.run_validator(skills)
             self.assertEqual(result, 0)
-            self.assertIn("routing checks passed", output)
+            self.assertIn("OK:", output)
 
     def test_rejects_unsafe_fixture(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -119,18 +111,11 @@ class ValidatorTests(unittest.TestCase):
             result, _ = self.run_validator(skills)
             self.assertEqual(result, 0)
 
-    def test_human_only_explicit_is_excluded_from_routing(self):
+    def test_human_only_explicit_is_valid(self):
         with tempfile.TemporaryDirectory() as tmp:
             skills = write_repo(Path(tmp), mode="explicit", invocation_policy="manual")
             result, _ = self.run_validator(skills)
             self.assertEqual(result, 0)
-
-            (Path(tmp) / "evals" / "routing.json").write_text(json.dumps({"evals": [
-                {"skill_name": "demo", "polarity": "positive", "prompt": "demo"},
-                {"skill_name": "demo", "polarity": "negative", "prompt": "other"},
-            ]}))
-            with self.assertRaises(SystemExit):
-                self.run_validator(skills)
 
 
 if __name__ == "__main__":

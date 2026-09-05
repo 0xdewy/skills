@@ -1,24 +1,8 @@
 # Knowledge Patterns
 
-Loaded by skills in the Knowledge & Reference category: teach-me, rust-evm,
-polymarketv2, web-scraping.
-
-Read this at activation. Also load
-`skills/common/patterns/execution-contract.md` when the skill writes files,
-runs scripts, or produces a durable report. Append discovered patterns at
-completion.
-
-## Contribution Format
-
-```
-### <Pattern Name>
-- **Discovered by:** <skill>, <date>
-- **Tags:** <tag1>, <tag2>
-- **Pattern:** <one sentence>
-- **Why:** <one sentence>
-```
-
----
+Loaded by reference and research skills (teach-me, researcher, web-scraping).
+Also load `execution-contract.md` when the skill writes files, runs scripts, or
+produces a durable report.
 
 ### Freshness Gate
 - **Discovered by:** polymarketv2, rust-evm hardening, 2026-06-17

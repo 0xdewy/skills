@@ -24,8 +24,8 @@ metadata:
 Iterate against fixed gates until they pass, progress stalls, or the cap is
 reached.
 
-Load `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Consult
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Consult
 `../common/ROUTING.md`. Load `../common/patterns/worker-slice.md` only when
 dispatching an independent implementation slice. Validate state with
 `../common/scripts/validate_state.py`.
@@ -42,9 +42,9 @@ command or observable criterion.
 
 ## Modes
 
-- `lite`: direct work, max 3 iterations, zero workers.
-- `standard`: one workstream, optional worker/reviewer, max 8 iterations.
-- `full`: several criteria or a long-running task, bounded workers, max 15.
+- `--quick`: direct work, max 3 iterations, zero workers.
+- `--standard`: one workstream, optional worker/reviewer, max 8 iterations.
+- `--thorough`: several criteria or a long-running task, bounded workers, max 15.
 
 ## Durable State
 

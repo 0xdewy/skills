@@ -38,8 +38,8 @@ candidates from the index, the orchestrator selects, then they implement.
 Prefer direct edits for small targets; use agents only when independent bloat
 categories can run in parallel.
 
-Load `../common/patterns/orchestration.md`, `../common/patterns/execution-contract.md`, `../common/patterns/quarantine-loop.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`.
+Load `../common/patterns/execution-contract.md`,
+`../common/patterns/quarantine-loop.md`, and `../common/patterns/scaling.md`.
 Use `../common/scripts/detect_runner.py` and `measure_loc.py`, plus
 shrinkray's own `scripts/deadcode_scan.py` and `scripts/dependency_index.py`
 for the two pre-passes. At dispatch, use `references/subagent-prompts.md` to

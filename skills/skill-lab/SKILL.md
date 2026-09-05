@@ -22,7 +22,8 @@ metadata:
 Create or improve a reusable skill: `SKILL.md` plus optional `references/`,
 `scripts/`, `templates/`, `assets/`, and `evals/`.
 
-Load `../common/patterns/execution-contract.md`, `../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. For Codex-system
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. For Codex-system
 skills, also follow the local system `skill-creator` instructions if available.
 
 ## Workflow

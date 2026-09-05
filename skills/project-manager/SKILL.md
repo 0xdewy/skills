@@ -24,8 +24,8 @@ metadata:
 
 Own a long-running mandate from decomposition through verified integration.
 
-Load `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Consult
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Consult
 `../common/ROUTING.md`. Load `../common/patterns/worker-slice.md` and
 `references/subagent-prompts.md` only when dispatching or reviewing workers.
 Validate state with `../common/scripts/validate_state.py`.

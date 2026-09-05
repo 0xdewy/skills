@@ -24,9 +24,8 @@ metadata:
 Find and fix correctness, maintainability, architecture, and security problems
 without changing intended behavior.
 
-Load `../common/patterns/orchestration.md`, `../common/patterns/activation.md`, `../common/patterns/execution-contract.md`,
-`../common/patterns/quarantine-loop.md`, `../common/patterns/workspace.md`,
-and `../common/patterns/scaling.md`. Use `../common/scripts/detect_runner.py` and `measure_loc.py`.
+Load `../common/patterns/execution-contract.md`,
+`../common/patterns/quarantine-loop.md`, and `../common/patterns/scaling.md`. Use `../common/scripts/detect_runner.py` and `measure_loc.py`.
 At dispatch, use `references/subagent-prompts.md` to load the shared contract and
 only the active role prompt.
 

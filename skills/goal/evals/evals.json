@@ -68,10 +68,10 @@
     {
       "id": 5,
       "prompt": "Iterate until the build script prints 'BUILD OK'. VERIFY: ./build.sh | grep -q 'BUILD OK'",
-      "expected_output": "A lite-tier goal with a single clear criterion and an authoritative verify command. Works directly, caps at a small number of iterations, and stops as soon as the command exits 0.",
+      "expected_output": "A --quick-tier goal with a single clear criterion and an authoritative verify command. Works directly, caps at a small number of iterations, and stops as soon as the command exits 0.",
       "expectations": [
-        "States the mode line (mode: lite ...; budget: ...) before iterating",
-        "Takes the lite tier for a single-criterion goal with a verify command",
+        "States the mode line (mode: --quick ...; budget: ...) before iterating",
+        "Takes the --quick tier for a single-criterion goal with a verify command",
         "Does not dispatch workers for a trivial build fix (0 agents)",
         "Uses the verify command exit code as the sole gate",
         "Ends with a DONE: line"
