@@ -7,6 +7,8 @@ import { pathToFileURL } from 'node:url';
 
 process.umask(0o077);
 
+// Relay base URLs to bootstrap (comma-separated). Private/LAN relays belong in
+// MYCO_RELAY_URL; a portable skill must not assume this machine's network.
 const DEFAULT_RELAY = 'https://waste.3a2d50.com';
 const DEFAULT_WORKFLOW = ['Backlog', 'Ready', 'In Progress', 'Review', 'Done'];
 const STATE_VERSION = 1;
@@ -67,11 +69,15 @@ function help(): void {
 Usage:
   myco doctor [--json]
   myco identity [--json]
+  myco rename --name NAME [--dry-run] [--json]
   myco groups [--search NAME] [--all] [--json]
   myco entity --id ENTITY_ID [--acl] [--json]
   myco messages --entity ENTITY_ID [--limit N] [--json]
   myco peers [--json]
   myco add-peer --peer-link URL [--dry-run] [--json]
+  myco remove-peer --did DID [--dry-run] [--json]
+  myco join [--entity ENTITY_ID] [--dry-run] [--json]   # accept pending invites
+  myco invite --entity ENTITY_ID --did DID [--dry-run] [--json]
   myco edit-acl --entity ENTITY_ID --slot SLOT [--value JSON] [--tier public|private] [--dry-run] [--json]
   myco post --entity ENTITY_ID --title TITLE [--body TEXT] [--space NAME] [--public] [--dry-run] [--json]
   myco init [--name NAME] [--owner-did DID] [--json]
@@ -176,7 +182,7 @@ function parseMarker(description: unknown): { repo: string; key: string } | unde
   try { return { repo: match[1], key: Buffer.from(match[2], 'base64url').toString('utf8') }; } catch { return undefined; }
 }
 
-function parsePeerLink(raw: string, modules: Dict): { id: string; publicKey: string; connections: Dict[] } {
+function parsePeerLink(raw: string, modules: Dict): { id: string; publicKey: string; legacyRelayUrls: string[] } {
   let params: URLSearchParams;
   try {
     const query = raw.indexOf('?');
@@ -186,19 +192,22 @@ function parsePeerLink(raw: string, modules: Dict): { id: string; publicKey: str
     fail('invalid peer link');
   }
   const id = params.get('id');
-  const publicKey = params.get('pk');
-  if (!id?.startsWith('did:ed25519:') || !publicKey) fail('peer link must contain an ed25519 DID and public key');
-  if (modules.getPublicKey(id).publicKey !== publicKey) fail('peer link public key does not match its DID');
-  const connections = params.getAll('c').map((encoded) => {
+  if (!id?.startsWith('did:ed25519:')) fail('peer link must contain an ed25519 DID');
+  const derivedPublicKey = modules.getPublicKey(id).publicKey;
+  const publicKey = params.get('pk') ?? derivedPublicKey;
+  if (derivedPublicKey !== publicKey) fail('peer link public key does not match its DID');
+  // Current app links carry identity only. Parse old connection-bearing links
+  // for compatibility, but never attach their relay URL directly to the peer:
+  // relay connections belong to the relay's DID and the core validates that.
+  const legacyRelayUrls = params.getAll('c').map((encoded) => {
     const colon = encoded.indexOf(':');
     if (colon <= 0) fail(`invalid peer connection: ${encoded}`);
-    return { transportType: encoded.slice(0, colon), uri: encoded.slice(colon + 1) };
+    const transportType = encoded.slice(0, colon);
+    const uri = encoded.slice(colon + 1);
+    if (transportType !== 'api' || !/^https?:\/\//.test(uri)) fail(`invalid peer connection: ${encoded}`);
+    return uri;
   });
-  if (!connections.length) fail('peer link has no delivery connections');
-  if (connections.some((connection) => connection.transportType !== 'api' || !/^https?:\/\//.test(connection.uri))) {
-    fail('owner peer links may contain only HTTP(S) API relay connections');
-  }
-  return { id, publicKey, connections };
+  return { id, publicKey, legacyRelayUrls };
 }
 
 async function loadMyco(cfg: ReturnType<typeof config>): Promise<Dict> {
@@ -212,7 +221,7 @@ async function loadMyco(cfg: ReturnType<typeof config>): Promise<Dict> {
   const source = async (relative: string) => import(pathToFileURL(path.join(cfg.agentRoot, relative)).href);
   const [protocol, transports, wastebin, core, dbModule, clientModule] = await Promise.all([
     importPackage('@mycoprotocol/client'),
-    importPackage('@wasteprotocol/transports'),
+    importPackage('@wasteprotocol/web-transports'),
     importPackage('@wasteprotocol/wb-sqlite'),
     importPackage('@wasteprotocol/core'),
     source('src/db-sqlite.ts'),
@@ -240,18 +249,55 @@ async function openClient(cfg: ReturnType<typeof config>, modules: Dict): Promis
   await wb.connect();
   const existingDid = readText(cfg.didFile);
   const local = cfg.relay.trim().toLowerCase() === 'local' || cfg.relay.trim().toLowerCase() === 'none';
-  const transports = local ? { local: new modules.LocalTransport() } : { api: new modules.APITransport() };
+  const transports: Record<string, any> = local
+    ? { local: new modules.LocalTransport() }
+    : { api: new modules.APITransport() };
   const bundle = await modules.createClientBundle(db, wb, transports, existingDid ? { existingDid } : {});
   const client = bundle.client;
   if (!existingDid) writePrivate(cfg.didFile, `${client.id}\n`);
-  await client.addConnection(local
-    ? { transportType: 'local', uri: client.id }
-    : { transportType: 'api', uri: cfg.relay });
-  return { client, waste: bundle.waste, db, wb, createdDid: !existingDid, local };
+  const waste = bundle.waste;
+  // One-time cleanup for the removed identity-revealing receiver transport.
+  // Leaving these rows behind advertises an unusable route indefinitely.
+  for (const peer of waste.getPeers()) {
+    for (const connection of waste.getConnections(peer.id)) {
+      if (connection.transportType === 'http-receive') {
+        await waste.removeConnection(connection.connectionId, peer.id);
+      }
+    }
+  }
+  if (local) {
+    await waste.addConnection({ transportType: 'local', posture: 'receive' });
+  } else {
+    const relayUrls = cfg.relay.split(',').map((s: string) => s.trim()).filter(Boolean);
+    const relayDids: string[] = [];
+    for (const url of relayUrls) {
+      const relayDid = await modules.bootstrapHttpRelay(waste, url);
+      if (!relayDid) continue;
+      relayDids.push(relayDid);
+      for (const conn of [
+        { transportType: 'api', posture: 'send' },
+        { transportType: 'api', posture: 'scan' },
+      ]) {
+        try { await waste.addConnection(conn, relayDid); } catch { /* posture not advertised */ }
+      }
+    }
+    if (relayDids.length) {
+      try { await waste.setPrivatePeers(relayDids); } catch { /* non-fatal */ }
+    }
+  }
+  return { client, waste, db, wb, createdDid: !existingDid, local };
 }
 
-async function safeSync(client: any): Promise<string | undefined> {
+async function safeSync(client: any, waste?: any): Promise<string | undefined> {
   try {
+    // A short-lived CLI process cannot rely on receiver transport timers
+    // (30s intervals never fire before exit), so poll every receiver here —
+    // otherwise the skill never sees inbound traffic at all.
+    if (waste) {
+      for (const t of Object.values(waste.getTransports())) {
+        try { await (t as any).poll?.(); } catch { /* best-effort */ }
+      }
+    }
     await client.sync();
     return undefined;
   } catch (error: any) {
@@ -263,10 +309,10 @@ function messageId(modules: Dict, signed: any): string {
   return modules.getMessageId(modules.getMessageHash(signed.message));
 }
 
-function peerLink(modules: Dict, did: string, relay: string): string {
-  const pk = modules.getPublicKey(did).publicKey;
-  const params = new URLSearchParams({ id: did, pk, v: 'private' });
-  if (relay.toLowerCase() !== 'local' && relay.toLowerCase() !== 'none') params.append('c', `api:${relay}`);
+function peerLink(did: string): string {
+  // ed25519 DIDs self-encode their public key. Reachability is learned through
+  // gossip/shared relays and must not be represented as a direct peer edge.
+  const params = new URLSearchParams({ id: did });
   return `myco://peer?${params.toString()}`;
 }
 
@@ -442,7 +488,6 @@ async function commandIdentity(args: ParsedArgs): Promise<void> {
     output({ initialized: false, dataDir: cfg.dataDir, next: 'run init before a write operation' }, has(args, 'json'));
     return;
   }
-  const modules = await loadMyco(cfg);
   const state = readState(cfg);
   output({
     initialized: true,
@@ -450,7 +495,7 @@ async function commandIdentity(args: ParsedArgs): Promise<void> {
     agentEntityId,
     routingDid,
     relay: cfg.relay,
-    peerLink: peerLink(modules, routingDid, cfg.relay),
+    peerLink: peerLink(routingDid),
     dataDir: cfg.dataDir,
   }, has(args, 'json'));
 }
@@ -458,18 +503,19 @@ async function commandIdentity(args: ParsedArgs): Promise<void> {
 async function commandInit(args: ParsedArgs): Promise<void> {
   const cfg = config();
   const modules = await loadMyco(cfg);
-  const { client, createdDid } = await openClient(cfg, modules);
+  const { client, waste, createdDid } = await openClient(cfg, modules);
   const identity = await ensureEntity(cfg, modules, client, { name: flag(args, 'name'), ownerDid: flag(args, 'owner-did') });
-  const syncError = await safeSync(client);
+  const syncError = await safeSync(client, waste);
+  const name = readState(cfg).identity.name || 'Myco Code Steward';
   output({
     initialized: true,
     createdRoutingIdentity: createdDid,
     createdAgentEntity: identity.created,
-    name: flag(args, 'name') || 'Myco Code Steward',
+    name,
     agentEntityId: identity.entityId,
     routingDid: client.id,
     relay: cfg.relay,
-    peerLink: peerLink(modules, client.id, cfg.relay),
+    peerLink: peerLink(client.id),
     sync: syncError ? { ok: false, error: syncError } : { ok: true },
   }, has(args, 'json'));
 }
@@ -501,7 +547,7 @@ function ensureCanCreate(ctx: Dict, target: string, type: string): void {
 
 async function commandSnapshot(args: ParsedArgs): Promise<void> {
   const ctx = await initializedClient(args);
-  const syncError = await safeSync(ctx.client);
+  const syncError = await safeSync(ctx.client, ctx.waste);
   const state = readState(ctx.cfg);
   const repo = canonicalRepo(flag(args, 'repo'));
   const id = repoHash(repo);
@@ -533,7 +579,7 @@ async function commandReconcile(args: ParsedArgs): Promise<void> {
   const manifest = validateManifest(raw);
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
-  const inboundSyncError = await safeSync(ctx.client);
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
   const repo = canonicalRepo(flag(args, 'repo'));
   const id = repoHash(repo);
   const state = readState(ctx.cfg);
@@ -631,7 +677,7 @@ async function commandReconcile(args: ParsedArgs): Promise<void> {
     writeState(ctx.cfg, state);
   }
 
-  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client);
+  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client, ctx.waste);
   output({
     dryRun,
     repo,
@@ -654,7 +700,7 @@ async function focusedTask(args: ParsedArgs, mode: 'move' | 'close'): Promise<vo
   if (mode === 'move' && !status) fail('move requires --status');
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
-  const inboundSyncError = await safeSync(ctx.client);
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
   const repo = canonicalRepo(flag(args, 'repo'));
   const id = repoHash(repo);
   const state = readState(ctx.cfg);
@@ -682,7 +728,7 @@ async function focusedTask(args: ParsedArgs, mode: 'move' | 'close'): Promise<vo
   if (!dryRun && JSON.stringify(before) !== JSON.stringify(next)) {
     await editField(ctx.client, ctx.modules, ctx.entityId, base, [fieldName], next);
   }
-  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client);
+  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client, ctx.waste);
   output({
     dryRun,
     repo,
@@ -699,29 +745,54 @@ async function focusedTask(args: ParsedArgs, mode: 'move' | 'close'): Promise<vo
 
 async function commandInvite(args: ParsedArgs): Promise<void> {
   const did = flag(args, 'did');
-  if (!did) fail('invite-owner requires --did');
-  if (!did.startsWith('did:')) fail('owner DID must start with did:');
+  if (!did) fail('invite requires --did');
+  if (!did.startsWith('did:')) fail('invitee DID must start with did:');
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
-  const entity = ctx.client.entities.find((item: any) => item.id === ctx.entityId);
-  const currentMembers = entity ? Object.keys(ctx.modules.currentView(entity).public.members || {}) : [];
-  if (!dryRun && !currentMembers.includes(did)) {
-    await ctx.client.createMessage(
-      { nominee: did, agentEntityId: ctx.entityId, actor_entity: ctx.entityId },
-      ctx.modules.MessageType.Join,
-      ctx.entityId,
-      ctx.modules.Propagation.Public,
-    );
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
+  const entityId = flag(args, 'entity') || ctx.entityId;
+  const entity = ctx.client.entities.find((item: any) => item.id === entityId);
+  if (!entity) fail(`target entity is not present locally: ${entityId}`);
+  const currentMembers = Object.keys(ctx.modules.currentView(entity).public.members || {});
+  const alreadyMember = currentMembers.includes(did);
+  const canInvite = ctx.client.isMessagePermitted(
+    entityId,
+    ctx.modules.Propagation.Public,
+    ctx.modules.MessageType.Join,
+  );
+  let inviteId: string | undefined;
+  let error: string | undefined;
+  if (!dryRun && !alreadyMember && canInvite) {
+    try {
+      const signed = await ctx.client.createMessage(
+        { nominee: did, agentEntityId: ctx.entityId, actor_entity: ctx.entityId },
+        ctx.modules.MessageType.Join,
+        entityId,
+        ctx.modules.Propagation.Public,
+      );
+      inviteId = messageId(ctx.modules, signed);
+    } catch (e: any) {
+      error = e?.message || String(e);
+    }
   }
-  const syncError = dryRun ? undefined : await safeSync(ctx.client);
+  const outboundSyncError = dryRun || alreadyMember || !canInvite || error
+    ? undefined
+    : await safeSync(ctx.client, ctx.waste);
   output({
+    invited: !dryRun && !alreadyMember && canInvite && !error,
     dryRun,
-    agentEntityId: ctx.entityId,
-    ownerDid: did,
-    alreadyKnownMember: currentMembers.includes(did),
-    peerLink: peerLink(ctx.modules, ctx.client.id, ctx.cfg.relay),
-    sync: syncError ? { ok: false, error: syncError } : { ok: true },
+    entity: entityId,
+    nominee: did,
+    alreadyMember,
+    canInvite,
+    inviteId: inviteId || null,
+    status: alreadyMember ? 'already-member' : canInvite ? (dryRun ? 'ready' : error ? 'failed' : 'pending-acceptance') : 'denied',
+    ...(error ? { error } : {}),
+    sync: inboundSyncError || outboundSyncError
+      ? { ok: false, inboundError: inboundSyncError, outboundError: outboundSyncError }
+      : { ok: true },
   }, ctx.json);
+  if (error || (!alreadyMember && !canInvite)) process.exitCode = 1;
 }
 
 async function commandConnectOwner(args: ParsedArgs): Promise<void> {
@@ -731,38 +802,39 @@ async function commandConnectOwner(args: ParsedArgs): Promise<void> {
   if (!rawPeerLink) fail('connect-owner requires --peer-link');
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
   const peer = parsePeerLink(rawPeerLink, ctx.modules);
   const entity = ctx.client.entities.find((item: any) => item.id === ctx.entityId);
   if (!entity) fail(`agent entity is missing locally: ${ctx.entityId}`);
   const members = Object.keys(ctx.modules.currentView(entity).public.members || {});
   const joins = [avatarDid, peer.id].filter((did) => !members.includes(did));
 
+  const canInvite = ctx.client.isMessagePermitted(
+    ctx.entityId,
+    ctx.modules.Propagation.Public,
+    ctx.modules.MessageType.Join,
+  );
+  if (!canInvite && joins.length) fail(`agent cannot invite members to ${ctx.entityId}`);
+
+  const inviteIds: string[] = [];
   if (!dryRun) {
-    await ctx.client.addPeer(
-      { id: peer.id, publicKey: peer.publicKey, encryption: 'default' },
-      peer.connections,
-    );
-    const returnConnections = ctx.client.getConnections().map(({ transportType, uri }: Dict) => ({ transportType, uri }));
-    const { signedMessage } = await ctx.waste.signMessage({
-      connections: returnConnections,
-      label: 'Myco Code Steward',
-      nonce: `myco-kanban:${ctx.client.id}:${peer.id}`,
-    }, 'connect', false);
-    await ctx.waste.queueMessages([peer.id], [signedMessage]);
+    await ctx.waste.addPeer({ id: peer.id, publicKey: peer.publicKey });
+    // This command is the explicit user consent gate for trusting the owner.
+    // The owner still decides independently whether to trust this agent.
+    await ctx.waste.setTrust(peer.id, true);
     for (const did of joins) {
-      await ctx.client.createMessage(
+      const signed = await ctx.client.createMessage(
         { nominee: did, agentEntityId: ctx.entityId, actor_entity: ctx.entityId },
         ctx.modules.MessageType.Join,
         ctx.entityId,
         ctx.modules.Propagation.Public,
       );
+      inviteIds.push(messageId(ctx.modules, signed));
     }
-    // Re-run after membership changes so Myco queues the complete private
-    // agent-entity history to the newly authorized delivery peer.
-    await ctx.client.addPeer(
-      { id: peer.id, publicKey: peer.publicKey, encryption: 'default' },
-      peer.connections,
-    );
+    await ctx.waste.gossip(peer.id, {
+      respond: true,
+      message: `Connect to ${readState(ctx.cfg).identity.name || 'Myco Code Steward'}`,
+    });
     await ctx.waste.push();
   }
 
@@ -771,9 +843,13 @@ async function commandConnectOwner(args: ParsedArgs): Promise<void> {
     agentEntityId: ctx.entityId,
     avatarDid,
     deliveryPeerDid: peer.id,
-    connections: peer.connections,
-    membershipsAdded: joins,
-    connectRequestQueued: !dryRun,
+    peerAdded: !dryRun,
+    trusted: !dryRun,
+    membershipInvites: joins,
+    inviteIds,
+    trustRequestQueued: !dryRun,
+    legacyRelayUrlsIgnored: peer.legacyRelayUrls,
+    sync: inboundSyncError ? { ok: false, error: inboundSyncError } : { ok: true },
   }, ctx.json);
 }
 
@@ -787,7 +863,7 @@ function viewOf(modules: Dict, entity: any): any | undefined {
 
 async function commandGroups(args: ParsedArgs): Promise<void> {
   const ctx = await initializedClient(args);
-  const syncError = await safeSync(ctx.client);
+  const syncError = await safeSync(ctx.client, ctx.waste);
   const search = flag(args, 'search')?.toLowerCase();
   const all = has(args, 'all');
   const self = [ctx.client.id, ctx.entityId];
@@ -826,7 +902,7 @@ async function commandEntity(args: ParsedArgs): Promise<void> {
   const id = flag(args, 'id');
   if (!id) fail('entity requires --id');
   const ctx = await initializedClient(args);
-  const syncError = await safeSync(ctx.client);
+  const syncError = await safeSync(ctx.client, ctx.waste);
   const entity = ctx.client.entities.find((item: any) => item.id === id);
   if (!entity) {
     output({
@@ -881,7 +957,7 @@ async function commandMessages(args: ParsedArgs): Promise<void> {
   if (!entityId) fail('messages requires --entity');
   const limit = Number.parseInt(flag(args, 'limit') || '50', 10);
   const ctx = await initializedClient(args);
-  const syncError = await safeSync(ctx.client);
+  const syncError = await safeSync(ctx.client, ctx.waste);
   const all = await ctx.client.getMessagesByEntity(entityId);
   const rows = all
     .filter((m: any) => !m.deleted)
@@ -909,24 +985,58 @@ async function commandMessages(args: ParsedArgs): Promise<void> {
 
 async function commandPeers(args: ParsedArgs): Promise<void> {
   const ctx = await initializedClient(args);
-  const syncError = await safeSync(ctx.client);
-  const peers = ctx.client.getPeers().map((p: any) => ({
+  const syncError = await safeSync(ctx.client, ctx.waste);
+  const peers = (ctx.waste.getPeers?.() ?? []).map((p: any) => ({
     id: p.id,
     publicKey: p.publicKey,
     encryption: p.encryption,
-    url: p.url,
+    capabilities: ctx.waste.getCapabilities?.(p.id) ?? {},
+    trusted: ctx.waste.isTrusted?.(p.id) ?? false,
+    connections: (ctx.waste.getConnections?.(p.id) ?? []).map((c: any) => ({
+      connectionId: c.connectionId,
+      transportType: c.transportType,
+      posture: c.posture,
+      uri: c.uri,
+    })),
   }));
-  const connections = ctx.client.getConnections().map((c: any) => ({
+  const ownConnections = (ctx.waste.getConnections?.() ?? []).map((c: any) => ({
     connectionId: c.connectionId,
     transportType: c.transportType,
+    posture: c.posture,
     uri: c.uri,
   }));
   output({
     agentEntityId: ctx.entityId,
     routingDid: ctx.client.id,
     peers,
-    connections,
+    ownConnections,
     sync: syncError ? { ok: false, error: syncError } : { ok: true },
+  }, ctx.json);
+}
+
+async function commandRemovePeer(args: ParsedArgs): Promise<void> {
+  const did = flag(args, 'did');
+  if (!did?.startsWith('did:ed25519:')) fail('remove-peer requires --did did:ed25519:...');
+  const dryRun = has(args, 'dry-run');
+  const ctx = await initializedClient(args);
+  if (did === ctx.client.id) fail('refusing to remove the active routing identity');
+  const peer = (ctx.waste.getPeers?.() ?? []).find((item: any) => item.id === did);
+  const trusted = ctx.waste.isTrusted?.(did) ?? false;
+  const capabilities = ctx.waste.getCapabilities?.(did) ?? {};
+  const connections = (ctx.waste.getConnections?.(did) ?? []).map((c: any) => ({
+    connectionId: c.connectionId,
+    transportType: c.transportType,
+    posture: c.posture,
+  }));
+  if (!dryRun && peer) await ctx.waste.removePeer(did);
+  output({
+    removed: !dryRun && !!peer,
+    dryRun,
+    peerDid: did,
+    found: !!peer,
+    trusted,
+    capabilities,
+    connections,
   }, ctx.json);
 }
 
@@ -943,7 +1053,7 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   if (tier !== 'public' && tier !== 'private') fail('--tier must be public or private');
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
-  const inboundSyncError = await safeSync(ctx.client);
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
   const entity = ctx.client.entities.find((item: any) => item.id === entityId);
   if (!entity) {
     output({
@@ -974,7 +1084,7 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
       error = e?.message || String(e);
     }
   }
-  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client);
+  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client, ctx.waste);
   output({
     edited: !dryRun && canEdit && !error,
     dryRun,
@@ -994,6 +1104,53 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   if (error || !canEdit) process.exitCode = 1;
 }
 
+// Rename the bound identity: updates the local `identity --json` name and, when
+// the edit slot allows, publishes a public-tier Edit so peers see the new name
+// and can mention it.
+async function commandRename(args: ParsedArgs): Promise<void> {
+  const name = flag(args, 'name')?.trim();
+  if (!name) fail('rename requires --name');
+  const dryRun = has(args, 'dry-run');
+  const ctx = await initializedClient(args);
+  const syncError = await safeSync(ctx.client, ctx.waste);
+
+  const state = readState(ctx.cfg);
+  const canEdit = ctx.client.isMessagePermitted(ctx.entityId, ctx.modules.Propagation.Public, ctx.modules.MessageType.Edit);
+  let editId: string | undefined;
+  let error: string | undefined;
+  if (!dryRun && canEdit) {
+    try {
+      const signed = await ctx.client.createMessage(
+        { keys: ['public', 'name'], value: name },
+        ctx.modules.MessageType.Edit,
+        ctx.entityId,
+        ctx.modules.Propagation.Public,
+      );
+      editId = messageId(ctx.modules, signed);
+      state.identity.name = name;
+      writeState(ctx.cfg, state);
+    } catch (e: any) {
+      error = e?.message || String(e);
+    }
+  }
+  const pushError = dryRun || !editId ? undefined : await (async () => {
+    try { await ctx.waste.push(); return undefined; } catch (e: any) { return e?.message || String(e); }
+  })();
+  output({
+    renamed: !dryRun && canEdit && !error,
+    dryRun,
+    name,
+    agentEntityId: ctx.entityId,
+    routingDid: ctx.client.id,
+    publicNameEdit: canEdit ? (editId || null) : null,
+    ...(canEdit ? {} : { reason: 'agent is not in the edit permission slot; public name not changed' }),
+    ...(error ? { error } : {}),
+    sync: syncError ? { ok: false, error: syncError } : { ok: true },
+    push: pushError ? { ok: false, error: pushError } : { ok: true },
+  }, ctx.json);
+  if (error || !canEdit) process.exitCode = 1;
+}
+
 async function commandPost(args: ParsedArgs): Promise<void> {
   const entityId = flag(args, 'entity');
   const title = flag(args, 'title');
@@ -1004,7 +1161,7 @@ async function commandPost(args: ParsedArgs): Promise<void> {
   const pub = has(args, 'public');
   const dryRun = has(args, 'dry-run');
   const ctx = await initializedClient(args);
-  const inboundSyncError = await safeSync(ctx.client);
+  const inboundSyncError = await safeSync(ctx.client, ctx.waste);
   const entity = ctx.client.entities.find((item: any) => item.id === entityId);
   if (!entity) {
     output({
@@ -1023,6 +1180,7 @@ async function commandPost(args: ParsedArgs): Promise<void> {
   const self = [ctx.client.id, ctx.entityId];
   const agentIsMember = members.some((member: string) => self.includes(member));
   const propagation = pub ? ctx.modules.Propagation.Public : ctx.modules.Propagation.Private;
+  const canPost = ctx.client.isMessagePermitted(entityId, propagation, ctx.modules.MessageType.Note);
   const content: Dict = {
     title,
     ...(body ? { body } : {}),
@@ -1032,7 +1190,7 @@ async function commandPost(args: ParsedArgs): Promise<void> {
   };
   let postId: string | undefined;
   let error: string | undefined;
-  if (!dryRun) {
+  if (!dryRun && canPost) {
     try {
       const signed = await ctx.client.createMessage(content, ctx.modules.MessageType.Note, entityId, propagation);
       postId = messageId(ctx.modules, signed);
@@ -1040,21 +1198,23 @@ async function commandPost(args: ParsedArgs): Promise<void> {
       error = e?.message || String(e);
     }
   }
-  const outboundSyncError = dryRun ? undefined : await safeSync(ctx.client);
+  const outboundSyncError = dryRun || !canPost ? undefined : await safeSync(ctx.client, ctx.waste);
   output({
-    posted: !dryRun && !error,
+    posted: !dryRun && canPost && !error,
     dryRun,
     entity: entityId,
     title,
     propagation,
     postId: postId || null,
     agentIsMember,
+    agentCanPost: canPost,
+    ...(!canPost ? { reason: 'ACL denies this identity permission to create the Note' } : {}),
     ...(error ? { error } : {}),
     sync: inboundSyncError || outboundSyncError
       ? { ok: false, inboundError: inboundSyncError, outboundError: outboundSyncError }
       : { ok: true },
   }, ctx.json);
-  if (error) process.exitCode = 1;
+  if (error || !canPost) process.exitCode = 1;
 }
 
 async function commandAddPeer(args: ParsedArgs): Promise<void> {
@@ -1064,17 +1224,70 @@ async function commandAddPeer(args: ParsedArgs): Promise<void> {
   const ctx = await initializedClient(args);
   const peer = parsePeerLink(rawPeerLink, ctx.modules);
   if (!dryRun) {
-    await ctx.client.addPeer(
-      { id: peer.id, publicKey: peer.publicKey, encryption: 'default' },
-      peer.connections,
-    );
+    await ctx.waste.addPeer({ id: peer.id, publicKey: peer.publicKey });
   }
-  const syncError = dryRun ? undefined : await safeSync(ctx.client);
+  const syncError = dryRun ? undefined : await safeSync(ctx.client, ctx.waste);
   output({
     added: !dryRun,
     dryRun,
     peerDid: peer.id,
-    connections: peer.connections,
+    legacyRelayUrlsIgnored: peer.legacyRelayUrls,
+    sync: syncError ? { ok: false, error: syncError } : { ok: true },
+  }, ctx.json);
+}
+
+// Accept pending group invites naming this identity. Scans every known
+// entity for an unresolved Join whose nominee is our DID and authors the
+// Accept (only the nominee may). --entity scopes to one group; default
+// accepts every pending invite.
+async function commandJoin(args: ParsedArgs): Promise<void> {
+  const scope = flag(args, 'entity');
+  const dryRun = has(args, 'dry-run');
+  const ctx = await initializedClient(args);
+  const syncError = await safeSync(ctx.client, ctx.waste);
+  const MessageType = ctx.modules.MessageType;
+  const nominees = new Set([ctx.client.id, ctx.entityId]);
+  const results: any[] = [];
+  for (const entity of ctx.client.entities) {
+    if (scope && entity.id !== scope) continue;
+    let messages: any[] = [];
+    try { messages = await ctx.client.getMessagesByEntity(entity.id); } catch { continue; }
+    const joins = messages.filter((m: any) =>
+      m.message?.data?.type === MessageType.Join
+      && nominees.has(m.message?.data?.content?.nominee));
+    for (const join of joins) {
+      const nominee = join.message.data.content.nominee;
+      const entry: any = { entity: entity.id, joinId: join.id, nominee };
+      const alreadyAccepted = messages.some((m: any) =>
+        m.message?.data?.type === MessageType.Accept
+        && (m.message?.data?.content as any)?.join === join.id);
+      if (alreadyAccepted) { entry.status = 'already-accepted'; results.push(entry); continue; }
+      if (dryRun) { entry.status = 'pending'; results.push(entry); continue; }
+      try {
+        const previousIdentity = ctx.client.currentIdentity();
+        if (previousIdentity !== nominee) ctx.client.switchEntity(nominee);
+        try {
+          await ctx.client.createMessage({}, MessageType.Accept, join.id, ctx.modules.Propagation.Private);
+        } finally {
+          if (ctx.client.currentIdentity() !== previousIdentity) ctx.client.switchEntity(previousIdentity);
+        }
+        entry.status = 'accepted';
+      } catch (e: any) {
+        entry.status = 'failed';
+        entry.error = e?.message ?? String(e);
+      }
+      results.push(entry);
+    }
+  }
+  const pushError = dryRun ? undefined : await (async () => {
+    try { await ctx.waste.push(); return undefined; } catch (e: any) { return e?.message ?? String(e); }
+  })();
+  output({
+    agentEntityId: ctx.entityId,
+    routingDid: ctx.client.id,
+    dryRun,
+    results,
+    push: pushError ? { ok: false, error: pushError } : { ok: true },
     sync: syncError ? { ok: false, error: syncError } : { ok: true },
   }, ctx.json);
 }
@@ -1086,17 +1299,21 @@ async function main(): Promise<void> {
     case 'doctor': await commandDoctor(args); break;
     case 'init': await commandInit(args); break;
     case 'identity': await commandIdentity(args); break;
+    case 'rename': await commandRename(args); break;
     case 'groups': await commandGroups(args); break;
     case 'entity': await commandEntity(args); break;
     case 'messages': await commandMessages(args); break;
     case 'peers': await commandPeers(args); break;
     case 'add-peer': await commandAddPeer(args); break;
+    case 'remove-peer': await commandRemovePeer(args); break;
+    case 'join': await commandJoin(args); break;
     case 'edit-acl': await commandEditAcl(args); break;
     case 'post': await commandPost(args); break;
     case 'snapshot': await commandSnapshot(args); break;
     case 'reconcile': await commandReconcile(args); break;
     case 'move': await focusedTask(args, 'move'); break;
     case 'close': await focusedTask(args, 'close'); break;
+    case 'invite': await commandInvite(args); break;
     case 'invite-owner': await commandInvite(args); break;
     case 'connect-owner': await commandConnectOwner(args); break;
     default: fail(`unknown command: ${args.command}`);

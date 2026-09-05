@@ -1,11 +1,11 @@
 ---
 name: myco
 description: >-
-  Operate native Myco identity, groups, membership, peers, messaging, ACLs,
+  Operate native Myco identities, groups, memberships, peers, messages, ACLs,
   and Kanban boards through the bundled CLI. TRIGGER on Myco identity or group
-  inspection, peer sync, posting, owner connection, or board/card management.
-  SKIP generic Kanban, non-Myco messaging, UI automation, and unrelated Myco
-  development.
+  inspection, peer sync, posting, invitations, owner connection, or board/card
+  management. SKIP generic Kanban, non-Myco messaging, UI automation, and
+  unrelated Myco development.
 metadata:
   activation: intent
 ---
@@ -42,9 +42,38 @@ Use `MYCO_ROOT` only when Myco is not at `/home/user/code/myco`. Use
 `MYCO_DATA_DIR` only for a non-default identity-data location;
 `MYCO_KANBAN_DATA_DIR` is a legacy alias.
 
+## Identity model
+
+The CLI controls one identity per data directory. Multiple identities can
+coexist on one computer, but never share their data directory or key material.
+Everything visible to a command is scoped to the selected identity.
+
+- **Where identities live.** One data directory per identity. Default
+  `~/.local/share/myco`, overridden by `MYCO_DATA_DIR` (legacy alias
+  `MYCO_KANBAN_DATA_DIR`). Give each additional identity its own directory.
+  The directory holds:
+  - `agent-did` — routing DID (`did:ed25519:...`), signing + delivery infra.
+  - `agent-entity` — agent entity id (`did:myco:...`), the product identity.
+  - `runtime-key` — private signing material. Never print or read it.
+  - `myco.db` / `waste.db` — entity/message state and waste blobs.
+  - `kanban-state.json` — the identity `name` plus per-repo board state.
+- **Which identity you control.** `scripts/myco identity --json` reports
+  `name`, `agentEntityId`, and `routingDid`. `agentEntityId` is the product
+  identity; `routingDid` is signing/delivery infrastructure. To operate as a
+  *different* identity, run the CLI with that identity's `MYCO_DATA_DIR`.
+  A human and an agent should normally keep separate identities and connect as
+  peers; sharing one signer erases authorship and trust boundaries.
+- **Identity by name.** The identity has a human `name` (set at
+  `init --name`, kept in `kanban-state.json` and the entity's public `name`).
+  Rename an existing identity with `scripts/myco rename --name <name>` — it
+  updates the local name and publishes a public-tier Edit so peers see and can
+  mention the new name. Resolve a name to an id with
+  `scripts/myco groups --search <name>` then `scripts/myco entity --id <did:myco:...>`.
+  A mention (`@<name>`) refers to that same entity id through its public name.
+
 ## Read before writing
 
-Prefer read-only `identity`, `groups`, `entity`, `peers`, and `snapshot`
+Prefer read-only `identity`, `groups`, `entity`, `messages`, `peers`, and `snapshot`
 commands. Absence after sync means an entity is not present locally; report
 that honestly instead of guessing or self-joining.
 
@@ -75,4 +104,6 @@ request.
 - Never regenerate a missing or mismatched bound identity.
 - Do not invite, join, alter membership, edit ACLs, post, close, or delete
   without the user's authorization and the required Myco permission.
+- Membership is two-step: an authorized member creates a Join invitation and
+  the nominee creates the Accept. Never report an invitation as membership.
 - A sync failure does not authorize a second identity or bypassing consent.
