@@ -26,8 +26,8 @@ Review only behavior introduced by a pull request or branch diff. Findings lead;
 every finding must be actionable, independently verified, and anchored to a
 changed line. Default is read-only.
 
-Load `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Run
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Run
 `scripts/changed_scope.py` for locally available refs. When dispatching, load
 `references/reviewer-prompts.md` and only the selected lenses.
 

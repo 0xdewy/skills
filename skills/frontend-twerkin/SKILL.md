@@ -25,7 +25,7 @@ Use Playwright to verify frontend workflows, fix failures, and re-test. Scope th
 pass to the user's request unless they explicitly ask for exhaustive QA.
 
 Load `../common/patterns/quality.md`, `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`.
+and `../common/patterns/scaling.md`.
 Run `scripts/detect_stack.sh` first. For web apps, load only the relevant
 checklist from `references/adversarial-attacks.md` or
 `references/css-audit-checklist.md`; when native is detected, load

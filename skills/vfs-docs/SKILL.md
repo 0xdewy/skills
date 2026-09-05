@@ -26,7 +26,8 @@ to: every path is a statement, every directory is a zoom level, and
 `tree docs/` alone conveys the mental model. The tree is the only index — no
 README, NAVIGATION, or context-map files inside `docs/`.
 
-Load `../common/patterns/execution-contract.md`, `../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Load
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Load
 `references/tree-design.md` before designing or editing a tree. Prefer the
 skill's scripts over handwritten equivalents: `scripts/analyze_repo.py` for
 repo shape, `scripts/lint_tree.py` for convention checks.

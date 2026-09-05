@@ -23,9 +23,8 @@ metadata:
 Produce correct work, then refine qualities that strict requirements often
 leave unspecified. Beauty is a defeasible design prior, never proof.
 
-Load `../common/patterns/quality.md`,
-`../common/patterns/execution-contract.md`, and
-`../common/patterns/workspace.md`. Load `references/beauty-criteria.md` before
+Load `../common/patterns/quality.md` and
+`../common/patterns/execution-contract.md`. Load `references/beauty-criteria.md` before
 review and `references/socrates-prompt.md` only when dispatching a reviewer.
 
 ## Modes

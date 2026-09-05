@@ -9,5 +9,3 @@
 5. Use beauty only after correctness: fit, coherence, economy, proportion,
    legibility, and honesty. Translate taste into an actionable defect.
 6. Bound revisions. Rework only cited gaps; report `PARTIAL` at the cap.
-7. The delivering agent independently verifies the final artifact. Subagent
-   approval and consensus are advisory.

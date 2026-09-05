@@ -7,6 +7,29 @@ identity data directory has one routing DID for signing/delivery and one agent
 entity identity. Multiple data directories allow separate identities on the
 same computer.
 
+- **Where identities live.** One data directory per identity. Default
+  `~/.local/share/myco`, overridden by `MYCO_DATA_DIR` (legacy alias
+  `MYCO_KANBAN_DATA_DIR`). Give each additional identity its own directory.
+  The directory holds:
+  - `agent-did` — routing DID (`did:ed25519:...`), signing + delivery infra.
+  - `agent-entity` — agent entity id (`did:myco:...`), the product identity.
+  - `runtime-key` — private signing material. Never print or read it.
+  - `myco.db` / `waste.db` — entity/message state and waste blobs.
+  - `kanban-state.json` — the identity `name` plus per-repo board state.
+- **Which identity you control.** `scripts/myco identity --json` reports
+  `name`, `agentEntityId`, and `routingDid`. `agentEntityId` is the product
+  identity; `routingDid` is signing/delivery infrastructure. To operate as a
+  *different* identity, run the CLI with that identity's `MYCO_DATA_DIR`.
+  A human and an agent should normally keep separate identities and connect as
+  peers; sharing one signer erases authorship and trust boundaries.
+- **Identity by name.** The identity has a human `name` (set at
+  `init --name`, kept in `kanban-state.json` and the entity's public `name`).
+  Rename an existing identity with `scripts/myco rename --name <name>` — it
+  updates the local name and publishes a public-tier Edit so peers see and can
+  mention the new name. Resolve a name to an id with
+  `scripts/myco groups --search <name>` then `scripts/myco entity --id <did:myco:...>`.
+  A mention (`@<name>`) refers to that same entity id through its public name.
+
 ```bash
 scripts/myco identity --json
 scripts/myco groups [--search NAME] [--all] [--json]

@@ -162,7 +162,7 @@ installation—verify installed status separately.
 
 - **Routing before weight.** Frontmatter catches user language; `../common/ROUTING.md`
   catches task shape. If a task is one direct action, do it directly.
-- **Cheap first.** Skills with modes start at `--quick`/lite unless the task
+- **Cheap first.** Skills with modes start at `--quick` unless the task
   genuinely needs parallelism, isolated context, or multiple workstreams.
 - **Lazy context.** Keep `SKILL.md` small. Put long prompts, examples, scripts,
   and domain facts in lazy-loaded resources.

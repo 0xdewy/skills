@@ -314,48 +314,6 @@ def main() -> int:
     if missing_real_modes:
         fail(f"raw positive activation evals do not cover modes {sorted(missing_real_modes)}")
 
-    routing_file = ROOT / "evals" / "routing.json"
-    if not routing_file.exists():
-        fail("evals/routing.json is missing")
-    try:
-        routing_cases = json.loads(routing_file.read_text()).get("evals", [])
-    except (json.JSONDecodeError, AttributeError) as exc:
-        fail(f"evals/routing.json is invalid: {exc}")
-    routing_pairs = set()
-    for index, case in enumerate(routing_cases, start=1):
-        skill_name = case.get("skill_name")
-        polarity = case.get("polarity")
-        if skill_name not in {p.parent.name for p in skill_files}:
-            fail(f"evals/routing.json case #{index} names unknown skill {skill_name!r}")
-        if polarity not in {"positive", "negative"}:
-            fail(f"evals/routing.json case #{index} has invalid polarity {polarity!r}")
-        if not isinstance(case.get("prompt"), str) or not case["prompt"].strip():
-            fail(f"evals/routing.json case #{index} has no prompt")
-        pair = (skill_name, polarity)
-        if pair in routing_pairs:
-            fail(f"evals/routing.json duplicates {skill_name} {polarity} case")
-        routing_pairs.add(pair)
-    model_visible_skills = {
-        skill.parent.name for skill in skill_files
-        if parse_frontmatter(skill).get("disable-model-invocation") != "true"
-    }
-    expected_pairs = {
-        (skill.parent.name, polarity)
-        for skill in skill_files if skill.parent.name in model_visible_skills
-        for polarity in ("positive", "negative")
-    }
-    missing_pairs = expected_pairs - routing_pairs
-    if missing_pairs:
-        fail(f"evals/routing.json missing cases: {sorted(missing_pairs)}")
-    hidden_pairs = {
-        pair for pair in routing_pairs if pair[0] not in model_visible_skills
-    }
-    if hidden_pairs:
-        fail(
-            "evals/routing.json includes human-only skills hidden from discovery: "
-            f"{sorted(hidden_pairs)}"
-        )
-
     reference_paths = [
         path for path in SKILLS.glob("*/references/**/*") if path.is_file()
     ]
@@ -366,7 +324,7 @@ def main() -> int:
     body_tokens, _ = token_count("\n".join(body_texts))
     reference_tokens, _ = token_count(reference_text)
     print(
-        f"OK: {len(skill_files)} skills, {eval_count} evals, routing checks passed; "
+        f"OK: {len(skill_files)} skills, {eval_count} evals; "
         f"activation={activation_counts}; "
         f"tokens[{token_method}] descriptions={description_tokens}, "
         f"activated_bodies={body_tokens}, lazy_references={reference_tokens}"

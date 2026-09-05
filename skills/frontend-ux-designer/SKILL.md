@@ -27,7 +27,7 @@ Audit rendered UI with Playwright, fix targeted visual/UX issues, and verify the
 screenshots. Do not run broad functional QA unless needed to inspect states.
 
 Load `../common/patterns/quality.md`, `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`.
+and `../common/patterns/scaling.md`.
 Use `scripts/audit.py <base-url> --output-dir <WORKSPACE>/ux-audit` for the
 initial screenshot/computed-style inventory; pass `--routes` when scope is
 explicitly limited.

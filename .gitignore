@@ -34,8 +34,5 @@ skills/*/*.pyc
 .claude/settings.local.json
 skills/**/.claude/settings.local.json
 
-# Episodic memory — per-installation runtime observations
-skills/*/learnings/
-
 # Preserved user data from the retired simple-memory skill
 skills/.retired-simple-memory/

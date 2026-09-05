@@ -27,7 +27,7 @@ Run a cited scientific literature review and write
 `research/<slug>/RESEARCH.md`.
 
 Load `../common/patterns/knowledge.md`, `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Use scripts in
+and `../common/patterns/scaling.md`. Use scripts in
 `scripts/` for paper search/fetch when available. Load `references/report-template.md`
 only when writing the report.
 

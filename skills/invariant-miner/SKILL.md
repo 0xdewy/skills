@@ -24,8 +24,8 @@ metadata:
 Discover general behavioral properties, then attempt to disprove them with
 executable tests. A plausible statement is a candidate, not an invariant.
 
-Load `../common/patterns/execution-contract.md`,
-`../common/patterns/workspace.md`, and `../common/patterns/scaling.md`. Consult
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Consult
 `../common/ROUTING.md` for overlap. Load `references/methods.md` only when
 selecting a falsification technique. Use `scripts/validate_ledger.py` before
 completion.

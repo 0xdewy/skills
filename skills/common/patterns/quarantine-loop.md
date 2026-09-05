@@ -3,14 +3,14 @@
 Shared converge-and-revert loop for read-only-agent cleanup skills:
 `code-smellz` and `shrinkray`. Both run the same six-phase skeleton — they differ
 only in agent roster, finding schema, and which gates they enable. Load this
-alongside `execution-contract.md` (patch-only rollback, `DONE:` signal) and
-`workspace.md` (scratch directory resolution). Each skill defines its own agents
+alongside `execution-contract.md` (workspace resolution, patch-only rollback,
+`DONE:` signal). Each skill defines its own agents
 and output schema in its `references/subagent-prompts.md`; this file is the loop
 they both run.
 
 ## Contract summary
 
-- **Phase 0 — Setup & baseline.** Resolve a scratch workspace (see `workspace.md`).
+- **Phase 0 — Setup & baseline.** Resolve `WORKSPACE` (see `execution-contract.md`).
   If a prior run's output dir exists, archive it (`mv … .prev`) before recreating.
   Read the one-sentence project goal from `CLAUDE.md` / `README.md` /
   `package.json` / `pyproject.toml`. Detect the test runner and baseline LOC with

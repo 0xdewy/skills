@@ -33,12 +33,7 @@ tooling, caches, or runtime state:
 - `**/*.pyc`
 - `.claude/settings.local.json`
 - `skills/**/.claude/settings.local.json`
-- `skills/*/learnings/`
 - generated reports, temporary workspaces, and cache directories
-
-Do not read `skills/*/memory/memory.jsonl` unless the active task is explicitly
-about that memory skill or the user asks to inspect saved memories. Treat memory
-files as persisted user data, not as ordinary source docs.
 
 ## Safety
 
@@ -52,16 +47,12 @@ files as persisted user data, not as ordinary source docs.
 
 ## Verification
 
-For broad skill edits, run at least:
+For any skill edit, run:
 
 ```bash
-python3 - <<'PY'
-import json, pathlib
-for p in pathlib.Path('skills').glob('*/evals/evals.json'):
-    json.loads(p.read_text())
-print('eval json ok')
-PY
+python3 scripts/check_sources.py
+python3 scripts/validate_skills.py
 ```
 
-For shell scripts, run `bash -n path/to/script.sh`. For Python scripts, prefer
-`ast.parse` over `py_compile` so verification does not create `__pycache__/`.
+`check_sources.py` parses every Python, shell, and eval JSON file without
+creating `__pycache__/`; `validate_skills.py` checks the skill contracts.

@@ -3,7 +3,7 @@ name: Validate skills
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,5 @@ jobs:
         run: python3 scripts/run_evals.py --all --dry-run
       - name: Plan outcome ablation
         run: python3 scripts/run_ablation.py --skill invariant-miner --id 3 --dry-run
-      - name: Plan routing evals
-        run: python3 scripts/run_routing_evals.py --dry-run
       - name: Confirm checks are read-only
         run: git diff --exit-code

@@ -24,8 +24,8 @@ metadata:
 Turn competing repository artifacts into atomic, source-anchored claims and
 classify their disagreements without inventing a source of truth.
 
-Load `../common/patterns/execution-contract.md`, `../common/patterns/workspace.md`,
-and `../common/patterns/scaling.md`; consult `../common/ROUTING.md` for overlap.
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`; consult `../common/ROUTING.md` for overlap.
 Use `references/claim-model.md` and `scripts/reconcile_claims.py` when extracting
 and classifying claims.
 
