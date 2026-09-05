@@ -248,9 +248,10 @@ cmd_list() {
         local name
         name=$(basename "$entry")
         if [[ -L "$entry" ]]; then
-            local target
+            local target state="symlink"
             target=$(readlink "$entry")
-            printf '%-30s [symlink → %s]\n' "$name" "$target"
+            [[ -e "$entry" ]] || state="BROKEN symlink"
+            printf '%-30s [%s → %s]\n' "$name" "$state" "$target"
         else
             local branch=""
             branch=$(git -C "$entry" branch --show-current 2>/dev/null || true)
@@ -379,6 +380,17 @@ cmd_repair() {
     fi
 
     local count=0
+
+    # Drop central entries that are symlinks to a source that no longer exists
+    # (a skill directory deleted from its repo). Tool links to them are pruned
+    # below once the entry is gone.
+    while IFS= read -r -d '' entry; do
+        if [[ -L "$entry" && ! -e "$entry" ]]; then
+            _yellow "Pruning dead central link: $entry → $(readlink "$entry")"
+            rm "$entry"
+            (( ++count )) || true
+        fi
+    done < <(find "$CENTRAL_STORE" -maxdepth 1 -mindepth 1 -type l -print0)
 
     # Remove orphaned tool links only when they point into this central store
     # and their central entry no longer exists. Leave unrelated user-managed
