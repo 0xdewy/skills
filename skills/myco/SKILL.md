@@ -6,8 +6,6 @@ description: >-
   inspection, peer sync, posting, invitations, owner connection, or board/card
   management. SKIP generic Kanban, non-Myco messaging, UI automation, and
   unrelated Myco development.
-metadata:
-  activation: intent
 ---
 
 # Myco

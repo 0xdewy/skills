@@ -9,7 +9,6 @@ metadata:
   author: 0xdewy
   version: 2.0.0
   category: testing
-  activation: explicit
   tags:
     - frontend
     - qa

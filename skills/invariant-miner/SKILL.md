@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 1.0.0
   category: testing
-  activation: explicit
   tags:
     - invariants
     - property-testing

@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 1.0.0
   category: quality
-  activation: explicit
   tags:
     - specifications
     - contracts

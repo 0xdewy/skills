@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 3.0.0
   category: meta
-  activation: explicit
   tags:
     - documentation
     - unix-philosophy

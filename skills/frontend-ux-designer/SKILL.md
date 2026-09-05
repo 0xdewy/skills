@@ -9,7 +9,6 @@ metadata:
   author: 0xdewy
   version: 1.0.0
   category: other
-  activation: explicit
   tags:
     - frontend
     - ux

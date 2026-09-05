@@ -38,22 +38,19 @@ See [INSTALL.md](INSTALL.md) for Python and system requirements.
 ---
 
 
-Every skill declares one activation mode under `metadata`:
+Every skill is one of two kinds, read off its frontmatter:
 
-```yaml
-metadata:
-  activation: intent
-description: Does X. TRIGGER on: "audit my design", "fix the UI".
-             SKIP on: "performance issues", "add a backend endpoint".
-```
+- **Model-invocable.** The description carries concise `TRIGGER` and `SKIP`
+  phrase boundaries so the agent can route to it:
 
-- `namespace`: a distinctive product/protocol domain; the short description is
-  enough to route it.
-- `intent`: natural-language requests can overlap; use concise `TRIGGER` and
-  `SKIP` boundaries.
-- `explicit`: costly workflows or personas; say they run only when explicitly
-  requested. Human-only skills also set `disable-model-invocation: true`;
-  coordinator-callable exceptions set `metadata.composable: true`.
+  ```yaml
+  description: Does X. TRIGGER on: "audit my design", "fix the UI".
+               SKIP on: "performance issues", "add a backend endpoint".
+  ```
+
+- **Human-only.** Costly workflows and personas set
+  `disable-model-invocation: true` and say they run only when explicitly
+  requested. No trigger list.
 
 ```
 You: "audit my app's design"
@@ -178,7 +175,7 @@ python3 scripts/validate_skills.py
 ```
 
 It checks skill frontmatter, size limits, stale forbidden strings, meta-skill
-routing references, activation-mode contracts, token budgets, and eval JSON.
+routing references, invocation contracts, token budgets, and eval JSON.
 
 To execute evals against a live agent backend and grade the results:
 
@@ -212,15 +209,13 @@ python3 scripts/check_domain_freshness.py
 
 ## Creating a Skill
 
-Skills are `SKILL.md` files with YAML frontmatter that declare their name,
-description, and activation contract:
+Skills are `SKILL.md` files with YAML frontmatter that declare their name and
+description:
 
 ```markdown
 ---
 name: my-skill
 description: What it does. TRIGGER on: "these phrases". SKIP on: "those phrases".
-metadata:
-  activation: intent
 ---
 
 ## Workflow

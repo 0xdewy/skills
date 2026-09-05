@@ -4,10 +4,10 @@
     {
       "id": 1,
       "prompt": "make a skill for summarizing git diffs",
-      "expected_output": "Creates a new intent-routed SKILL.md with proper frontmatter (name, description with TRIGGER/SKIP, metadata.activation, license), concise workflow, and DONE: completion signal. Produces references/ if needed.",
+      "expected_output": "Creates a new model-invocable SKILL.md with proper frontmatter (name, description with TRIGGER/SKIP, license), concise workflow, and DONE: completion signal. Produces references/ if needed.",
       "expectations": [
         "New SKILL.md file is created with YAML frontmatter delimited by ---",
-        "metadata.activation is set to intent",
+        "Leaves the skill model-invocable (no disable-model-invocation flag)",
         "description field contains TRIGGER on: and SKIP on: clauses",
         "Skill body is concise and routes long examples/templates to lazy-loaded files",
         "Skill ends with a DONE: completion signal",
@@ -16,11 +16,11 @@
     },
     {
       "id": 2,
-      "prompt": "improve my skill \u2014 the frontend-twerkin skill triggers too often on casual conversation",
-      "expected_output": "Loads the target skill, confirms its activation mode, analyzes the description's routing quality, and proposes specific refinements.",
+      "prompt": "improve my skill \u2014 the myco skill triggers too often on generic Kanban conversation",
+      "expected_output": "Loads the target skill, confirms it is model-invocable, analyzes the description's routing quality, and proposes specific refinements.",
       "expectations": [
         "Reads the target skill's SKILL.md before proposing changes",
-        "Keeps frontend-twerkin in intent activation mode",
+        "Keeps myco model-invocable instead of hiding it behind disable-model-invocation",
         "Proposes specific, word-level changes to description field",
         "Preserves existing skill functionality while narrowing triggers",
         "Adds or sharpens SKIP on: clauses to exclude false positives"

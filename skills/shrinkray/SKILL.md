@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 2.1.0
   category: meta
-  activation: explicit
   tags:
     - refactoring
     - code-size

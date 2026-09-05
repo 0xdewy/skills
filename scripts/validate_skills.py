@@ -37,13 +37,10 @@ FORBIDDEN_ACTIVE_TEXT = [
 MAX_SKILL_BYTES = 5_000
 MAX_DESCRIPTION_CHARS = 450
 MAX_PROMPT_BYTES = 12_000
-ACTIVATION_MODES = ("namespace", "intent", "explicit")
 PROMPT_TYPES = ("forced", "activation", "anti_trigger")
-ACTIVATION_DESCRIPTION_LIMITS = {
-    "namespace": 260,
-    "explicit": 300,
-    "intent": MAX_DESCRIPTION_CHARS,
-}
+# A skill is either hidden from the model (disable-model-invocation: true, run
+# only when a human asks) or model-invocable (routes on TRIGGER/SKIP phrases).
+DESCRIPTION_LIMITS = {"explicit": 300, "intent": MAX_DESCRIPTION_CHARS}
 RESOURCE_REF_RE = re.compile(r"`((?:\.\./common|references|scripts)/[^`\s,;)]+)`")
 
 
@@ -118,17 +115,15 @@ def main() -> int:
     body_chars = 0
     description_texts = []
     body_texts = []
-    activation_counts = {mode: 0 for mode in ACTIVATION_MODES}
+    activation_counts = {mode: 0 for mode in DESCRIPTION_LIMITS}
     for skill in skill_files:
         rel = skill.relative_to(ROOT)
         text = skill.read_text()
         frontmatter = parse_frontmatter(skill)
-        frontmatter_text = text.split("---", 2)[1]
         name = frontmatter.get("name")
         description = frontmatter.get("description")
-        activation = frontmatter.get("activation")
         disabled = frontmatter.get("disable-model-invocation") == "true"
-        composable = frontmatter.get("composable") == "true"
+        activation = "explicit" if disabled else "intent"
 
         if not name:
             fail(f"{rel} missing frontmatter name")
@@ -138,37 +133,22 @@ def main() -> int:
             fail(f"{rel} name must be <=64 lowercase letters, numbers, or hyphens")
         if "<" in name or ">" in name or "<" in description or ">" in description:
             fail(f"{rel} name/description may not contain XML tags")
-        if activation not in ACTIVATION_MODES:
-            fail(
-                f"{rel} metadata.activation must be one of "
-                f"{sorted(ACTIVATION_MODES)}, got {activation!r}"
-            )
-        if not re.search(rf"^  activation:\s*{re.escape(activation)}\s*$", frontmatter_text, re.M):
-            fail(f"{rel} activation must be declared under metadata")
-        description_limit = ACTIVATION_DESCRIPTION_LIMITS[activation]
+        description_limit = DESCRIPTION_LIMITS[activation]
         if len(description) > description_limit:
             fail(
                 f"{rel} description is {len(description)} chars; "
                 f"keep {activation} routing metadata under {description_limit}"
             )
-        if activation == "intent":
-            if "TRIGGER" not in description or "SKIP" not in description:
-                fail(f"{rel} intent mode requires TRIGGER and SKIP boundaries")
-        elif "TRIGGER" in description or "SKIP" in description:
-            fail(f"{rel} {activation} mode must not carry TRIGGER/SKIP lists")
-        if activation == "explicit" and "only use when explicitly" not in description.lower():
-            fail(f"{rel} explicit mode must say 'Only use when explicitly requested'")
-        if activation == "explicit" and disabled == composable:
+        if disabled:
+            if "TRIGGER" in description or "SKIP" in description:
+                fail(f"{rel} is hidden from the model; drop the TRIGGER/SKIP list")
+            if "only use when explicitly" not in description.lower():
+                fail(f"{rel} is hidden from the model and must say 'Only use when explicitly requested'")
+        elif "TRIGGER" not in description or "SKIP" not in description:
             fail(
-                f"{rel} explicit mode requires exactly one of "
-                "disable-model-invocation: true or metadata.composable: true"
+                f"{rel} is model-invocable and needs TRIGGER and SKIP boundaries, "
+                "or disable-model-invocation: true"
             )
-        if activation != "explicit" and (disabled or composable):
-            fail(f"{rel} invocation policy fields are only valid for explicit mode")
-        if activation == "namespace":
-            parts = [re.sub(r"v?\d+$", "", part) for part in re.split(r"[-_]", name)]
-            if not any(part and part.lower() in description.lower() for part in parts):
-                fail(f"{rel} namespace description must name its domain")
         if name != skill.parent.name:
             fail(f"{rel} name {name!r} does not match directory {skill.parent.name!r}")
         if "[TODO" in text or "TODO:" in text:
@@ -295,24 +275,16 @@ def main() -> int:
             eval_count += 1
         routing_coverage[eval_file.parents[1].name] = case_types
 
-    real_activation_modes = set()
     for skill_file in skill_files:
         name = skill_file.parent.name
         if name not in routing_coverage:
             fail(f"skills/{name} has no evals/evals.json")
         modes = routing_coverage[name]
-        if "activation" in modes:
-            real_activation_modes.add(parse_frontmatter(skill_file).get("activation"))
-        if "anti_trigger" not in modes and parse_frontmatter(skill_file).get("activation") != "namespace":
+        if "anti_trigger" not in modes:
             fail(f"skills/{name} has no anti_trigger eval")
-
-    declared_modes = {
-        parse_frontmatter(path).get("activation") for path in skill_files
-        if parse_frontmatter(path).get("disable-model-invocation") != "true"
-    }
-    missing_real_modes = declared_modes - real_activation_modes
-    if missing_real_modes:
-        fail(f"raw positive activation evals do not cover modes {sorted(missing_real_modes)}")
+        visible = parse_frontmatter(skill_file).get("disable-model-invocation") != "true"
+        if visible and "activation" not in modes:
+            fail(f"skills/{name} is model-invocable but has no activation eval")
 
     reference_paths = [
         path for path in SKILLS.glob("*/references/**/*") if path.is_file()
