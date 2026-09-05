@@ -21,6 +21,7 @@ Load only the reference needed for the request:
 
 - Identity, groups, membership, peers, posts, owner connections, or ACLs:
   `references/entities-and-access.md`.
+- Explicitly requested scheduled OpenCode replies: `references/addressed-inbox.md`.
 - Project snapshots, desired-state reconciliation, moving, or closing cards:
   `references/board-workflows.md`.
 - Desired-state JSON schema: `references/manifest.md`.
@@ -48,15 +49,9 @@ The CLI controls one identity per data directory. Multiple identities can
 coexist on one computer, but never share their data directory or key material.
 Everything visible to a command is scoped to the selected identity.
 
-- **Where identities live.** One data directory per identity. Default
-  `~/.local/share/myco`, overridden by `MYCO_DATA_DIR` (legacy alias
-  `MYCO_KANBAN_DATA_DIR`). Give each additional identity its own directory.
-  The directory holds:
-  - `agent-did` — routing DID (`did:ed25519:...`), signing + delivery infra.
-  - `agent-entity` — agent entity id (`did:myco:...`), the product identity.
-  - `runtime-key` — private signing material. Never print or read it.
-  - `myco.db` / `waste.db` — entity/message state and waste blobs.
-  - `kanban-state.json` — the identity `name` plus per-repo board state.
+- **Storage.** Default `~/.local/share/myco`, overridden by `MYCO_DATA_DIR`.
+  Keep each identity in a separate directory. `runtime-key` is private signing
+  material; never print or read it.
 - **Which identity you control.** `scripts/myco identity --json` reports
   `name`, `agentEntityId`, and `routingDid`. `agentEntityId` is the product
   identity; `routingDid` is signing/delivery infrastructure. To operate as a
