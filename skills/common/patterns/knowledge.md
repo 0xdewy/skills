@@ -1,6 +1,6 @@
 # Knowledge Patterns
 
-Loaded by reference and research skills (teach-me, researcher, web-scraping).
+Loaded by skills that answer from external sources (web-scraping).
 Also load `execution-contract.md` when the skill writes files, runs scripts, or
 produces a durable report.
 
