@@ -18,6 +18,7 @@ so.
 | Build genuinely competing candidates, test them, and select one | **project-manager --compete** | `goal` — that follows one implementation stream |
 | Find issues in an existing deliverable; produce prioritized findings, don't fix | **red-team** | `project-manager` — that builds/fixes |
 | Review behavior introduced by a pull request or merge-base diff, anchored to changed lines | **pr-smellz** | `code-smellz` — that cleans the whole repository; `red-team` — that is not diff-scoped |
+| Write or rewrite a pull request's title and description for readers with no context | **pr-describe** | `pr-smellz` — that finds defects, it does not explain the change |
 | Infer general behavioral properties and try to falsify them across inputs or state sequences | **invariant-miner** | a direct unit test — that checks one known example; `code-smellz` — that searches broadly for quality problems |
 | Reconcile the same behavioral claim across schemas, code, tests, docs, or generated artifacts | **spec-reconciler** | `invariant-miner` — that searches an input/state space; a direct edit — use that when the known correction and authority are already supplied |
 | Clean up bugs, security, architecture, or maintainability while preserving behavior | **code-smellz** | `shrinkray` — that optimizes size/dead code |

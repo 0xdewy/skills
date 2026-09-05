@@ -79,6 +79,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 |---|---|
 | [student-counsel](skills/student-counsel/SKILL.md) | The Student works, Socrates examines by elenchus, revise until the work answers for itself |
 | [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
+| [pr-describe](skills/pr-describe/SKILL.md) | Rewrites a PR title and body for a reader with no context: why, what changed, how to verify |
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
