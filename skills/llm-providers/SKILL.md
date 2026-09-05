@@ -11,7 +11,6 @@ metadata:
   author: skill-lab
   version: 1.0.0
   category: integration
-  activation: explicit
   tags:
     - llm
     - api

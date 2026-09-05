@@ -10,7 +10,6 @@ metadata:
   author: iamky1e
   version: 2.0.0
   category: quality
-  activation: explicit
   tags:
     - beauty
     - quality

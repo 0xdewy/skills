@@ -10,7 +10,6 @@ metadata:
   author: iamky1e
   version: 1.1.0
   category: finance
-  activation: explicit
   tags:
     - polymarket
     - prediction-markets

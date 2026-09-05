@@ -10,7 +10,6 @@ metadata:
   author: user
   version: 1.0.0
   category: quality
-  activation: explicit
   tags:
     - pull-request
     - code-review

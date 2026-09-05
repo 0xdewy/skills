@@ -9,7 +9,6 @@ metadata:
   author: iamky1e
   version: 2.0.0
   category: meta
-  activation: explicit
   tags:
     - code-map
     - repo-map

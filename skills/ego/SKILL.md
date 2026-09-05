@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 2.0.0
   category: writing
-  activation: explicit
   tags:
     - epistemic-rigor
     - anti-sycophancy

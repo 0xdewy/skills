@@ -11,7 +11,6 @@ metadata:
   author: user
   version: 2.0.0
   category: meta
-  activation: explicit
   tags:
     - coordination
     - long-running

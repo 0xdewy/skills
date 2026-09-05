@@ -6,8 +6,6 @@ description: >-
   justify its maintenance cost without weakening behavior, safety, or clarity.
   Only use when explicitly requested.
 disable-model-invocation: true
-metadata:
-  activation: explicit
 ---
 
 # Pareto

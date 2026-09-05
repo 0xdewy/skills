@@ -10,7 +10,6 @@ metadata:
   author: user
   version: 1.0.0
   category: meta
-  activation: explicit
   tags:
     - adversarial
     - review

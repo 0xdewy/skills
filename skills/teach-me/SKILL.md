@@ -10,7 +10,6 @@ metadata:
   author: 0xdewy
   version: 5.0.0
   category: education
-  activation: explicit
   tags:
     - education
     - socratic

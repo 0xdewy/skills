@@ -11,7 +11,6 @@ metadata:
   author: 0xdewy
   version: 1.0.0
   category: finance
-  activation: explicit
   tags:
     - hyperliquid
     - hypercore

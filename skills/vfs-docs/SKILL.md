@@ -10,7 +10,6 @@ metadata:
   author: iamky1e
   version: 3.0.0
   category: meta
-  activation: explicit
   tags:
     - documentation
     - unix-philosophy

@@ -30,7 +30,6 @@ metadata:
   author: your-github-username
   version: 1.0.0
   category: data
-  activation: intent
   tags:
     - timestamps
     - data-cleaning

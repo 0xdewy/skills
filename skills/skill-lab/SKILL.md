@@ -9,7 +9,6 @@ metadata:
   author: iamky1e
   version: 2.0.0
   category: meta
-  activation: explicit
   tags:
     - skills
     - development
@@ -30,9 +29,10 @@ skills, also follow the local system `skill-creator` instructions if available.
 
 1. Confirm the behavior deserves a skill: repeated workflow, specialized domain,
    reusable outputs, or tool integration.
-2. Choose `metadata.activation`: `namespace`, `intent`, or `explicit`. Add
-   trigger/skip rules only for `intent`, then define inputs, workflow, safety,
-   output, and verification.
+2. Decide who invokes it. Model-invocable skills get concise TRIGGER/SKIP
+   boundaries in the description; costly workflows and personas set
+   `disable-model-invocation: true` and say they run only when explicitly
+   requested. Then define inputs, workflow, safety, output, and verification.
 3. Keep `SKILL.md` small. Put long prompts, examples, templates, and data in
    lazy-loaded files.
 4. Add scripts/templates only when they reduce repeated work.
