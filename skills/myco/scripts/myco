@@ -13,4 +13,20 @@ if [[ ! -f "${tsx_loader}" ]]; then
   exit 2
 fi
 
-exec node --import "${tsx_loader}" "${skill_script_dir}/myco.ts" "$@"
+myco_data_dir="${MYCO_DATA_DIR:-${MYCO_KANBAN_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/myco}}"
+entrypoint="${skill_script_dir}/myco.ts"
+if [[ "${1:-}" == "inbox" ]]; then
+  shift
+  entrypoint="${skill_script_dir}/inbox.ts"
+  mkdir -p "${myco_data_dir}"
+  touch "${myco_data_dir}/threadripper-inbox.lock"
+fi
+# A scheduled poll and the CLI must not load competing ratchet/session state.
+if [[ -f "${myco_data_dir}/threadripper-inbox.lock" ]]; then
+  if ! command -v flock >/dev/null; then
+    echo "myco: flock is required while the addressed inbox is configured" >&2
+    exit 2
+  fi
+  exec flock -w 240 "${myco_data_dir}/threadripper-inbox.lock" node --import "${tsx_loader}" "${entrypoint}" "$@"
+fi
+exec node --import "${tsx_loader}" "${entrypoint}" "$@"
