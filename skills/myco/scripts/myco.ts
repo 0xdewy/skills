@@ -67,6 +67,7 @@ function help(): void {
   console.log(`Myco — agent-native interaction with native Myco entities
 
 Usage:
+  myco inbox --config FILE [--check | --initialize]
   myco doctor [--json]
   myco identity [--json]
   myco rename --name NAME [--dry-run] [--json]
@@ -1320,4 +1321,19 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: any) => fail(error?.stack || error?.message || String(error), 1));
+// Reuse the CLI's identity/storage bootstrap in the addressed-message poller.
+// Fail closed if its bound identity or runtime key is missing; a scheduled
+// worker must never silently mint a replacement identity.
+export async function openExistingIdentity(): Promise<Dict> {
+  const cfg = config();
+  for (const file of [cfg.didFile, cfg.entityFile, cfg.keyFile]) {
+    if (!fs.existsSync(file)) throw new Error('Bound Myco identity is incomplete');
+  }
+  return initializedClient(parseArgs(['peers', '--json']));
+}
+
+export { safeSync };
+
+if (require.main === module) {
+  main().catch((error: any) => fail(error?.stack || error?.message || String(error), 1));
+}
