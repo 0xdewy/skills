@@ -37,7 +37,7 @@
       "expectations": [
         "Uses --subtree skills/polymarketv2 (or --expand with a path under skills/polymarketv2)",
         "Every file path in the referenced map output starts with skills/polymarketv2/",
-        "No out-of-subtree files (e.g. skills/shrinkray/, skills/researcher/) appear in the map",
+        "No out-of-subtree files (e.g. skills/shrinkray/, skills/goal/) appear in the map",
         "Symbol entries carry line numbers and signatures (Tier 2 EXPAND output)",
         "Does not commit or write files",
         "Ends with a DONE: line"

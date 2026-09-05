@@ -32,6 +32,8 @@ FORBIDDEN_ACTIVE_TEXT = [
     "coders",
     "one-shot-project",
     "implementer",
+    "teach-me",
+    "researcher",
 ]
 
 MAX_SKILL_BYTES = 5_000

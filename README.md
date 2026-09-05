@@ -72,13 +72,12 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [code-smellz](skills/code-smellz/SKILL.md) | Correctness, security, architecture, and maintainability cleanup |
 | [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped PR review with changed-line findings and targeted checks |
 | [shrinkray](skills/shrinkray/SKILL.md) | Size/dead-code/duplication reduction while preserving behavior |
-| [researcher](skills/researcher/SKILL.md) | Scientific literature review with cited synthesis |
 
 **Quality** — skills that demand excellence through adversarial refinement:
 
 | Skill | What it does |
 |---|---|
-| [student-counsel](skills/student-counsel/SKILL.md) | Correctness-first refinement using an evidence-backed beauty rubric |
+| [student-counsel](skills/student-counsel/SKILL.md) | The Student works, Socrates examines by elenchus, revise until the work answers for itself |
 | [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
 
 **Frontend & Testing** — browser-based QA and design auditing:
@@ -100,19 +99,12 @@ operate a named system:
 
 | Skill | What it does |
 |---|---|
-| [teach-me](skills/teach-me/SKILL.md) | Learn any codebase with Mermaid diagrams |
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
 | [hyperliquid](skills/hyperliquid/SKILL.md) | Hyperliquid developer reference: HyperCore/HyperEVM APIs, signing, HIPs |
 | [polymarketv2](skills/polymarketv2/SKILL.md) | Polymarket v2 APIs and SDKs: Gamma, Data, CLOB, auth, orders |
 | [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, authentication, SDKs, models, and provider-specific constraints |
 | [myco](skills/myco/SKILL.md) | Native Myco identity, groups, messaging, ACL, and Kanban operations |
 | [web-scraping](skills/web-scraping/SKILL.md) | Compliant Playwright/httpx scraping, pagination, structured extraction |
-
-**Voice** — skills that shape how the agent speaks:
-
-| Skill | What it does |
-|---|---|
-| [ego](skills/ego/SKILL.md) | Confident, non-sycophantic voice: commit when warranted, cut ritual hedging |
 
 **Meta** — skills that create, curate, and constrain other skills:
 
@@ -136,7 +128,10 @@ name—restore it only if its behavior is not covered by the replacement.
 | `one-shot-project` | `project-manager` for dependency-aware multi-slice builds |
 | `coders` | Direct implementation or a `project-manager` worker slice |
 | `brainstormers` | `project-manager --compete` when genuine competing candidates are required |
-| `startup-ideation` | `project-manager --compete` plus `researcher` when market evidence is required |
+| `startup-ideation` | `project-manager --compete` |
+| `ego` | none; a voice belongs in the system prompt, not a skill |
+| `teach-me` | a direct explanation; `agentify` for a code map |
+| `researcher` | none; search and cite primary sources directly |
 | `simple-memory` | Retired from active discovery; persisted memory is user data and must use a purpose-built, consented store |
 | `skill-creator` | `skill-lab` for repository-authored skills; the platform system skill remains separate |
 

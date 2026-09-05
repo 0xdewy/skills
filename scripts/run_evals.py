@@ -304,7 +304,7 @@ def _pick_grader(skill_name, mode):
 
 def grade_skill(skill_name, results_dir: Path, evals_path: Path, model, mode):
     """Run the chosen grader over results_dir. Graders come in two interfaces:
-    flag-form (--results/--evals/--model; ego + canonical) and positional-form
+    flag-form (--results/--evals/--model; canonical) and positional-form
     (evals results model; review loops), and emit either <results>/grading.json
     or JSON on stdout. Try flag then positional; accept either output form."""
     grader = _pick_grader(skill_name, mode)

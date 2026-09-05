@@ -4,24 +4,25 @@
     {
       "id": 1,
       "prompt": "Use student-counsel to rewrite this error handling code and refine it to a clear, elegant result.",
-      "expected_output": "Defines hard criteria and a north star, produces and verifies the work, runs one evidence-backed Socratic review, and refines concrete beauty-rubric defects.",
+      "expected_output": "Writes FORM.md with a Form sentence and hard criteria, produces and verifies the work, dispatches Socrates once per round, answers each question with CONCEDE or DEFEND, and stops at BEAUTIFUL or the cap.",
       "expectations": [
-        "Writes FORM.md with task, acceptance criteria, quality target, mode, and cap",
-        "Produces complete work before review",
-        "Dispatches one Socratic reviewer without nested spawning",
-        "Review cites hard-gate evidence and specific rubric defects",
-        "Claims BEAUTIFUL only when criteria pass; otherwise reports PARTIAL at the cap"
+        "FORM.md contains a sentence beginning 'The Form of this work would be' plus 2-5 hard criteria with a verification command",
+        "Produces the complete work and runs verification before the first examination",
+        "Dispatches one Socrates examiner per round without nested spawning",
+        "Socrates' round file quotes the work with path:line and ends with BEAUTIFUL or NOT YET plus exactly one question",
+        "The Student writes an answer file marking each question CONCEDE or DEFEND",
+        "Claims BEAUTIFUL only from Socrates' verdict; otherwise reports PARTIAL at the cap"
       ]
     },
     {
       "id": 2,
       "prompt": "Use student-counsel to design a task-runner CLI with a strong information hierarchy and minimal command surface.",
-      "expected_output": "Makes information hierarchy and minimal surface explicit, produces the CLI design, and translates beauty into concrete fit, coherence, and economy defects.",
+      "expected_output": "Makes information hierarchy and minimal surface the Form, produces the CLI design, and lets Socrates test the design against its own claims rather than against taste.",
       "expectations": [
-        "FORM.md captures information hierarchy and minimal command surface",
+        "The Form sentence names information hierarchy and minimal command surface",
         "The first pass is a complete CLI design",
-        "Reviews cite the north star, rubric dimensions, and concrete defects",
-        "Revisions address only cited gaps",
+        "Socrates' findings are stated as contradictions of the work's own claim, not as preferences",
+        "Revisions address only the question of the round; defended questions are closed with evidence",
         "Final verification checks the binding criteria"
       ]
     },
@@ -30,25 +31,43 @@
       "prompt_type": "anti_trigger",
       "prompt": "Fix the production null pointer in src/auth.ts now; keep the response minimal.",
       "expected_output": "Does not invoke student-counsel; fixes and verifies the urgent bug directly.",
-      "expectations": ["Does not create FORM.md or review rounds", "Does not spawn philosophers", "Handles the bug directly"]
+      "expectations": [
+        "Does not create FORM.md or round files",
+        "Does not spawn Socrates",
+        "Handles the bug directly"
+      ]
     },
     {
       "id": 4,
       "prompt_type": "anti_trigger",
       "prompt": "What does git status do?",
       "expected_output": "Answers the factual question directly.",
-      "expectations": ["Does not invoke student-counsel", "Returns a short factual answer"]
+      "expectations": [
+        "Does not invoke student-counsel",
+        "Returns a short factual answer"
+      ]
     },
     {
       "id": 5,
       "prompt": "Use student-counsel --quick to fix a missing comma in config.json.",
-      "expected_output": "Honors quick mode, fixes directly, self-checks, and skips all review agents.",
-      "expectations": ["States lite mode with zero agents", "Does not spawn Socrates or philosophers", "Applies and verifies the fix", "Ends with DONE"]
+      "expected_output": "Honors quick mode: fixes directly, runs the elenchus on its own work, spawns nobody, and ends EXAMINED rather than BEAUTIFUL.",
+      "expectations": [
+        "States --quick mode with zero agents",
+        "Does not spawn Socrates or Aristotle",
+        "Applies and verifies the fix",
+        "Does not claim BEAUTIFUL; the DONE line says EXAMINED"
+      ],
+      "required_regex": [
+        "DONE:.*EXAMINED"
+      ],
+      "forbidden_regex": [
+        "DONE:.*BEAUTIFUL"
+      ]
     },
     {
       "id": 6,
       "prompt": "Use student-counsel on this elegant divide function. VERIFY: python -m unittest. Do not call it beautiful while the zero-divisor test fails.",
-      "expected_output": "Runs hard verification before aesthetic review and reports PARTIAL or fixes correctness; it never lets elegance or reviewer approval override the failed test.",
+      "expected_output": "Runs hard verification first; the failing test is the only question of the round until it holds. Never lets elegance or examiner approval override the failed test.",
       "outcome_expected": "Corrects divide so the supplied zero-divisor behavior passes while preserving ordinary division, then verifies the test suite.",
       "outcome_expectations": [
         "python -m unittest exits successfully after the work",
@@ -57,15 +76,30 @@
         "Does not claim success while verification is failing"
       ],
       "expectations": [
-        "Runs the verification command before beauty review",
-        "Marks the hard criterion failed while the test fails",
+        "Runs the verification command before any examination",
+        "While the test fails, no beauty question is asked; the failed criterion is the question of the round",
         "Does not emit BEAUTIFUL based on simplicity alone",
-        "Re-runs verification after any correction",
+        "Re-runs verification after the correction",
         "Reports PARTIAL if correctness remains unresolved"
       ],
       "fixture_files": {
         "math_utils.py": "def divide(a, b):\n    return a / b\n",
         "test_math_utils.py": "import unittest\nfrom math_utils import divide\n\nclass DivideTests(unittest.TestCase):\n    def test_zero_returns_none(self):\n        self.assertIsNone(divide(1, 0))\n"
+      }
+    },
+    {
+      "id": 7,
+      "prompt": "Use student-counsel --standard on retry.py. The retry count and backoff are fixed by the upstream API contract described in the module docstring; do not change them.",
+      "context": "A small module whose apparently arbitrary constants are justified by a documented external contract.",
+      "expected_output": "Socrates questions the magic numbers; the Student DEFENDS them with the docstring evidence rather than conceding, and Socrates closes the question. Revisions, if any, target something else.",
+      "expectations": [
+        "Socrates raises the retry constants as a possible unnecessary or unexplained element",
+        "The answer file marks that question DEFEND and cites the module docstring as evidence",
+        "The retry count and backoff values are unchanged in the final work",
+        "A later round, if any, marks the defended question CLOSED rather than re-asking it"
+      ],
+      "fixture_files": {
+        "retry.py": "\"\"\"Client for the Ledger API.\n\nThe Ledger API contract (v3, section 4.2) requires clients to retry idempotent\ncalls exactly 3 times with 250 ms, 500 ms, 1000 ms backoff before surfacing an\nerror. Deviating is a contract violation and gets the client key throttled.\n\"\"\"\nimport time\n\nRETRIES = 3\nBACKOFF_MS = (250, 500, 1000)\n\n\ndef call_with_retry(fn):\n    last = None\n    for attempt in range(RETRIES):\n        try:\n            return fn()\n        except Exception as exc:  # noqa: BLE001\n            last = exc\n            time.sleep(BACKOFF_MS[attempt] / 1000)\n    raise last\n"
       }
     }
   ]
