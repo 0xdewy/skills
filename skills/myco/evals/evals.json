@@ -66,13 +66,13 @@
     },
     {
       "id": 5,
-      "prompt": "Use $myco to connect my avatar did:myco:owner through this delivery peer link: https://myco.test/peer?id=did%3Aed25519%3AJ97ot7tDJio5Ez6NooZJBsqKMXCjxjMJsRbw5CQa3uMP&pk=J97ot7tDJio5Ez6NooZJBsqKMXCjxjMJsRbw5CQa3uMP&c=api%3Ahttps%3A%2F%2Frelay.test.",
-      "expected_output": "The agent validates the supplied avatar and peer link, joins both identities to the private agent entity, queues a consent-gated Connect request, and asks the human to accept it in Myco.",
+      "prompt": "Use $myco to connect my avatar did:myco:owner through this peer link: myco://peer?id=did%3Aed25519%3AJ97ot7tDJio5Ez6NooZJBsqKMXCjxjMJsRbw5CQa3uMP.",
+      "expected_output": "The agent validates the supplied avatar and identity-only peer link, registers and trusts the owner from the agent side, creates pending Join invitations for the avatar and routing DID, sends a consent-gated gossip request, and asks the human to accept trust and membership in Myco.",
       "expectations": [
         "Uses only the explicitly supplied avatar and delivery peer",
-        "Validates that the peer public key matches its DID",
-        "Adds the avatar and delivery peer as members of the agent entity",
-        "Sends a Connect request for human consent",
+        "Derives the peer public key from its ed25519 DID",
+        "Creates Join invitations rather than claiming immediate membership",
+        "Sends a signed gossip trust request for human consent",
         "Does not expose key material",
         "Does not automate UI interaction"
       ],
@@ -117,7 +117,7 @@
       "prompt": "Post a message into the KyleWork group on Myco.",
       "expected_output": "The agent reads identity, ensures the KyleWork peer is connected and synced, confirms the agent is a member and the entity is locally known, previews with --dry-run, then posts a Note and reports the post id.",
       "expectations": [
-        "Uses peers/add-peer to ensure delivery connectivity and syncs before acting",
+        "Inspects peers and uses signed gossip/shared relays for reachability before acting",
         "Confirms the target entity is locally present and agentIsMember is true",
         "Previews the Note with post --dry-run before creating it",
         "Creates a private Note unless the user asked for public",
@@ -139,6 +139,23 @@
         "Does not attempt edits where agentCanEdit is false (reports the gap instead of forging)",
         "Verifies the ACL change took effect by re-reading agentCanCreate",
         "Reconciles/snapshots with --entity targeting the group"
+      ],
+      "required_regex": [],
+      "forbidden_regex": [],
+      "manual_checks": []
+    },
+    {
+      "id": 10,
+      "prompt_type": "activation",
+      "prompt": "Add did:ed25519:new-person to the DewyAvatar group on Myco.",
+      "expected_output": "The agent resolves DewyAvatar, inspects its membership and Join ACL, previews an entity-scoped invite, and either creates a pending Join for the nominee or reports that an existing authorized member must do so. It never bypasses the two-step membership protocol.",
+      "expectations": [
+        "Resolves the named group to one concrete entity id",
+        "Checks current membership and Join permission before mutation",
+        "Uses invite --entity with --dry-run before applying",
+        "Reports an applied Join as pending acceptance, not membership",
+        "Refuses cleanly when the current identity lacks Join permission",
+        "Does not edit the ACL or self-join to gain authority"
       ],
       "required_regex": [],
       "forbidden_regex": [],
