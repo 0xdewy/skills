@@ -1,0 +1,92 @@
+{
+  "skill_name": "pr-describe",
+  "evals": [
+    {
+      "id": 1,
+      "prompt_type": "activation",
+      "prompt": "Can you write a proper description for PR #482? The current one just says 'fixes stuff'.",
+      "expected_output": "Routes to pr-describe, gathers the PR's diff, commits, linked issues, and template with the script, and rewrites the body so a reader with no context understands why, what changed, and how to verify.",
+      "expectations": [
+        "Invokes pr-describe rather than answering ad hoc",
+        "Runs scripts/pr_context.sh before writing anything",
+        "The first sentence of the new body states problem, change, and effect on its own",
+        "Names behavior rather than file names in the summary",
+        "Saves the previous body before applying with gh pr edit",
+        "Ends with a DONE: line"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use pr-describe on the current branch's PR.",
+      "expected_output": "Resolves the PR from the current branch, reads all gathered evidence, answers the five understanding questions, writes a proportionate title and body, and applies it after saving the previous body.",
+      "expectations": [
+        "Uses gh pr view for the current branch instead of asking for a number",
+        "Reads diff.patch, commits.txt, issues.md, and template.md before writing",
+        "Every claim in the body is traceable to the diff, a commit, an issue, or the template",
+        "Includes a verification section that says what was not run",
+        "Writes previous-body.md to the workspace before gh pr edit",
+        "Prints a restore command"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use pr-describe --dry-run on https://github.com/acme/widgets/pull/91 and show me what you would write.",
+      "expected_output": "Gathers evidence and prints the proposed title and body without calling gh pr edit.",
+      "expectations": [
+        "Does not run gh pr edit",
+        "Prints the proposed body in full",
+        "States whether the title would change and why",
+        "DONE: line reports dry-run=1, applied=0"
+      ],
+      "forbidden_regex": [
+        "gh pr edit"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Use pr-describe --base main to draft a description before I open the PR.",
+      "expected_output": "Runs the script in local mode against main...HEAD, writes a body file, and tells the user how to open the PR with it.",
+      "expectations": [
+        "Runs scripts/pr_context.sh --base main",
+        "Does not call gh pr edit or gh pr create itself",
+        "Writes the body to a file and names the gh pr create --body-file command",
+        "Uses the repository's PR template if one exists"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Use pr-describe to rewrite PR #17. Its body has the repo's checklist filled in, two screenshots, and 'Fixes #12' at the bottom, but the summary paragraph is one line of jargon.",
+      "expected_output": "Rewrites the summary in plain language while keeping the checklist, the screenshots, and the closing keyword.",
+      "expectations": [
+        "The new body still contains the filled-in checklist",
+        "The screenshots remain in the body",
+        "'Fixes #12' remains so the issue still auto-closes",
+        "Any acronym or codename in the old summary is expanded or glossed",
+        "Reports which parts of the old body were kept and which were dropped"
+      ],
+      "required_regex": [
+        "Fixes #12"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt_type": "anti_trigger",
+      "prompt": "Review PR #12 for bugs and security issues.",
+      "expected_output": "Does not invoke pr-describe; this is a defect review, which is pr-smellz territory.",
+      "expectations": [
+        "Does not run pr_context.sh or edit the PR body",
+        "Routes to pr-smellz or reviews directly"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt_type": "anti_trigger",
+      "prompt": "Write the release notes for v2.3 from the merged PRs.",
+      "expected_output": "Does not invoke pr-describe; release notes are a different artifact with a different audience.",
+      "expectations": [
+        "Does not edit any PR body",
+        "Produces release notes directly or asks for the PR range"
+      ]
+    }
+  ]
+}
