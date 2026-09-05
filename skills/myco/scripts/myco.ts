@@ -234,6 +234,7 @@ async function loadMyco(cfg: ReturnType<typeof config>): Promise<Dict> {
 function ensureRuntimeKey(cfg: ReturnType<typeof config>): string {
   const existing = readText(cfg.keyFile);
   if (existing) return existing;
+  if (fs.existsSync(cfg.keyFile)) throw new Error('Runtime key file is empty; refusing to replace it');
   const generated = randomBytes(32).toString('base64url');
   writePrivate(cfg.keyFile, `${generated}\n`);
   return generated;

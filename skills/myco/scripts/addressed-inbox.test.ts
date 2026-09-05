@@ -1,8 +1,12 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import type { MessageWithIds } from '@mycoprotocol/client';
 import { addressedReason, baseline, pollAddressedInbox, type InboxOperations, type InboxState } from './addressed-inbox';
-import { workerConfig, permittedReplyTarget } from './inbox';
+import { workerConfig, permittedReplyTarget, replyInThread } from './inbox';
 
 const policy = { routingDid: 'did:ed25519:threadripper', agentEntityId: 'did:myco:threadripper', allowedSigners: ['did:ed25519:pixel'] };
 const now = 1_800_000_000_000;
@@ -27,7 +31,7 @@ function setup(messages: MessageWithIds[] = []) {
 describe('addressed inbox paid-launch gate', () => {
     test('ordinary traffic, quotes, code, URLs, partial names and bare DIDs never launch', async () => {
         const bodies = ['hello', 'threadripper', policy.routingDid, policy.agentEntityId,
-            '> @threadripper please reply', '`@threadripper`', '```\n@threadripper\n```',
+            '> @threadripper please reply', '    @threadripper in indented code', '\t@threadripper in code', '`@threadripper`', '```\n@threadripper\n```',
             '~~~js\n@threadripper\n~~~', 'https://host/@threadripper', 'foo@threadripper',
             '@threadripper-bot', '@threadripper2', '@threadripper.com',
             '`a multiline\n@threadripper code span`', '<!--\n@threadripper\n-->'];
@@ -151,4 +155,46 @@ test('reply fallback stays in the validated thread and tier and honors permissio
         { ...root, id: 'msg:other' },
         { ...root, message: { ...root.message, data: { ...root.message.data, propagation: 'public' } } },
     ]) assert.equal(permittedReplyTarget(trigger, bad as MessageWithIds, m => m !== trigger), undefined);
+});
+
+
+test('reply retries find the original response when nesting permissions change', async () => {
+    const trigger = message('trigger', '@threadripper', { type: 'comment', propagation: 'private' });
+    trigger.post = 'msg:root' as any;
+    const reply = message('existing', 'answer', { parent: trigger.post,
+        creator: policy.routingDid, content: { nonce: `threadripper-inbox:${trigger.id}` } });
+    reply.message.signer = policy.routingDid as any;
+    let writes = 0;
+    const ctx = { modules: { MessageType: { Comment: 'comment' }, getMessageHash: () => 'new', getMessageId: () => 'msg:new' }, client: {
+        getMessagesByEntity: async () => [reply],
+        createMessage: async () => { writes++; return { message: {} }; },
+    } };
+    assert.equal(await replyInThread(ctx, policy, trigger, 'saved text', async () => trigger), reply.id);
+    assert.equal(writes, 0);
+    // Another author cannot suppress a reply by copying its deterministic nonce.
+    reply.message.signer = policy.allowedSigners[0] as any;
+    assert.equal(await replyInThread(ctx, policy, trigger, 'saved text', async () => trigger), 'msg:new');
+    assert.equal(writes, 1);
+});
+
+test('expiring a saved reply retains its spend in the rolling limit', async () => {
+    const s = setup();
+    const expired = message('expired', '@threadripper'); expired.timestamp = now - 86_400_001;
+    s.state.entries[expired.id] = { status: 'ready', body: 'saved', launchedAt: now - 10_000 };
+    for (let i = 0; i < 5; i++) s.state.entries[`msg:previous${i}`] = { status: 'failed', launchedAt: now - 10_000 };
+    await pollAddressedInbox([expired, message('new', '@threadripper')], policy, s.state, s.ops, now);
+    assert.equal(s.counts().launches, 0);
+    assert.equal(s.state.entries[expired.id].launchedAt, now - 10_000);
+});
+
+test('check plus initialize is rejected before creating state', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'myco-inbox-check-'));
+    const config = path.join(dir, 'config.json');
+    fs.writeFileSync(config, JSON.stringify({ ...policy, stateDir: path.join(dir, 'state'), opencode: '/not-invoked' }));
+    try {
+        const child = spawnSync(process.execPath, [...process.execArgv, path.join(__dirname, 'inbox.ts'),
+            '--config', config, '--check', '--initialize'], { encoding: 'utf8' });
+        assert.equal(child.status, 1);
+        assert.equal(fs.existsSync(path.join(dir, 'state')), false);
+    } finally { fs.unlinkSync(config); fs.rmdirSync(dir); }
 });

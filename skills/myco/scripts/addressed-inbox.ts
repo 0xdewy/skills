@@ -31,7 +31,7 @@ export function addressedText(text: string): string {
             else if (marker[1][0] === fence[0] && marker[1].length >= fence.length) fence = undefined;
             return '';
         }
-        if (fence || /^\s*>/.test(line)) return '';
+        if (fence || /^(?: {4}|\t)|^\s*>/.test(line)) return '';
         return line;
     }).join('\n').replace(/<!--[\s\S]*?-->/g, '').replace(/(`+)[\s\S]*?\1/g, '').replace(/https?:\/\/\S+/g, '');
 }
@@ -93,11 +93,11 @@ export async function pollAddressedInbox(
         if (prior && prior.status !== 'ready') continue;
         if (!message.entity) continue; // Wait for protocol validation/dependencies.
         if (message.timestamp < state.enabledAt || message.timestamp < now - 86_400_000 || message.timestamp > now + 300_000) {
-            state.entries[message.id] = { status: 'ignored' }; continue;
+            state.entries[message.id] = { status: 'ignored', ...(prior?.launchedAt === undefined ? {} : { launchedAt: prior.launchedAt }) }; continue;
         }
         const reason = await addressedReason(message, policy, ops.getMessage);
         if (reason === 'defer') { pending++; continue; }
-        if (!reason) { state.entries[message.id] = { status: 'ignored' }; continue; }
+        if (!reason) { state.entries[message.id] = { status: 'ignored', ...(prior?.launchedAt === undefined ? {} : { launchedAt: prior.launchedAt }) }; continue; }
         if (!await ops.canReply(message)) { pending++; continue; }
         let entry = prior;
         if (!entry) {
