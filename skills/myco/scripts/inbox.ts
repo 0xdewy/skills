@@ -83,8 +83,28 @@ export function permittedReplyTarget(message: MessageWithIds, root: MessageWithI
         && root.message.data.propagation === message.message.data.propagation && permitted(root)) return root;
 }
 
+export async function replyInThread(ctx: any, config: InboxPolicy, message: MessageWithIds, body: string,
+    replyTarget: (message: MessageWithIds) => Promise<MessageWithIds | undefined>): Promise<string> {
+    const { MessageType, getMessageId, getMessageHash } = ctx.modules;
+    const target = await replyTarget(message);
+    if (!target) throw new Error('Reply no longer permitted');
+    const nonce = `threadripper-inbox:${message.id}`;
+    const prior = (await ctx.client.getMessagesByEntity(message.entity)).find((m: MessageWithIds) =>
+        m.entity === message.entity && [message.id, message.post].includes(m.message.data.parent as any)
+        && m.message.signer === config.routingDid && m.message.data.creator === config.routingDid
+        && (m.message.data.content as any).nonce === nonce);
+    if (prior) return prior.id;
+    const replyBody = target.id === message.id ? body
+        : `@${message.message.signer} — replying to ${message.id}\n\n${body}`;
+    const reply = await ctx.client.createMessage({ body: replyBody, nonce, agentEntityId: config.agentEntityId },
+        MessageType.Comment, target.id, message.message.data.propagation, { creator: config.routingDid });
+    return getMessageId(getMessageHash(reply.message));
+}
+
 async function main() {
     process.umask(0o077);
+    if (process.argv.includes('--initialize') && process.argv.includes('--check'))
+        throw new Error('--initialize and --check cannot be combined');
     const configPath = process.argv[process.argv.indexOf('--config') + 1];
     if (!process.argv.includes('--config') || !configPath) throw new Error('--config is required');
     const config: Config = JSON.parse(await fs.readFile(configPath, 'utf8'));
@@ -107,7 +127,7 @@ async function main() {
         try { await dir.sync(); } finally { await dir.close(); }
     };
     const ctx = await openExistingIdentity();
-    const { MessageType, MycoSchemaType, getMessageHash, getMessageId } = ctx.modules;
+    const { MessageType, MycoSchemaType } = ctx.modules;
     try {
         if (ctx.client.id !== config.routingDid || ctx.entityId !== config.agentEntityId) throw new Error('Wrong bound Myco identity');
         const syncError = await safeSync(ctx.client, ctx.waste);
@@ -137,21 +157,8 @@ async function main() {
                 const parent = message.message.data.parent?.startsWith('msg:') ? await getMessage(message.message.data.parent) : undefined;
                 return runOpenCode(config, message, parent);
             },
-            reply: async (message, body) => {
-                if (check) return 'check-only';
-                const target = await replyTarget(message);
-                if (!target) throw new Error('Reply no longer permitted');
-                const nonce = `threadripper-inbox:${message.id}`;
-                const prior = (await ctx.client.getMessagesByParent(target.id)).find((m: MessageWithIds) =>
-                    m.message.signer === config.routingDid && m.message.data.creator === config.routingDid
-                    && (m.message.data.content as any).nonce === nonce);
-                if (prior) return prior.id;
-                const replyBody = target.id === message.id ? body
-                    : `@${message.message.signer} — replying to ${message.id}\n\n${body}`;
-                const reply = await ctx.client.createMessage({ body: replyBody, nonce, agentEntityId: config.agentEntityId },
-                    MessageType.Comment, target.id, message.message.data.propagation, { creator: config.routingDid });
-                return getMessageId(getMessageHash(reply.message));
-            },
+            reply: (message, body) => check ? Promise.resolve('check-only')
+                : replyInThread(ctx, config, message, body, replyTarget),
         });
         await ctx.waste.push();
         console.log(JSON.stringify(check
