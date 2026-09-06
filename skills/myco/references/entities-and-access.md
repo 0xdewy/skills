@@ -88,6 +88,9 @@ scripts/myco edit-acl --entity <did:myco:...> --slot SLOT \
   [--value JSON] [--tier public|private] [--dry-run] [--json]
 ```
 
+Use `response.comment` for replies beneath comments; ordinary slots such as
+`note.comment` address comments on posts.
+
 ACL values are permission arrays such as `["creator","members"]`. The command
 may edit only when the current entity is already allowed by the `edit` slot.
 Public and private tiers may differ; inspect both. If permission is absent,
