@@ -220,15 +220,16 @@ async function loadMyco(cfg: ReturnType<typeof config>): Promise<Dict> {
     return import(pathToFileURL(resolved).href);
   };
   const source = async (relative: string) => import(pathToFileURL(path.join(cfg.agentRoot, relative)).href);
-  const [protocol, transports, wastebin, core, dbModule, clientModule] = await Promise.all([
+  const [protocol, transports, wastebin, core, dbModule, clientModule, localModule] = await Promise.all([
     importPackage('@mycoprotocol/client'),
     importPackage('@wasteprotocol/web-transports'),
     importPackage('@wasteprotocol/wb-sqlite'),
     importPackage('@wasteprotocol/core'),
     source('src/db-sqlite.ts'),
     source('src/create-client.ts'),
+    source('src/local-transport.ts'),
   ]);
-  return { ...protocol, ...transports, ...wastebin, ...core, ...dbModule, ...clientModule };
+  return { ...protocol, ...transports, ...wastebin, ...core, ...dbModule, ...clientModule, ...localModule };
 }
 
 function ensureRuntimeKey(cfg: ReturnType<typeof config>): string {
