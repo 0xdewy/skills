@@ -1046,7 +1046,7 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   const entityId = flag(args, 'entity');
   if (!entityId) fail('edit-acl requires --entity');
   const slot = flag(args, 'slot');
-  if (!slot) fail('edit-acl requires --slot (e.g. task.create, project.create, edit, join)');
+  if (!slot) fail('edit-acl requires --slot (e.g. task.create, response.comment, edit, join)');
   const valueRaw = flag(args, 'value');
   if (!valueRaw) fail('edit-acl requires --value (JSON array, e.g. \'["creator","members"]\')');
   let value: any;
@@ -1070,7 +1070,8 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   }
   const propagation = tier === 'private' ? ctx.modules.Propagation.Private : ctx.modules.Propagation.Public;
   const canEdit = ctx.client.isMessagePermitted(entityId, propagation, ctx.modules.MessageType.Edit);
-  const keys = [tier, 'acl', 'post', ...slot.split('.')];
+  const slotPath = slot.split('.');
+  const keys = [tier, 'acl', ...(slotPath[0] === 'response' ? slotPath : ['post', ...slotPath])];
   let error: string | undefined;
   let editId: string | undefined;
   if (!dryRun && canEdit) {
