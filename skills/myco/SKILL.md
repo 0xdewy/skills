@@ -19,6 +19,7 @@ Load only the reference needed for the request:
 
 - Identity, groups, membership, peers, posts, owner connections, or ACLs:
   `references/entities-and-access.md`.
+- Explicitly requested scheduled OpenCode replies: `references/addressed-inbox.md`.
 - Project snapshots, desired-state reconciliation, moving, or closing cards:
   `references/board-workflows.md`.
 - Desired-state JSON schema: `references/manifest.md`.
