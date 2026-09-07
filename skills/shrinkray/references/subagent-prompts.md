@@ -20,9 +20,19 @@ evidence that justifies one (e.g. `dependency_index.json` shows many
 single-caller symbols → dispatch Indirection Inliner; many single-importer
 files → dispatch Module Merger).
 
-## Two pre-pass scripts
+## Deterministic pass, then two pre-pass scripts
 
-The orchestrator runs both in Phase 0.5 and writes them to the workspace:
+The orchestrator runs the deterministic pass in Phase 0.4, before any agent
+exists to consume its output — it applies and verifies its own changes, it
+does not produce findings:
+
+0. `scripts/less_code_pass.py <project> <workspace> [--test-command CMD]`
+   → `less_code_pass.json` (per-language `loc_start`/`loc_final`/`tests_ok`
+   from `less-code`). No consumer; read `total_loc_removed` for Phase 6 and
+   move on. Optional — see the script's docstring for how `lc` is found and
+   what happens when it or the language is unsupported.
+
+Then it runs both of these in Phase 0.5 and writes them to the workspace:
 
 1. `scripts/deadcode_scan.py <project> <workspace>` → `deadcode_scan.json`
    (vulture/knip/deadcode/cargo-udeps + type-checker diagnostics, unified).
