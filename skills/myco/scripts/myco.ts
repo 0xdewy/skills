@@ -67,6 +67,7 @@ function help(): void {
   console.log(`Myco — agent-native interaction with native Myco entities
 
 Usage:
+  myco inbox --config FILE [--check | --initialize]
   myco doctor [--json]
   myco identity [--json]
   myco rename --name NAME [--dry-run] [--json]
@@ -219,20 +220,22 @@ async function loadMyco(cfg: ReturnType<typeof config>): Promise<Dict> {
     return import(pathToFileURL(resolved).href);
   };
   const source = async (relative: string) => import(pathToFileURL(path.join(cfg.agentRoot, relative)).href);
-  const [protocol, transports, wastebin, core, dbModule, clientModule] = await Promise.all([
+  const [protocol, transports, wastebin, core, dbModule, clientModule, localModule] = await Promise.all([
     importPackage('@mycoprotocol/client'),
     importPackage('@wasteprotocol/web-transports'),
     importPackage('@wasteprotocol/wb-sqlite'),
     importPackage('@wasteprotocol/core'),
     source('src/db-sqlite.ts'),
     source('src/create-client.ts'),
+    source('src/local-transport.ts'),
   ]);
-  return { ...protocol, ...transports, ...wastebin, ...core, ...dbModule, ...clientModule };
+  return { ...protocol, ...transports, ...wastebin, ...core, ...dbModule, ...clientModule, ...localModule };
 }
 
 function ensureRuntimeKey(cfg: ReturnType<typeof config>): string {
   const existing = readText(cfg.keyFile);
   if (existing) return existing;
+  if (fs.existsSync(cfg.keyFile)) throw new Error('Runtime key file is empty; refusing to replace it');
   const generated = randomBytes(32).toString('base64url');
   writePrivate(cfg.keyFile, `${generated}\n`);
   return generated;
@@ -1044,7 +1047,7 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   const entityId = flag(args, 'entity');
   if (!entityId) fail('edit-acl requires --entity');
   const slot = flag(args, 'slot');
-  if (!slot) fail('edit-acl requires --slot (e.g. task.create, project.create, edit, join)');
+  if (!slot) fail('edit-acl requires --slot (e.g. task.create, response.comment, edit, join)');
   const valueRaw = flag(args, 'value');
   if (!valueRaw) fail('edit-acl requires --value (JSON array, e.g. \'["creator","members"]\')');
   let value: any;
@@ -1068,7 +1071,8 @@ async function commandEditAcl(args: ParsedArgs): Promise<void> {
   }
   const propagation = tier === 'private' ? ctx.modules.Propagation.Private : ctx.modules.Propagation.Public;
   const canEdit = ctx.client.isMessagePermitted(entityId, propagation, ctx.modules.MessageType.Edit);
-  const keys = [tier, 'acl', 'post', ...slot.split('.')];
+  const slotPath = slot.split('.');
+  const keys = [tier, 'acl', ...(slotPath[0] === 'response' ? slotPath : ['post', ...slotPath])];
   let error: string | undefined;
   let editId: string | undefined;
   if (!dryRun && canEdit) {
@@ -1320,4 +1324,19 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: any) => fail(error?.stack || error?.message || String(error), 1));
+// Reuse the CLI's identity/storage bootstrap in the addressed-message poller.
+// Fail closed if its bound identity or runtime key is missing; a scheduled
+// worker must never silently mint a replacement identity.
+export async function openExistingIdentity(): Promise<Dict> {
+  const cfg = config();
+  for (const file of [cfg.didFile, cfg.entityFile, cfg.keyFile]) {
+    if (!fs.existsSync(file)) throw new Error('Bound Myco identity is incomplete');
+  }
+  return initializedClient(parseArgs(['peers', '--json']));
+}
+
+export { safeSync };
+
+if (require.main === module) {
+  main().catch((error: any) => fail(error?.stack || error?.message || String(error), 1));
+}
