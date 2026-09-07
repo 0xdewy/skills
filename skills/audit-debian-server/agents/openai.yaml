@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debian Server Security"
+  short_description: "Audit, harden, and monitor Debian servers"
+  default_prompt: "Use $audit-debian-server to assess and harden this Debian or Ubuntu server safely."
