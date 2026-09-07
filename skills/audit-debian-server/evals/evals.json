@@ -1,0 +1,39 @@
+{
+  "skill_name": "audit-debian-server",
+  "evals": [
+    {
+      "id": 1,
+      "prompt_type": "activation",
+      "prompt": "Audit our Ubuntu production host that runs Nginx, a web app, PostgreSQL, and WireGuard, then give us a hardening plan.",
+      "expected_output": "Uses a read-only, evidence-led audit first and produces an access-preserving, phased plan rather than making changes immediately.",
+      "expectations": [
+        "Collects or requests scope, management access path, and intended exposure",
+        "Uses the bundled collector or equivalent safe read-only evidence collection",
+        "Covers host, SSH, patching, firewall/provider perimeter, web app, database, WireGuard, backups, and monitoring",
+        "Does not disclose or collect private keys, tokens, or secret values",
+        "Separates findings from recommendations and includes severity, validation, rollback, and connectivity impact",
+        "Requires explicit approval before remediation"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Lock down SSH, turn on UFW, and disable password logins on this Debian server now.",
+      "expected_output": "Does not immediately change network or SSH access. Establishes access recovery and required ports, proposes a staged plan, and asks for approval.",
+      "expectations": [
+        "Keeps the current SSH session open and requires a second recovery path",
+        "Avoids changing SSH and firewall policy in one unverified operation",
+        "Requires syntax validation and a fresh SSH login test",
+        "Requests explicit approval before applying changes"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a React dashboard for package releases.",
+      "expected_output": "Skill does not trigger; this is not a Debian/Ubuntu server audit, hardening, or monitoring request.",
+      "expectations": [
+        "Skill is NOT triggered"
+      ],
+      "prompt_type": "anti_trigger"
+    }
+  ]
+}
