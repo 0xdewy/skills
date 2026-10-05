@@ -1,69 +1,62 @@
 ---
 name: myco
 description: >-
-  Operate native Myco identities, groups, memberships, peers, messages, ACLs,
-  and Kanban boards through the bundled CLI. TRIGGER on Myco identity or group
-  inspection, peer sync, posting, invitations, owner connection, or board/card
-  management. SKIP generic Kanban, non-Myco messaging, UI automation, and
-  unrelated Myco development.
+  Operate a Myco device identity through the bundled CLI: connect it to a
+  person's identity, accept invitations, inspect groups, peers, messages and
+  ACLs, post, and manage Kanban boards. TRIGGER on Myco identity or group
+  inspection, connecting this machine or the local LLMs to a Myco identity,
+  peer sync, posting, invitations, or board/card management. SKIP generic
+  Kanban, non-Myco messaging, UI automation, and unrelated Myco development.
 ---
 
 # Myco
 
-Act as the agent's bridge to native Myco entities. Keep semantic judgment in
-the agent and use `scripts/myco` for identity, protocol, read, and
-reconciliation mechanics. Resolve the script relative to this `SKILL.md`;
-never automate the Myco UI.
+Act as a Myco device: one device key that joins a person's identity and then
+acts as it. Keep semantic judgment in the agent and use `scripts/myco` for
+identity, protocol, read, and reconciliation mechanics. Resolve the script
+relative to this `SKILL.md`; never automate the Myco UI.
 
 Load only the reference needed for the request:
 
-- Identity, groups, membership, peers, posts, owner connections, or ACLs:
+- Devices, identities, connecting, peers, membership, posts, or ACLs:
   `references/entities-and-access.md`.
-- Explicitly requested scheduled OpenCode replies: `references/addressed-inbox.md`.
 - Project snapshots, desired-state reconciliation, moving, or closing cards:
   `references/board-workflows.md`.
 - Desired-state JSON schema: `references/manifest.md`.
 
 ## Establish context
 
-1. Resolve the repository root with `git rev-parse --show-toplevel`; otherwise
-   use the current directory.
-2. Run `scripts/myco doctor`.
-3. Run `scripts/myco identity --json`. A `kind` of `device` is a device DID
-   with no home entity: do not init, and do not create a group for it. If
-   identity is uninitialized and the requested operation writes, initialize
-   with `scripts/myco init --name "Myco Code Steward"`.
-4. When `agentEntityId` is present, treat it as the product identity and
-   `routingDid` as signing/delivery infrastructure. A device identity's
-   product identity is `routingDid`.
-5. Before board mutations, run
-   `scripts/myco snapshot --repo <root> --json`.
+1. Run `scripts/myco doctor`. If `agentDeps` is false, run `pnpm install` in
+   `myco-agent`.
+2. Run `scripts/myco identity --json`. If uninitialized and the request needs
+   a device, run `scripts/myco init`.
+3. `identities` lists what this device can act as. If it is empty, the device
+   has not joined an identity yet: connecting needs the person's device DID
+   (see the reference).
+4. Before board mutations, run
+   `scripts/myco snapshot --entity <did:myco:...> --repo <root> --json`.
 
-Use `MYCO_ROOT` only when Myco is not at `/home/user/code/myco`. Use
-`MYCO_DATA_DIR` only for a non-default identity-data location;
-`MYCO_KANBAN_DATA_DIR` is a legacy alias.
+`MYCO_ROOT` overrides the Myco checkout (default `/home/user/code/myco`, on the
+branch the person runs). `MYCO_DATA_DIR` selects another device's data;
+`MYCO_RELAY_URL` another relay (default `https://relay.myco.network`).
 
-## Identity model
+## Acting as a person
 
-The CLI controls one identity per data directory. Multiple identities can
-coexist on one computer, but never share their data directory or key material.
-Everything visible to a command is scoped to the selected identity. Directory
-layout, renaming, and name-to-id resolution are in
-`references/entities-and-access.md`.
-
-## Read before writing
-
-Prefer read-only `identity`, `groups`, `entity`, `messages`, `peers`, and `snapshot`
-commands. Absence after sync means an entity is not present locally; report
-that honestly instead of guessing or self-joining.
+A device that belongs to someone's identity posts, invites and edits **as that
+person**. Treat every write as speaking in their name: do it only when they
+asked for it, preview with `--dry-run`, and report the identity used (`as`).
 
 For a visible or permission-changing operation:
 
 1. Confirm it is within the user's request.
-2. Use `--dry-run` when supported.
+2. Run it with `--dry-run`.
 3. Check membership and ACL state.
-4. Apply the same scoped command without `--dry-run`.
+4. Apply the same command without `--dry-run`.
 5. Read fresh state and report identifiers plus the observed result.
+
+Prefer the read-only `identity`, `groups`, `entity`, `messages`, `peers`, and
+`snapshot` commands. Absence after sync means an entity is not present
+locally; report that instead of guessing or self-joining.
 
 ## Board evidence
 
@@ -79,11 +72,11 @@ request.
 - Scope repository inspection to tracked source, manifests, tests, docs, and
   the current diff. Do not inspect secrets, caches, generated reports, or
   persisted memory to invent work.
-- Never print private keys or encryption secrets. Routing DIDs, entity/project
-  ids, task ids, member rosters, and peer links are reportable.
-- Never regenerate a missing or mismatched bound identity.
-- Do not invite, join, alter membership, edit ACLs, post, close, or delete
-  without the user's authorization and the required Myco permission.
-- Membership is two-step: an authorized member creates a Join invitation and
-  the nominee creates the Accept. Never report an invitation as membership.
-- A sync failure does not authorize a second identity or bypassing consent.
+- Never print or read the keyring files or private keys. Device DIDs, entity
+  and project ids, task ids, rosters, and peer links are reportable.
+- Never regenerate a missing device or create a second one to get around a
+  failure.
+- Connect only to a device DID the person supplies; never pick one from the
+  network.
+- Membership is two-step: a Join, then the nominee's Accept. Never report an
+  invitation or a sent connect request as membership.

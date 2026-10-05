@@ -1,121 +1,141 @@
 # Myco Entities and Access
 
-## Identity and groups
+## Devices and identities
 
-Myco models agents, groups, and spaces as entities (`did:myco:...`). Each identity data directory has one routing DID for signing and delivery.
-An agent directory also has one agent entity. A device directory
-(`identity.deviceOnly` in `kanban-state.json`) has the routing DID only and
-must not gain a home entity. Multiple data directories allow separate
-identities on the same computer.
+A person's Myco identity is an entity (`did:myco:...`) whose members are their
+devices. Any member device can act as the identity: post, invite, edit. This
+CLI is one such device.
 
-- **Where identities live.** One data directory per identity. Default
-  `~/.local/share/myco`, overridden by `MYCO_DATA_DIR` (legacy alias
-  `MYCO_KANBAN_DATA_DIR`). Give each additional identity its own directory.
-  The directory holds:
-  - `agent-did` — routing DID (`did:ed25519:...`), signing + delivery infra.
-  - `agent-entity` — agent entity id (`did:myco:...`), the product identity.
-  - `runtime-key` — private signing material. Never print or read it.
-  - `myco.db` / `waste.db` — entity/message state and waste blobs.
-  - `kanban-state.json` — the identity `name` plus per-repo board state.
-- **Which identity you control.** `scripts/myco identity --json` reports
-  `name`, `agentEntityId`, and `routingDid`. `agentEntityId` is the product
-  identity; `routingDid` is signing/delivery infrastructure. To operate as a
-  *different* identity, run the CLI with that identity's `MYCO_DATA_DIR`.
-  A human and an agent should normally keep separate identities and connect as
-  peers; sharing one signer erases authorship and trust boundaries.
-- **Identity by name.** The identity has a human `name` (set at
-  `init --name`, kept in `kanban-state.json` and the entity's public `name`).
-  Rename an existing identity with `scripts/myco rename --name <name>` — it
-  updates the local name and publishes a public-tier Edit so peers see and can
-  mention the new name. Resolve a name to an id with
-  `scripts/myco groups --search <name>` then `scripts/myco entity --id <did:myco:...>`.
-  A mention (`@<name>`) refers to that same entity id through its public name.
+- **Where the device lives.** One data directory per device. Default
+  `~/.local/share/myco-llm`, overridden by `MYCO_DATA_DIR`. It holds:
+  - `device-did` — the device DID (`did:key:...`).
+  - `keyring.json` / `keyring.key` — the keyring sealing every store and the
+    key row. Never print or read them.
+  - `myco.db` / `waste.db` — encrypted entity/message and transport state.
+  - `kanban-state.json` — per-repository board state.
+- **What it can act as.** `scripts/myco identity --json` reports `deviceDid`
+  and `identities` — the entities this device is a member of. Writes are
+  authored as the single identity, or the one named with `--as <did:myco:...>`.
+  `--as device` authors as the bare device key.
+- **Separate devices.** Run another data directory for another device; never
+  share one directory or its keyring between devices.
 
 ```bash
 scripts/myco identity --json
 scripts/myco groups [--search NAME] [--all] [--json]
-scripts/myco entity --id <did:myco:...> [--acl] [--json]
+scripts/myco entity --id <did:myco:...> [--acl] [--as DID] [--json]
 ```
 
-`groups` lists entities the agent belongs to; `--all` includes locally known
-non-member entities. `entity` returns the member roster, `agentIsMember`, and,
-with `--acl`, the relevant create/edit permissions.
+`groups` lists entities this device or its identities belong to; `--all`
+includes locally known non-member entities. `entity` returns the roster and,
+with `--acl`, the tier ACLs and what the acting identity can create.
 
-If an expected entity is missing, inspect and refresh peer connectivity:
+## Joining a person's identity
+
+Use only the device DID the person supplies (their app shows it):
+
+```bash
+scripts/myco connect --device <did:key:...> --dry-run --json
+scripts/myco connect --device <did:key:...> --json
+```
+
+This peers with and trusts that device and sends the app's identity-connect
+request. Give the person the `pairingCode`; they accept "Add to Identity" on
+their device after matching it, which creates a Join for this device. Then:
+
+```bash
+scripts/myco join --dry-run --json
+scripts/myco join --json
+```
+
+`join` accepts pending Joins naming this device or its identities and reports
+the `identities` it can now act as. Before the person accepts, `join` finds
+nothing — report that as waiting, never as membership.
+
+## Peers
 
 ```bash
 scripts/myco peers [--json]
 scripts/myco add-peer --peer-link <URL> [--dry-run] [--json]
-scripts/myco remove-peer --did <did:ed25519:...> [--dry-run] [--json]
+scripts/myco remove-peer --did <DID> [--dry-run] [--json]
 ```
 
-Current peer links are identity-only:
-
-```text
-myco://peer?id=did:ed25519:...
-```
-
-The ed25519 DID contains its public key. `add-peer` registers that identity;
-gossip and shared relays discover reachability. Older `pk` parameters are
-validated when present, while legacy `c` relay parameters are ignored because
-a relay connection belongs to the relay's DID—not to the person being added.
-Adding a peer never joins a group.
-Use `remove-peer` only for a specific stale or unwanted peer after previewing
-its trust, capabilities, and connections with `--dry-run`.
-
-## Membership
-
-Membership is a two-message handshake. A current member with Join permission
-creates an invitation, then the nominee accepts it from its own identity:
+Inbound connection requests are journaled, never auto-answered:
 
 ```bash
-scripts/myco invite --entity <did:myco:...> --did <did:ed25519:...> --dry-run --json
-scripts/myco invite --entity <did:myco:...> --did <did:ed25519:...> --json
-scripts/myco join --entity <did:myco:...> --dry-run --json  # run as nominee
-scripts/myco join --entity <did:myco:...> --json
+scripts/myco requests --json                 # origin, message, pairingCode
+scripts/myco trust --did <DID> --dry-run --json
+scripts/myco trust --did <DID> --json
 ```
 
-An invitation is `pending-acceptance`, not membership. If `canInvite` is false,
-report which existing member must invite the nominee; never forge or self-join.
+Trust only a request the person says they sent, matching the origin DID (or
+pairing code) they confirm.
 
-## Owner connection
+Peer links are identity-only (`myco://peer?id=<DID>`); relays are learned, not
+carried in links. Adding a peer never joins a group. Use `remove-peer` only for
+a specific stale or unwanted peer, after a `--dry-run`.
 
-Initialization creates a persistent signer and self-owned entity. Connect a
-human owner only with user-supplied values:
+## Membership in groups
+
+A member with Join permission invites; the nominee accepts from its own side:
 
 ```bash
-scripts/myco connect-owner --avatar <did:myco:...> --peer-link <URL>
+scripts/myco invite --entity <did:myco:...> --did <DID> --dry-run --json
+scripts/myco invite --entity <did:myco:...> --did <DID> --json
 ```
 
-This adds the supplied routing identity, trusts it from the agent side, sends a
-signed gossip request, and creates pending Join invitations for the supplied
-avatar and routing DID. The human must independently accept trust and each Join.
-Never infer an avatar, self-join, or report an invitation as accepted.
+An invitation is `pending-acceptance`, not membership. If `status` is
+`denied`, report which member must invite; never forge or self-join.
 
 ## Posts
 
-Once the agent is a member, create a native Note:
-
 ```bash
 scripts/myco post --entity <did:myco:...> --title TITLE \
-  [--body TEXT] [--space NAME] [--public] [--dry-run] [--json]
+  [--body TEXT] [--space NAME] [--public] [--as DID] [--dry-run] [--json]
 ```
 
-Posts are private to members by default. Always preview before posting on a
-user's behalf. Recheck `agentIsMember` and refuse when the entity is absent.
+Posts are private to members by default and appear as the acting identity —
+the person's own name. Always preview before posting on their behalf.
 
 ## ACL inspection and edits
 
 ```bash
 scripts/myco entity --id <did:myco:...> --acl --json
-scripts/myco edit-acl --entity <did:myco:...> --slot SLOT \
-  [--value JSON] [--tier public|private] [--dry-run] [--json]
+scripts/myco edit-acl --entity <did:myco:...> --slot SLOT --value JSON \
+  [--tier public|private] [--as DID] [--dry-run] [--json]
 ```
 
 Use `response.comment` for replies beneath comments; ordinary slots such as
-`note.comment` address comments on posts.
+`note.comment` address comments on posts. Values are permission arrays such as
+`["creator","members"]`. Public and private tiers may differ; inspect both. If
+`canEdit` is false, report the required grant and stop for human authorization.
 
-ACL values are permission arrays such as `["creator","members"]`. The command
-may edit only when the current entity is already allowed by the `edit` slot.
-Public and private tiers may differ; inspect both. If permission is absent,
-report the required grant and stop for human authorization.
+## Groups and hosted agents
+
+```bash
+scripts/myco create-group --name NAME [--description TEXT] [--template Company] --dry-run --json
+scripts/myco create-agent --entity <group> --name NAME --manager <factory DID> \
+  --keys minimax,deepseek [--description TEXT] [--instructions-file F] --dry-run --json
+scripts/myco share-key --provider minimax --to <factory DID> --json
+scripts/myco sync --json
+```
+
+`create-group` registers a group as the acting identity, which takes every role
+the template names. An agent is a child of a group run by a hosted factory
+(`--manager`); pair with the factory first (`connect --device <factory> --peer`).
+`--keys` lists providers in priority order: the first is used, the rest are
+fallbacks when a provider is out of quota. Each key is read from the desktop
+keyring (`secret-tool store --label='Myco minimax' myco llm-minimax`, stored by
+the person) and shared with `share-key`; the value is never printed or posted.
+The manager collects a key by asking this device for it, so after `share-key`
+run `sync` until the manager has it (its agents stop logging "waiting for
+secrets"); this device must be reachable when the manager first asks.
+For a working team, two more steps are required:
+
+- **Invite the factory into the group** (`invite --entity <group> --did <factory DID>`).
+  The factory accepts automatically; agents only scan groups the factory is a
+  member of, so without this they never see a mention.
+- **Name the agents in the ACL.** Agents cannot be roster members, so grant
+  standing by naming their ids in slots (`edit-acl`), including
+  `response.comment`: a reply to a post is a comment, and without it every
+  reply fails as `not_permitted`.

@@ -24,19 +24,19 @@ different workflow, use `Backlog`, `Ready`, `In Progress`, `Review`, `Done`.
 Write desired state using `references/manifest.md`, then:
 
 ```bash
-scripts/myco snapshot --repo <root> --json
-scripts/myco reconcile --repo <root> --file <manifest> --dry-run --json
-scripts/myco reconcile --repo <root> --file <manifest> --json
+scripts/myco snapshot --entity <did:myco:...> --repo <root> --json
+scripts/myco reconcile --entity <did:myco:...> --repo <root> --file <manifest> --dry-run --json
+scripts/myco reconcile --entity <did:myco:...> --repo <root> --file <manifest> --json
 ```
 
 Inspect the preview for duplicate keys, unsupported statuses, and accidental
 closures. After applying, read a fresh snapshot and report created, updated,
 unchanged, and closed cards.
 
-By default the project belongs to the agent entity. Pass
-`--entity <did:myco:...>` for a group project. The agent must be a member with
-project/task creation permission; if not, report the required ACL grant and
-stop.
+The board lives in the group named by `--entity`; a repository stays bound to
+the first group it was reconciled into. Cards are authored as the acting
+identity (`--as` when the device has several). That identity needs project/task
+creation permission; if not, report the required ACL grant and stop.
 
 Reconciliation is additive and key-based. Omitted cards remain untouched.
 Close only with `"closed": true` plus resolution evidence or an explicit
