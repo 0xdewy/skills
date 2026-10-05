@@ -50,14 +50,14 @@
     },
     {
       "id": 4,
-      "prompt": "Use $myco for the first time in this repo. Give the agent its own identity and create a board without using the app.",
-      "expected_output": "The agent runs doctor and identity checks, initializes one persistent Myco Code Steward entity and routing DID through the CLI, creates a native Myco Project, and reports public identifiers without exposing key material.",
+      "prompt": "Use $myco for the first time on this machine. Set up a device key for the local LLMs.",
+      "expected_output": "The agent runs doctor and identity checks, creates one persistent device key with init (stored encrypted under the keyring outside the repository), and reports the device DID and peer link without exposing key material.",
       "expectations": [
-        "Creates a Myco EntityId as the product identity",
-        "Treats the routing DID as signing and delivery infrastructure",
+        "Runs init once and reports the device DID",
+        "Explains the device acts as an identity only after that identity adds it",
         "Persists encrypted identity data outside the repository",
         "Does not use or automate the app",
-        "Never prints a private key or runtime encryption secret",
+        "Never prints a private key or keyring secret",
         "Does not regenerate identity on sync failure"
       ],
       "required_regex": [],
@@ -66,13 +66,13 @@
     },
     {
       "id": 5,
-      "prompt": "Use $myco to connect my avatar did:myco:owner through this peer link: myco://peer?id=did%3Aed25519%3AJ97ot7tDJio5Ez6NooZJBsqKMXCjxjMJsRbw5CQa3uMP.",
-      "expected_output": "The agent validates the supplied avatar and identity-only peer link, registers and trusts the owner from the agent side, creates pending Join invitations for the avatar and routing DID, sends a consent-gated gossip request, and asks the human to accept trust and membership in Myco.",
+      "prompt": "Use $myco to add this machine to my identity. My phone's device DID is did:key:z6MkPhoneDeviceExample.",
+      "expected_output": "The agent dry-runs then runs connect --device with the supplied DID, reports the pairing code, asks the person to accept \"Add to Identity\" on their phone after matching the code, then runs join and reports the identity the device can now act as.",
       "expectations": [
-        "Uses only the explicitly supplied avatar and delivery peer",
-        "Derives the peer public key from its ed25519 DID",
-        "Creates Join invitations rather than claiming immediate membership",
-        "Sends a signed gossip trust request for human consent",
+        "Uses only the explicitly supplied device DID",
+        "Reports the pairing code for the person to check",
+        "Does not claim membership before join reports it",
+        "Runs join after the person accepts",
         "Does not expose key material",
         "Does not automate UI interaction"
       ],
