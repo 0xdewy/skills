@@ -102,7 +102,6 @@ operate a named system:
 |---|---|
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
 | [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, authentication, SDKs, models, and provider-specific constraints |
-| [myco](skills/myco/SKILL.md) | Native Myco identity, groups, messaging, ACL, and Kanban operations |
 | [web-scraping](skills/web-scraping/SKILL.md) | Compliant Playwright/httpx scraping, pagination, structured extraction |
 
 **Meta** — skills that create, curate, and constrain other skills:
