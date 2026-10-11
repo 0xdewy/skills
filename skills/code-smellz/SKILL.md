@@ -4,18 +4,7 @@ description: >-
   Finds and fixes repository-wide correctness, security, architecture, and
   maintainability problems with bounded review. Only use when explicitly
   requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 2.0.0
-  category: meta
-  tags:
-    - refactoring
-    - code-quality
-    - bugs
-    - optimization
-    - multi-agent
 ---
 
 # Code Smellz
@@ -25,14 +14,12 @@ without changing intended behavior.
 
 Load `../common/patterns/execution-contract.md`,
 `../common/patterns/quarantine-loop.md`, and `../common/patterns/scaling.md`. Use `../common/scripts/detect_runner.py` and `measure_loc.py`.
-At dispatch, use `references/subagent-prompts.md` to load the shared contract and
-only the active role prompt.
+Load `references/subagent-prompts.md` only at dispatch.
 
 ## Activation
 
-Second gate: confirm via `../common/ROUTING.md` that the task is
-quality/correctness cleanup, not size-only reduction, pure review, or a
-single obvious fix.
+Quality and correctness cleanup only. Size-only reduction is `shrinkray`; a
+report without fixes is `red-team`; a single obvious fix needs no skill.
 
 ## Modes
 

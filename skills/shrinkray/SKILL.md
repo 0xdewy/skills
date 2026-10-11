@@ -4,18 +4,7 @@ description: >-
   Shrinks repositories while preserving behavior by removing dead code,
   duplication, and verbosity with measured verification. Only use when
   explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 2.2.1
-  category: meta
-  tags:
-    - refactoring
-    - code-size
-    - dead-code
-    - multi-agent
-    - optimization
 ---
 
 # Shrinkray
@@ -24,9 +13,9 @@ Reduce repository size while preserving behavior. Prefer direct edits for a
 small target; use agents only when evidence identifies independent bloat
 categories that benefit from parallel work.
 
-Load `../common/ROUTING.md` to confirm this is a size or dead-code task rather
-than bug, security, architecture, documentation, or build-minification work.
-Then load `../common/patterns/execution-contract.md`,
+Size and dead-code work only; bug, security, and architecture cleanup is
+`code-smellz`, and build minification is not this skill. Load
+`../common/patterns/execution-contract.md`,
 `../common/patterns/quarantine-loop.md`, and
 `../common/patterns/scaling.md`. Use `references/subagent-prompts.md` only when
 dispatching a role.
@@ -88,8 +77,9 @@ Use `lines: "all"` for ghost files and categories `dead_code`, `ghost_file`,
 then verbosity. Weight tool-certified findings above model-only findings.
 Phase 0.4 output is exempt because `lc` applies and verifies its own changes.
 
-Run the shared type-check and test gates after edits, including the second
-minimizer pass. Finish with:
+Run the shared type-check and test gates after edits. For the second minimizer
+pass, re-run `scripts/deadcode_scan.py` on each changed file and feed new
+findings into the same iteration's triage. Finish with:
 
 ```text
 DONE: <WORKSPACE> — <lines> lines removed across <iterations> iterations (-<pct>% LOC)

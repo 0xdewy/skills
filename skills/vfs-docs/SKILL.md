@@ -4,18 +4,7 @@ description: >-
   Builds self-describing docs/ trees where directory shape and filenames
   carry the meaning, so an agent orients from `tree docs/` alone. Only use
   when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 3.0.0
-  category: meta
-  tags:
-    - documentation
-    - unix-philosophy
-    - progressive-disclosure
-    - onboarding
-    - docs-tree
 ---
 
 # VFS Docs
@@ -25,16 +14,25 @@ to: every path is a statement, every directory is a zoom level, and
 `tree docs/` alone conveys the mental model. The tree is the only index — no
 README, NAVIGATION, or context-map files inside `docs/`.
 
-Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Load
+Load `../common/patterns/execution-contract.md`. Load
 `references/tree-design.md` before designing or editing a tree. Prefer the
 skill's scripts over handwritten equivalents: `scripts/analyze_repo.py` for
-repo shape, `scripts/lint_tree.py` for convention checks.
+code areas, existing docs, and site generators; `scripts/lint_tree.py` for
+convention checks.
+
+## Activation
+
+These rules suit docs read in place by agents and developers. If
+`analyze_repo.py` reports a site generator (MkDocs, Docusaurus, Sphinx, ...),
+`docs/` feeds a published site whose index files and nav config are
+load-bearing: do not restructure it. Say so, and offer a separate tree such
+as `docs/internal/` or stop.
 
 ## The four rules
 
 1. **Names carry the meaning.** Filenames are kebab-case claims or questions
-   readable in `tree` output; directory names are topics.
+   readable in `tree` output; directory names are topics. Claims name what
+   rarely changes; questions and topics name what changes with the code.
 2. **Depth is zoom.** Root files orient in one screen; each level down narrows
    scope and adds detail.
 3. **Summary file pairs with detail dir.** When `topic.md` outgrows one
@@ -53,17 +51,22 @@ repo shape, `scripts/lint_tree.py` for convention checks.
 ## Workflow
 
 1. Confirm repo root and git status. Preserve unrelated changes.
-2. Run `scripts/analyze_repo.py` for repo shape; inventory existing docs.
-   Existing content is preserved and relocated, never discarded.
+2. Run `scripts/analyze_repo.py`: code areas by size, every existing doc
+   with its headings, and site generators (see Activation). Existing content
+   is preserved and relocated, never discarded.
 3. Design on paper first: write the intended `tree docs/` output and check it
    reads as an outline of the system before creating anything.
-4. Write files: one topic per file, one screen per file. `git mv` existing
-   docs into place, then update inbound links repo-wide.
+4. Write files: one topic per file, one screen per file. Write only what the
+   code, config, or an existing doc supports, and end each new file with the
+   paths it was written from (`Sources: src/retry.ts, config/queue.yml`).
+   Where the evidence is missing, leave the file out rather than guess.
+   `git mv` existing docs into place, then update inbound links repo-wide.
 5. Run `scripts/lint_tree.py docs/` and fix every violation (naming,
    structure, and date-prefixed names). After a migration, run
    `scripts/lint_tree.py docs/ --links` to confirm no cross-reference dangles;
    treat runtime-path mentions as expected noise, not docs links.
-6. Print the final `tree docs/` and report created/moved/deleted files.
+6. Print the final `tree docs/` and counts of created, moved, and deleted
+   files.
 
 Final line:
 

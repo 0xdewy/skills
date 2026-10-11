@@ -3,17 +3,6 @@
 Shared contract for skills that run phases, spawn subagents, write files, or
 modify a user worktree. Load this alongside the domain-specific pattern file.
 
-## Activation Gate
-
-Before doing heavyweight work, confirm the situation still matches the skill:
-
-1. The user asked for this workflow, not just a word that appears in the trigger.
-2. Required inputs are present or can be inferred safely.
-3. Required tools are available, or there is a documented fallback.
-4. The expected side effects are acceptable for the current directory.
-
-If any condition fails, ask one focused question or use the documented fallback.
-
 ## Workspace
 
 Do not hardcode `/tmp/<skill>-output/` in skill bodies; the temp directory
@@ -39,10 +28,13 @@ resume rules say to continue it.
 
 At the start of a run:
 
-1. Write down the observable acceptance criteria.
-2. State the resolved `WORKSPACE` in one line so the run is auditable.
-3. Create every output directory before dispatching agents or scripts.
-4. Record the phase state in one place: `status.json`, `README.md`, or a clearly
+1. If a required input is missing and cannot be inferred safely, ask one
+   focused question, or take the skill's documented fallback when nobody can
+   answer.
+2. Write down the observable acceptance criteria.
+3. State the resolved `WORKSPACE` in one line so the run is auditable.
+4. Create every output directory before dispatching agents or scripts.
+5. Record the phase state in one place: `status.json`, `README.md`, or a clearly
    named status section.
 
 ## Subagent Contract
@@ -113,6 +105,25 @@ Before emitting the final `DONE:` line:
 4. Mark the result `DONE` only if required criteria passed.
 5. Use `PARTIAL` when useful artifacts exist but blockers remain.
 
+## Reporting to a Human
+
+The reader's time is the cost. Artifacts hold the detail; the reply holds what
+the reader needs to act.
+
+1. Lead with the result in one or two sentences.
+2. Then only what changes what the reader does next: failures, unverified
+   parts, decisions that are theirs to make.
+3. Length follows the decision, not the effort. A long run with a clean result
+   gets a short report; a hard trade-off gets the room it needs.
+4. Point to the artifact instead of pasting it. Don't list every edit or
+   finding when a file already has them.
+5. Cut recaps, process narration, restated instructions, caveats that change
+   nothing, and offers of next steps.
+6. Short is not cryptic: full sentences, no invented abbreviations.
+
+The same applies to anything a skill writes for other people: PR comments,
+reports, issue text.
+
 ## Completion Line
 
 End with a parseable line:
@@ -129,10 +140,5 @@ DONE: <primary-output-path> — PARTIAL, <what works>, blockers: <summary>
 
 The completion line is the final line. Do not emit it before verification.
 
-**Scope.** The completion line is mandatory for orchestrator-invoked skills —
-anything another agent, a loop, a cron, or a pipeline might dispatch and wait
-on. It is optional for pure reference or voice skills that answer a human
-directly and are never consumed by an orchestrator (e.g. a Q&A reference skill,
-a voice/persona skill). If a skill can be spawned by another skill, it emits
-`DONE:`; if it only ever talks back to a human, the line is encouraged but not
-required.
+**Scope.** Mandatory for any skill another agent, loop, cron, or pipeline might
+dispatch and wait on. Optional for skills that only ever answer a human.

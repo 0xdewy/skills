@@ -1,0 +1,6 @@
+interface:
+  display_name: "PR Smellz"
+  short_description: "Review introduced risks in a pull request diff"
+  default_prompt: "Use $pr-smellz to review this pull request for introduced risks."
+policy:
+  allow_implicit_invocation: false

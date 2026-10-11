@@ -3,21 +3,7 @@ name: agentify
 description: >-
   Maps git-tracked code with a ranked outline, scoped expansion, and
   symbol or call-site XREFs. Only use when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 2.0.0
-  category: meta
-  tags:
-    - code-map
-    - repo-map
-    - context-management
-    - llm-navigation
-    - lazy-context
-    - tree-sitter
-    - codebase-indexing
-    - progressive-disclosure
 ---
 
 # Agentify

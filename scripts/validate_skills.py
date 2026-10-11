@@ -12,30 +12,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 
-META_SKILLS = {
-    "goal",
-    "project-manager",
-    "red-team",
-    "code-smellz",
-    "pr-smellz",
-    "shrinkray",
-}
-
-FORBIDDEN_ACTIVE_TEXT = [
-    "evm-auditor",
-    "direct-executor",
-    "domain-router",
-    "god-skill",
-    "brainstormers",
-    "startup-ideation",
-    "simple-memory",
-    "coders",
-    "one-shot-project",
-    "implementer",
-    "teach-me",
-    "researcher",
-]
-
 MAX_SKILL_BYTES = 5_000
 MAX_DESCRIPTION_CHARS = 450
 MAX_PROMPT_BYTES = 12_000
@@ -157,8 +133,6 @@ def main() -> int:
             fail(f"{rel} contains template TODO text")
         if skill.stat().st_size > MAX_SKILL_BYTES:
             fail(f"{rel} is {skill.stat().st_size} bytes; keep SKILL.md under {MAX_SKILL_BYTES}")
-        if name in META_SKILLS and "../common/ROUTING.md" not in text:
-            fail(f"{rel} is a meta-skill but does not reference ../common/ROUTING.md")
         reference_dir = skill.parent / "references"
         docs = [skill]
         if reference_dir.exists():
@@ -189,12 +163,6 @@ def main() -> int:
                 f"{prompt.relative_to(ROOT)} is {prompt.stat().st_size} bytes; "
                 f"split prompt bundles above {MAX_PROMPT_BYTES}"
             )
-
-    routing = (SKILLS / "common" / "ROUTING.md").read_text()
-    active_text = routing + "\n".join(p.read_text() for p in skill_files)
-    for forbidden in FORBIDDEN_ACTIVE_TEXT:
-        if forbidden in active_text:
-            fail(f"active skill/routing text contains stale term: {forbidden}")
 
     eval_count = 0
     routing_coverage = {}

@@ -4,18 +4,7 @@ description: >-
   Runs a bounded attempt-verify-diagnose loop until executable,
   observable, or explicit reviewer gates pass, with durable resume state
   and evidence per criterion. Only use when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: user
-  version: 2.0.0
-  category: meta
-  tags:
-    - goal
-    - iteration
-    - verifier
-    - review
-    - resumable
 ---
 
 # Goal
@@ -24,8 +13,9 @@ Iterate against fixed gates until they pass, progress stalls, or the cap is
 reached.
 
 Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Consult
-`../common/ROUTING.md`. Load `../common/patterns/worker-slice.md` only when
+`../common/patterns/scaling.md`. Independent workstreams belong to
+`project-manager`; one direct action needs no skill. Load
+`../common/patterns/worker-slice.md` only when
 dispatching an independent implementation slice. Validate state with
 `../common/scripts/validate_state.py`.
 

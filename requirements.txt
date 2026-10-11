@@ -1,8 +1,0 @@
-# Python dependencies for the scripts shipped inside this repo's skills.
-# Install with: pip install -r requirements.txt && playwright install chromium
-#
-# Skills that generate code for the user's own project (web-scraping,
-# llm-providers) describe those dependencies in their references; they are
-# installed in the user's project, not here.
-
-playwright>=1.44.0       # frontend-ux-designer/scripts/audit.py

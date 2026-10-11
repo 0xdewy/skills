@@ -54,7 +54,7 @@ Every skill is one of two kinds, read off its frontmatter:
 
 ```
 You: "audit my app's design"
-Agent: [loads frontend-ux-designer skill]
+Agent: [loads frontend-qa skill]
 Agent: "Evaluating layout consistency, typography, color, spacing..."
 ```
 
@@ -80,13 +80,13 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [student-counsel](skills/student-counsel/SKILL.md) | The Student works, Socrates examines by elenchus, revise until the work answers for itself |
 | [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
 | [pr-describe](skills/pr-describe/SKILL.md) | Rewrites a PR title and body for a reader with no context: why, what changed, how to verify |
+| [git-show](skills/git-show/SKILL.md) | HTML dashboards and text trees of org/team repos, PR stacks, blockers, dependencies, and local work |
 
 **Frontend & Testing** — browser-based QA and design auditing:
 
 | Skill | What it does |
 |---|---|
-| [frontend-twerkin](skills/frontend-twerkin/SKILL.md) | Playwright workflow QA with scoped auto-fixes |
-| [frontend-ux-designer](skills/frontend-ux-designer/SKILL.md) | Rendered UI/UX audit and targeted visual fixes |
+| [frontend-qa](skills/frontend-qa/SKILL.md) | Headless-browser QA: functional flows, visual audit, scoped fixes proven by re-run |
 
 **Contract Analysis** — discovers behavioral properties and cross-artifact drift:
 
@@ -101,8 +101,6 @@ operate a named system:
 | Skill | What it does |
 |---|---|
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
-| [hyperliquid](skills/hyperliquid/SKILL.md) | Hyperliquid developer reference: HyperCore/HyperEVM APIs, signing, HIPs |
-| [polymarketv2](skills/polymarketv2/SKILL.md) | Polymarket v2 APIs and SDKs: Gamma, Data, CLOB, auth, orders |
 | [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, authentication, SDKs, models, and provider-specific constraints |
 | [myco](skills/myco/SKILL.md) | Native Myco identity, groups, messaging, ACL, and Kanban operations |
 | [web-scraping](skills/web-scraping/SKILL.md) | Compliant Playwright/httpx scraping, pagination, structured extraction |
@@ -117,28 +115,10 @@ operate a named system:
 
 ---
 
-## Retired and Replaced Skills
+## Retired Skills
 
-Retired skills remain recoverable from Git history; they are deliberately not
-installed or exposed as active routes. Do not restore one merely to preserve a
-name—restore it only if its behavior is not covered by the replacement.
-
-| Retired skill | Current route |
-|---|---|
-| `implementer` | `goal` for one bounded implementation loop |
-| `one-shot-project` | `project-manager` for dependency-aware multi-slice builds |
-| `coders` | Direct implementation or a `project-manager` worker slice |
-| `brainstormers` | `project-manager --compete` when genuine competing candidates are required |
-| `startup-ideation` | `project-manager --compete` |
-| `ego` | none; a voice belongs in the system prompt, not a skill |
-| `teach-me` | a direct explanation; `agentify` for a code map |
-| `researcher` | none; search and cite primary sources directly |
-| `simple-memory` | Retired from active discovery; persisted memory is user data and must use a purpose-built, consented store |
-| `skill-creator` | `skill-lab` for repository-authored skills; the platform system skill remains separate |
-
-`agentify` and `vfs-docs` are both active: `agentify` maps code for lazy
-navigation, while `vfs-docs` builds self-describing documentation trees. They
-are not aliases and neither should be deleted as part of the split.
+Retired skills live in Git history. Restore one only if its behavior is not
+covered by a current skill.
 
 ## Plugin Compatibility
 
@@ -153,8 +133,9 @@ installation—verify installed status separately.
 
 ## Design Principles
 
-- **Routing before weight.** Frontmatter catches user language; `../common/ROUTING.md`
-  catches task shape. If a task is one direct action, do it directly.
+- **Routing before weight.** Frontmatter TRIGGER/SKIP catches user language;
+  each skill's Activation section names its neighbours. If a task is one direct
+  action, do it directly.
 - **Cheap first.** Skills with modes start at `--quick` unless the task
   genuinely needs parallelism, isolated context, or multiple workstreams.
 - **Lazy context.** Keep `SKILL.md` small. Put long prompts, examples, scripts,
@@ -170,8 +151,8 @@ Run the lightweight repo validator after skill edits:
 python3 scripts/validate_skills.py
 ```
 
-It checks skill frontmatter, size limits, stale forbidden strings, meta-skill
-routing references, invocation contracts, token budgets, and eval JSON.
+It checks skill frontmatter, size limits, referenced resource paths, invocation
+contracts, token budgets, and eval JSON.
 
 To execute evals against a live agent backend and grade the results:
 
@@ -194,12 +175,6 @@ python3 scripts/run_ablation.py --skill invariant-miner --id 3
 
 Pass `--grader-model codex:<model>` to judge with Codex instead of the default
 Anthropic/Claude path.
-
-Check volatile domain references without network access:
-
-```bash
-python3 scripts/check_domain_freshness.py
-```
 
 ---
 

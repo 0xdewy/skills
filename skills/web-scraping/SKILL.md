@@ -3,26 +3,15 @@ name: web-scraping
 description: >-
   Builds compliant scrapers and datasets with HTTP parsing or Playwright.
   Only use when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: 0xdewy
-  version: 1.1.0
-  category: data
-  tags:
-    - scraping
-    - playwright
-    - beautifulsoup
-    - data-extraction
-    - compliance
 ---
 
 # Web Scraping
 
 Build compliant scrapers and data extractors. Use official APIs when available.
 
-Load `../common/patterns/knowledge.md` for source/compliance rules and `../common/patterns/execution-contract.md` when
-writing durable scripts or datasets.
+Load `../common/patterns/execution-contract.md` when writing durable scripts
+or datasets.
 
 ## Safety Gate
 
@@ -30,6 +19,9 @@ Before scraping, check robots/TOS where relevant, rate limits, authentication
 permission, data sensitivity, and whether an API is the better route. Refuse
 bypass of CAPTCHA, bot defenses, paywalls, geoblocks, access controls, or
 robots/TOS restrictions.
+
+Before any code, write a short compliance note: target paths, robots/TOS
+status, rate limit, user agent, and the decision to proceed or stop.
 
 ## Workflow
 

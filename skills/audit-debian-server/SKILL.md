@@ -34,6 +34,7 @@ confirm intended exposure before calling it a vulnerability.
 
 ## Report and plan
 
+Lead with the exposure verdict and the findings that need action now.
 Separate facts, uncertainty, risk, and recommendations. Report:
 
 - scope, access assumptions, evidence gaps, and an exposure map;

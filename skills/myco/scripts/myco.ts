@@ -133,6 +133,37 @@ function writePrivate(file: string, value: string): void {
   fs.chmodSync(file, 0o600);
 }
 
+function deviceOnly(cfg: ReturnType<typeof config>): boolean {
+  return readState(cfg).identity?.deviceOnly === true;
+}
+
+// Waste receipts a gossip as soon as it decrypts. A sync with no trust handler
+// therefore consumes a connection request, and a later scan will not see it
+// again. Record it here and leave the trust decision for the user.
+function connectionRequestJournal(cfg: ReturnType<typeof config>): string {
+  return path.join(cfg.dataDir, 'connection-requests.json');
+}
+
+function rememberConnectionRequest(cfg: ReturnType<typeof config>, origin: string, message?: string): void {
+  const file = connectionRequestJournal(cfg);
+  let requests: Dict[] = [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (Array.isArray(parsed)) requests = parsed;
+  } catch (error: any) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
+  const receivedAt = new Date().toISOString();
+  const existing = requests.find((request) => request.origin === origin);
+  if (existing) {
+    existing.receivedAt = receivedAt;
+    if (message) existing.message = message;
+  } else {
+    requests.push({ origin, receivedAt, ...(message ? { message } : {}) });
+  }
+  writePrivate(file, `${JSON.stringify(requests, null, 2)}\n`);
+}
+
 function readState(cfg: ReturnType<typeof config>): Dict {
   const raw = readText(cfg.stateFile);
   if (!raw) return { version: STATE_VERSION, identity: {}, repositories: {} };
@@ -288,6 +319,11 @@ async function openClient(cfg: ReturnType<typeof config>, modules: Dict): Promis
       try { await waste.setPrivatePeers(relayDids); } catch { /* non-fatal */ }
     }
   }
+  waste.registerTrustHandler(async ({ origin, message }: { origin: string; message?: string }) => {
+    if (waste.getCapabilities(origin)?.relay) return 'ignore';
+    rememberConnectionRequest(cfg, origin, message);
+    return 'ignore';
+  });
   return { client, waste, db, wb, createdDid: !existingDid, local };
 }
 
@@ -325,6 +361,7 @@ async function ensureEntity(
   client: any,
   opts: { name?: string; ownerDid?: string } = {},
 ): Promise<{ entityId: string; created: boolean }> {
+  if (deviceOnly(cfg)) return { entityId: null, created: false };
   const state = readState(cfg);
   const bound = readText(cfg.entityFile) || state.identity.agentEntityId;
   if (bound) {
@@ -476,7 +513,7 @@ async function commandDoctor(args: ParsedArgs): Promise<void> {
     mycoClient: fs.existsSync(path.join(cfg.mycoRoot, 'myco-ts', 'dist', 'index.js')),
     dataDir: cfg.dataDir,
     relay: cfg.relay,
-    initialized: Boolean(readText(cfg.didFile) && readText(cfg.entityFile)),
+    initialized: Boolean(readText(cfg.didFile) && (readText(cfg.entityFile) || deviceOnly(cfg))),
   };
   const ok = checks.mycoRoot && checks.agentPackage && checks.tsx && checks.mycoClient;
   output({ ok, checks }, has(args, 'json'));
@@ -487,13 +524,27 @@ async function commandIdentity(args: ParsedArgs): Promise<void> {
   const cfg = config();
   const routingDid = readText(cfg.didFile);
   const agentEntityId = readText(cfg.entityFile);
+  const state = readState(cfg);
+  if (routingDid && deviceOnly(cfg)) {
+    output({
+      initialized: true,
+      kind: 'device',
+      name: state.identity.name || '',
+      agentEntityId: null,
+      routingDid,
+      relay: cfg.relay,
+      peerLink: peerLink(routingDid),
+      dataDir: cfg.dataDir,
+    }, has(args, 'json'));
+    return;
+  }
   if (!routingDid || !agentEntityId) {
     output({ initialized: false, dataDir: cfg.dataDir, next: 'run init before a write operation' }, has(args, 'json'));
     return;
   }
-  const state = readState(cfg);
   output({
     initialized: true,
+    kind: 'agent',
     name: state.identity.name || 'Myco Code Steward',
     agentEntityId,
     routingDid,
@@ -505,6 +556,7 @@ async function commandIdentity(args: ParsedArgs): Promise<void> {
 
 async function commandInit(args: ParsedArgs): Promise<void> {
   const cfg = config();
+  if (deviceOnly(cfg)) fail('this identity is a device and does not own a group');
   const modules = await loadMyco(cfg);
   const { client, waste, createdDid } = await openClient(cfg, modules);
   const identity = await ensureEntity(cfg, modules, client, { name: flag(args, 'name'), ownerDid: flag(args, 'owner-did') });
@@ -525,7 +577,9 @@ async function commandInit(args: ParsedArgs): Promise<void> {
 
 async function initializedClient(args: ParsedArgs): Promise<Dict> {
   const cfg = config();
-  if (!readText(cfg.didFile) || !readText(cfg.entityFile)) fail('identity is not initialized; run init first');
+  if (!readText(cfg.didFile) || (!readText(cfg.entityFile) && !deviceOnly(cfg))) {
+    fail('identity is not initialized; run init first');
+  }
   const modules = await loadMyco(cfg);
   const opened = await openClient(cfg, modules);
   const identity = await ensureEntity(cfg, modules, opened.client);
@@ -534,6 +588,7 @@ async function initializedClient(args: ParsedArgs): Promise<Dict> {
 
 function resolveTarget(args: ParsedArgs, ctx: Dict): string {
   const target = flag(args, 'entity') || ctx.entityId;
+  if (!target) fail('pass --entity; this identity has no home entity');
   if (target !== ctx.entityId && !ctx.client.entities.find((item: any) => item.id === target)) {
     fail(`target entity is not present locally: ${target} (sync/add-peer first)`);
   }
@@ -869,7 +924,7 @@ async function commandGroups(args: ParsedArgs): Promise<void> {
   const syncError = await safeSync(ctx.client, ctx.waste);
   const search = flag(args, 'search')?.toLowerCase();
   const all = has(args, 'all');
-  const self = [ctx.client.id, ctx.entityId];
+  const self = [ctx.client.id, ctx.entityId].filter(Boolean);
   const groups: Dict[] = [];
   for (const entity of ctx.client.entities) {
     const view = viewOf(ctx.modules, entity);
@@ -922,7 +977,7 @@ async function commandEntity(args: ParsedArgs): Promise<void> {
   const view = viewOf(ctx.modules, entity);
   if (!view) fail(`cannot compute current view for ${id}`);
   const members: string[] = ctx.modules.memberList(view);
-  const self = [ctx.client.id, ctx.entityId];
+  const self = [ctx.client.id, ctx.entityId].filter(Boolean);
   const result: Dict = {
     found: true,
     id: entity.id,
@@ -1181,7 +1236,7 @@ async function commandPost(args: ParsedArgs): Promise<void> {
   }
   const view = viewOf(ctx.modules, entity);
   const members: string[] = view ? ctx.modules.memberList(view) : [];
-  const self = [ctx.client.id, ctx.entityId];
+  const self = [ctx.client.id, ctx.entityId].filter(Boolean);
   const agentIsMember = members.some((member: string) => self.includes(member));
   const propagation = pub ? ctx.modules.Propagation.Public : ctx.modules.Propagation.Private;
   const canPost = ctx.client.isMessagePermitted(entityId, propagation, ctx.modules.MessageType.Note);
@@ -1329,9 +1384,10 @@ async function main(): Promise<void> {
 // worker must never silently mint a replacement identity.
 export async function openExistingIdentity(): Promise<Dict> {
   const cfg = config();
-  for (const file of [cfg.didFile, cfg.entityFile, cfg.keyFile]) {
+  for (const file of [cfg.didFile, cfg.keyFile]) {
     if (!fs.existsSync(file)) throw new Error('Bound Myco identity is incomplete');
   }
+  if (!fs.existsSync(cfg.entityFile) && !deviceOnly(cfg)) throw new Error('Bound Myco identity is incomplete');
   return initializedClient(parseArgs(['peers', '--json']));
 }
 

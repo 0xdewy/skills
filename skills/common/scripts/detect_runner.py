@@ -8,9 +8,13 @@ Usage: detect_runner.py <project_dir>
 Output: JSON {runner, command, confidence}
 """
 
+import os
 import sys
 import json
+from fnmatch import fnmatch
 from pathlib import Path
+
+_SKIP_DIRS = {'.git', 'node_modules', '.venv', 'venv', 'env', 'vendor', 'dist', 'build', 'target'}
 
 # (marker_filename, runner_name, command, confidence)
 _FILE_MARKERS = [
@@ -33,13 +37,21 @@ _PYPROJECT_HINTS = [
     ('unittest', 'unittest', 'python3 -m unittest discover', 'medium'),
 ]
 
-# (package.json content keyword -> runner, command); first match wins
+# (package.json dependency -> command), used when no test script is defined
 _NPM_HINTS = [
-    ('vitest', 'vitest', 'npx vitest run'),
-    ('jest',   'jest',   'npx jest'),
-    ('mocha',  'mocha',  'npx mocha'),
-    ('"test"', 'npm',    'npm test'),
+    ('vitest', 'npx vitest run'),
+    ('jest',   'npx jest'),
+    ('mocha',  'npx mocha'),
 ]
+
+
+def _has_file(root: Path, patterns: tuple) -> bool:
+    """True if a file outside dependency and build dirs matches a pattern."""
+    for _, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
+        if any(fnmatch(f, pat) for f in files for pat in patterns):
+            return True
+    return False
 
 
 def detect(project_dir: str) -> dict:
@@ -48,9 +60,20 @@ def detect(project_dir: str) -> dict:
     # package.json — JS/TS projects
     pkg = root / 'package.json'
     if pkg.exists():
-        content = pkg.read_text(encoding='utf-8', errors='replace')
-        for marker, name, cmd in _NPM_HINTS:
-            if marker in content:
+        try:
+            data = json.loads(pkg.read_text(encoding='utf-8', errors='replace'))
+        except ValueError:
+            data = {}
+        if not isinstance(data, dict):
+            data = {}
+        # The project's own script wins: it carries the flags, config, and
+        # build steps a bare `npx <runner>` would drop.
+        script = (data.get('scripts') or {}).get('test', '')
+        if script and 'no test specified' not in script:
+            return {'runner': 'npm', 'command': 'npm test', 'confidence': 'high'}
+        deps = {**(data.get('dependencies') or {}), **(data.get('devDependencies') or {})}
+        for name, cmd in _NPM_HINTS:
+            if name in deps:
                 return {'runner': name, 'command': cmd, 'confidence': 'high'}
 
     # pyproject.toml
@@ -81,15 +104,10 @@ def detect(project_dir: str) -> dict:
             return {'runner': 'make', 'command': 'make test', 'confidence': 'medium'}
 
     # Fallback: sniff for test files
-    py_tests = list(root.rglob('test_*.py'))[:1] + list(root.rglob('*_test.py'))[:1]
-    if py_tests:
+    if _has_file(root, ('test_*.py', '*_test.py')):
         return {'runner': 'pytest', 'command': 'python3 -m pytest -v', 'confidence': 'low'}
 
-    js_tests = (
-        list(root.rglob('*.test.js'))[:1] + list(root.rglob('*.spec.js'))[:1] +
-        list(root.rglob('*.test.ts'))[:1] + list(root.rglob('*.spec.ts'))[:1]
-    )
-    if js_tests:
+    if _has_file(root, ('*.test.js', '*.spec.js', '*.test.ts', '*.spec.ts')):
         return {'runner': 'jest', 'command': 'npx jest', 'confidence': 'low'}
 
     return {'runner': 'unknown', 'command': None, 'confidence': 'none'}

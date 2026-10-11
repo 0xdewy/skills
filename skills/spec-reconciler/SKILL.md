@@ -4,18 +4,7 @@ description: >-
   Reconciles source-anchored claims across schemas, code, tests, docs, and
   generated clients using declared authority. Only use when explicitly
   requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 1.0.0
-  category: quality
-  tags:
-    - specifications
-    - contracts
-    - schemas
-    - documentation
-    - drift
 ---
 
 # Spec Reconciler
@@ -23,9 +12,7 @@ metadata:
 Turn competing repository artifacts into atomic, source-anchored claims and
 classify their disagreements without inventing a source of truth.
 
-Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`; consult `../common/ROUTING.md` for overlap.
-Use `references/claim-model.md` and `scripts/reconcile_claims.py` when extracting
+Load `../common/patterns/execution-contract.md`. Use `references/claim-model.md` and `scripts/reconcile_claims.py` when extracting
 and classifying claims.
 
 ## Activation
@@ -77,7 +64,7 @@ claims are `authority-conflict`. Do not silently break ties.
 
 For anything beyond the inline quick case:
 
-1. State the mode line, resolve `WORKSPACE`, and write `status.json` with target,
+1. State the mode, resolve `WORKSPACE`, and write `status.json` with target,
    mode, edit authority, claim/surface budgets, and baseline checks.
 2. Inventory only relevant schemas, types, parsers/handlers, tests, docs,
    examples, clients, and generation config. Mark each surface `primary`,

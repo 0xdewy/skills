@@ -5,18 +5,7 @@ description: >-
   dispatching isolated workers, reviewing and integrating checkpoints, and
   verifying the result; supports explicit competing candidates. Only use when
   explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: user
-  version: 2.0.0
-  category: meta
-  tags:
-    - coordination
-    - long-running
-    - resumable
-    - integration
-    - multi-agent
 ---
 
 # Project Manager
@@ -24,8 +13,7 @@ metadata:
 Own a long-running mandate from decomposition through verified integration.
 
 Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Consult
-`../common/ROUTING.md`. Load `../common/patterns/worker-slice.md` and
+`../common/patterns/scaling.md`. Load `../common/patterns/worker-slice.md` and
 `references/subagent-prompts.md` only when dispatching or reviewing workers.
 Validate state with `../common/scripts/validate_state.py`.
 

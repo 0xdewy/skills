@@ -4,18 +4,7 @@ description: >-
   Mines evidence-backed invariants and falsifies them with generative
   tests, shrinking reproducible counterexamples. Only use when explicitly
   requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 1.0.0
-  category: testing
-  tags:
-    - invariants
-    - property-testing
-    - fuzzing
-    - testing
-    - counterexamples
 ---
 
 # Invariant Miner
@@ -23,9 +12,8 @@ metadata:
 Discover general behavioral properties, then attempt to disprove them with
 executable tests. A plausible statement is a candidate, not an invariant.
 
-Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Consult
-`../common/ROUTING.md` for overlap. Load `references/methods.md` only when
+Load `../common/patterns/execution-contract.md`. Load
+`references/methods.md` only when
 selecting a falsification technique. Use `scripts/validate_ledger.py` before
 completion.
 
@@ -94,8 +82,8 @@ invariants; encode `observed` behavior only when the user accepts it as policy.
    duration, output SHA-256, and a replay command for counterexamples. Passing
    finite trials means "not falsified within this budget," never proof.
 8. Run `scripts/validate_ledger.py --print-template`, write `INVARIANTS.json`
-   from that schema, then `REPORT.md` with supported properties,
-   counterexamples, test changes, commands, budgets, and residual search gaps.
+   from that schema, then `REPORT.md`: counterexamples first, then supported
+   properties, residual search gaps, test changes, commands, and budgets.
 9. Run the ledger validator and all targeted tests. With `--fix`, also run the
    relevant regression suite after the production patch.
 

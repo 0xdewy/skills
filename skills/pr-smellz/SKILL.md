@@ -4,24 +4,12 @@ description: >-
   Reviews PR diffs for introduced risks, anchoring findings to changed
   lines; read-only unless --fix is explicit. Only use when explicitly
   requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: user
-  version: 1.0.0
-  category: quality
-  tags:
-    - pull-request
-    - code-review
-    - correctness
-    - security
-    - regression
-    - testing
 ---
 
 # PR Smellz
 
-Review only behavior introduced by a pull request or branch diff. Findings lead;
+Review behavior and complexity introduced by a pull request or branch diff. Findings lead;
 every finding must be actionable, independently verified, and anchored to a
 changed line. Default is read-only.
 
@@ -32,7 +20,7 @@ Load `../common/patterns/execution-contract.md` and
 
 ## Activation
 
-Confirm via `../common/ROUTING.md` that the target is a PR/diff. Use
+The target is a PR or branch diff. Use
 `code-smellz` for whole-repo cleanup and `red-team` for a broad read-only review
 of a non-PR deliverable. Address already-supplied review comments directly.
 
@@ -44,11 +32,17 @@ of a non-PR deliverable. Address already-supplied review comments directly.
 
 ## Modes
 
-- `--quick`: small, low-risk diff; review directly. Budget: 0 agents.
-- `--standard`: select 2 relevant lenses for a multi-area or moderate-risk diff.
-  Budget: 2 agents, one wave.
-- `--thorough`: all 3 lenses for large/high-risk changes such as auth, payments,
-  migrations, concurrency, cryptography, or public APIs. Budget: 3 agents.
+- `--quick`: small, low-risk diff; apply Pareto first, then review directly for
+  relevant risks. Budget: 0 agents.
+- `--standard`: Pareto plus the most relevant remaining lens for a multi-area
+  or moderate-risk diff. Budget: 2 agents, one wave.
+- `--thorough`: all 4 lenses for large/high-risk changes such as auth, payments,
+  migrations, concurrency, cryptography, or public APIs. Budget: 4 agents, one
+  wave; run any lens beyond available concurrency inline.
+
+Pareto is the highest-priority lens: allocate its reviewer slot first and
+consider subtraction before additive fixes. Priority does not override finding
+severity or justify removing required behavior or security safeguards.
 
 ## Workflow
 
@@ -71,7 +65,8 @@ of a non-PR deliverable. Address already-supplied review comments directly.
 6. Run targeted tests/static checks for affected areas when available. Record
    unavailable checks and residual risk.
 7. Deduplicate and write `<WORKSPACE>/PR_REVIEW.md`. Lead with findings ordered
-   by severity, then questions/assumptions, verification, and a short summary.
+   by severity, with Pareto findings first within each severity, then
+   questions/assumptions, verification, and a short summary.
 8. Only with `--fix`, apply minimal accepted fixes and re-run targeted checks.
    Never commit or post review comments unless separately requested.
 

@@ -3,17 +3,7 @@ name: skill-lab
 description: >-
   Creates, refines, evaluates, and publishes SKILL.md behavior packs. Only
   use when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 2.0.0
-  category: meta
-  tags:
-    - skills
-    - development
-    - workflow
-    - publishing
 ---
 
 # Skill Lab

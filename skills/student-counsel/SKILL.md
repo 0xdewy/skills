@@ -5,17 +5,7 @@ description: >-
   can answer every question without contradiction, or the round cap lands.
   Correctness is the first question; beauty is the verdict. Only use when
   explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 3.0.0
-  category: quality
-  tags:
-    - beauty
-    - socratic
-    - elenchus
-    - refinement
 ---
 
 # Student Counsel

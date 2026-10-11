@@ -5,25 +5,7 @@ description: >-
   bytecode, opcodes, traces, calldata, storage, gas, Yul/assembly, evmole,
   CREATE2, delegatecall, and precompiles. Only use when explicitly
   requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: iamky1e
-  version: 1.0.0
-  category: security
-  tags:
-    - evm
-    - rust
-    - revm
-    - foundry
-    - forge
-    - cast
-    - yul
-    - bytecode
-    - solidity
-    - evmole
-    - opcodes
-    - assembly
 ---
 
 # Rust EVM

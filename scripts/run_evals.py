@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Eval runner: execute a skill's evals.json prompts against an agent backend,
-capture artifacts into results/<skill>/eval-<id>/, then grade with the existing
+capture artifacts into reports/evals/<skill>/eval-<id>/, then grade with the existing
 per-skill grader (skills/<name>/evals/grade.py) or the canonical generic grader
 (skills/skill-lab/scripts/llm_judge_grade.py).
 
@@ -43,7 +43,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
 CANONICAL_GRADER = SKILLS / "skill-lab" / "scripts" / "llm_judge_grade.py"
-DEFAULT_RESULTS = Path("/tmp/eval-results")
+DEFAULT_RESULTS = ROOT / "reports" / "evals"
 DEFAULT_MODEL = os.environ.get("EVAL_MODEL")
 DEFAULT_GRADER_MODEL = os.environ.get("GRADE_MODEL", "claude-sonnet-4-5")
 PREFERENCE = ["claude", "codex", "opencode"]

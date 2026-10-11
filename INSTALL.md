@@ -1,8 +1,10 @@
 # Setup
 
-```bash
-pip install -r requirements.txt
-playwright install chromium
-```
+Python 3 for the validators and eval runner. Bash 4+ for the installer. Git
+for cloning remote skills.
 
-Python 3 required. Bash 4+ for the installer. Git for cloning remote skills.
+`frontend-qa` needs Node with Playwright:
+
+```bash
+npm i -g playwright && playwright install chromium
+```

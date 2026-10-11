@@ -15,6 +15,7 @@
     "expectations": [
       "Runs scripts/analyze_repo.py before designing the tree",
       "Creates docs/ files with kebab-case names that state their content, readable from tree output alone",
+      "Each new docs file ends with a Sources line naming the fixture paths it was written from, and states nothing the fixture code does not support",
       "Creates no README.md, index.md, NAVIGATION.md, or context-map inside docs/",
       "Every directory under docs/ has a same-named sibling summary file and at least two entries",
       "Runs scripts/lint_tree.py and reports it clean in the final DONE: vfs-docs line"
@@ -119,6 +120,25 @@
       "Verifies cross-references with scripts/lint_tree.py docs/ --links and resolves the dangling operations/rollback.md reference",
       "Does not rewrite or rename the already-conforming files",
       "Spawns no subagents and ends with DONE: vfs-docs reporting lint clean"
+    ]
+  },
+  {
+    "id": 7,
+    "prompt_type": "forced",
+    "prompt": "Run vfs-docs to restructure our docs folder.",
+    "context": "A Python library whose docs/ folder is an MkDocs site.",
+    "fixture_files": {
+      "mkdocs.yml": "site_name: Fixture Lib\nnav:\n  - Home: index.md\n  - Usage: usage.md\n",
+      "docs/index.md": "# Fixture Lib\n\nSee [usage](usage.md).\n",
+      "docs/usage.md": "# Usage\n\nCall `fixture.run()`.\n",
+      "src/fixture/__init__.py": "def run():\n    return True\n"
+    },
+    "expected_output": "Runs the analyzer, sees that docs/ feeds MkDocs, and does not restructure it: says why and offers a separate tree such as docs/internal/ or stops.",
+    "expectations": [
+      "Runs scripts/analyze_repo.py and reports the MkDocs site generator",
+      "Does not delete or rename docs/index.md or edit mkdocs.yml",
+      "Explains that the index file and nav config are load-bearing for the published site",
+      "Offers a separate tree (for example docs/internal/) or stops"
     ]
   }
 ]
