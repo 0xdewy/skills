@@ -1,4 +1,0 @@
-interface:
-  display_name: "Myco"
-  short_description: "Interact with Myco: identity, groups, membership, and project boards"
-  default_prompt: "Use $myco to inspect this repository's Myco identity and reconcile its project board."
