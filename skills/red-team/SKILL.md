@@ -4,20 +4,7 @@ description: >-
   Read-only adversarial review through user, security, and
   architecture/economics perspectives, merged into one prioritized report.
   Only use when explicitly requested.
-license: MIT
 disable-model-invocation: true
-metadata:
-  author: user
-  version: 1.0.0
-  category: meta
-  tags:
-    - adversarial
-    - review
-    - coworker
-    - multi-agent
-    - security
-    - ux
-    - red-team
 ---
 
 # Red Team
@@ -25,13 +12,14 @@ metadata:
 Adversarially review one deliverable and produce a prioritized findings report.
 
 Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Load persona prompts only when spawning.
+`../common/patterns/scaling.md`. Load `references/persona-prompts.md` only
+when spawning.
 
 ## Activation
 
-Second gate: confirm via `../common/ROUTING.md` that the job is to *find*
-issues in an existing deliverable, not build/fix work or a specialized
-domain/security audit. This skill writes reports only; it never edits the target.
+Find issues in an existing deliverable. Building or fixing is `goal` or
+`project-manager`; a diff-scoped review is `pr-smellz`. This skill writes
+reports only; it never edits the target.
 
 ## Modes
 
@@ -39,8 +27,6 @@ domain/security audit. This skill writes reports only; it never edits the target
   0 agents.
 - `--standard`: spawn User, Hacker, and Red-teamer once in parallel. Budget: 3.
 - `--thorough`: standard plus one targeted follow-up wave if needed.
-
-Do not use this for implementation. It writes reports only.
 
 ## Personas
 
@@ -58,8 +44,9 @@ Do not use this for implementation. It writes reports only.
    `findings-redteam.json`.
 3. Validate JSON exists and parses. Re-run only missing/invalid roles.
 4. Merge duplicates, preserve disagreements, sort by severity then confidence.
-5. Write `REPORT.md` with summary, cross-persona signals, conflicts, prioritized
-   findings, and recommended next actions.
+5. Write `REPORT.md`: a short summary with counts, then prioritized findings,
+   then recommended next actions. On each finding, note which personas raised
+   it (a cross-persona signal) and any conflict between them.
 
 Finding schema: `{id, persona, severity, confidence, title, evidence, impact,
 recommendation}`.

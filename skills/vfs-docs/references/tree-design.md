@@ -39,7 +39,10 @@ Conventions:
   schemas, fixtures) live in the tree under the same naming rules.
 - A question filename (`how-do-retries-work.md`) promises an answer; a claim
   filename (`retries-are-idempotent.md`) promises evidence. Both are good.
-  Prefer the claim when one sentence can carry the conclusion.
+- A claim in a path goes stale when the code changes, and renaming it breaks
+  every inbound link. Use claims for what rarely changes: decisions,
+  invariants, constraints. For behavior that moves with the code, use the
+  question or topic (`how-retries-work.md`) so the path survives the change.
 - Numeric prefixes (`10-`, `20-`) only when reading order genuinely matters
   (tutorials, runbooks). Everywhere else, alphabetical is the order.
 
@@ -76,12 +79,33 @@ Invariants:
 - Demotion is legal too: a directory whose children shrank back to one screen
   total collapses into its summary file.
 
+## Every claim has a source
+
+A tree that reads well and is wrong misleads better than `notes.md` ever
+could. Write only what the code, config, or an existing doc supports. Each
+new file ends with the paths it was written from:
+
+```markdown
+Sources: src/queue/retry.ts, config/queue.yml
+```
+
+The line lets a later reader check the file against the code and tells them
+which changes should send them back here. When the evidence is missing, leave
+the file out; an absent file is honest, a guessed one is not. Relocated
+content keeps its text; note a claim the code contradicts instead of
+silently carrying it over.
+
 ## Rule 4 — The tree is the index
 
 Forbidden inside `docs/`: `README.md`, `index.md`, `NAVIGATION.md`, `TOC.md`,
 context maps, link farms, "start here" files. Each of these is an admission
 that the names have failed. When tempted, rename and restructure until the
 tree output itself reads as the table of contents.
+
+The exception is a `docs/` that feeds a site generator (MkDocs, Docusaurus,
+Sphinx, VitePress, mdBook, Jekyll). There `index.md` and the nav config are
+the site, not a failed name. Leave that tree alone and build this one beside
+it, for example in `docs/internal/`.
 
 Outside `docs/` a single pointer is fine and encouraged — one line in the repo
 README or agent guidance: "Docs are self-describing: run `tree docs/`."

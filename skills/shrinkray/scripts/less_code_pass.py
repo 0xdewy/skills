@@ -29,6 +29,15 @@ skipped rather than treated as a blocker (see execution-contract.md ->
 Usage: less_code_pass.py <project_dir> <output_dir> [--test-command CMD]
                           [--timeout SECONDS]
 
+Per-repo config: a target's `pyproject.toml` may carry `[tool.shrinkray]`:
+  languages    = ["python"]             # override extension detection
+  exclude      = ["bench", "fixtures"]  # relative paths lc leaves unmapped
+  test_command = ".venv/bin/python -m pytest -x -q"
+  timeout      = 900                    # lc's per-test-run timeout (seconds)
+Explicit CLI flags win over config values. `exclude` is passed to
+`lc shrink --exclude`; keep benchmark inputs and vendored data out of the
+target so the pass reduces shipped code, not its fixtures.
+
 Finding `lc`:
   1. `shutil.which("lc")` - a global install (`uv tool install --editable
      /path/to/less-code`, or any install that puts `lc` on PATH).
@@ -72,6 +81,11 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+try:  # py3.11+; config is skipped, not fatal, on an older interpreter
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover
+    tomllib = None
 
 _SKIP_DIRS = {
     '.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env',
@@ -159,6 +173,21 @@ def _default_python_test_command(project_dir: Path) -> str | None:
     return None
 
 
+def _read_config(root: Path) -> dict:
+    """`[tool.shrinkray]` from the target's pyproject.toml, or {}."""
+    if tomllib is None:
+        return {}
+    path = root / 'pyproject.toml'
+    if not path.is_file():
+        return {}
+    try:
+        data = tomllib.loads(path.read_text(encoding='utf-8'))
+    except (OSError, tomllib.TOMLDecodeError):
+        return {}
+    cfg = data.get('tool', {}).get('shrinkray', {})
+    return cfg if isinstance(cfg, dict) else {}
+
+
 def _run_one(
     lc_cmd: list[str],
     lang: str,
@@ -166,6 +195,7 @@ def _run_one(
     out_dir: Path,
     test_command: str | None,
     timeout: int,
+    exclude: list[str],
 ) -> dict:
     report_path = out_dir / f'lc_report_{lang}.json'
     cmd = [
@@ -174,22 +204,34 @@ def _run_one(
         '--out', str(report_path),
         '--timeout', str(timeout),
     ]
+    for entry in exclude:
+        cmd += ['--exclude', entry]
     if test_command:
         cmd += ['--test-command', test_command]
+    # The outer bound is deliberately far looser than lc's per-test `--timeout`:
+    # one shrink runs the suite once per gated layer, so `timeout` is the real
+    # per-run limit. On expiry SIGTERM first, not SIGKILL, so lc's own signal
+    # restore reverts the in-flight layer instead of leaving a half-applied tree.
+    outer = timeout * 10 + 120
     try:
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=timeout + 60, check=False,
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         )
-        exit_code = proc.returncode
-        stderr, stdout = proc.stderr, proc.stdout
-    except subprocess.TimeoutExpired as exc:
-        # `lc` itself already enforces --timeout on the test command; a
-        # subprocess-level timeout here means `lc` hung outright. Report it
-        # like any other failed run rather than letting it crash the whole
-        # pass and its "exit codes: 0 always" contract with it.
-        exit_code = -1
-        stderr = f'lc timed out after {timeout + 60}s (outer wrapper timeout)'
-        stdout = exc.stdout or ''  # text=True above means this is already str
+        try:
+            stdout, stderr = proc.communicate(timeout=outer)
+            exit_code = proc.returncode
+        except subprocess.TimeoutExpired:
+            proc.terminate()
+            try:
+                stdout, stderr = proc.communicate(timeout=30)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                stdout, stderr = proc.communicate()
+            exit_code = -1
+            stderr = (
+                f'lc timed out after {outer}s (outer wrapper timeout); '
+                f'sent SIGTERM so lc could restore the tree\n'
+            ) + (stderr or '')
     except OSError as exc:
         exit_code = -1
         stderr, stdout = str(exc), ''
@@ -230,11 +272,18 @@ def run(
     project_dir: str,
     output_dir: str,
     test_command: str | None,
-    timeout: int,
+    timeout: int | None,
 ) -> dict:
     root = Path(project_dir)
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
+
+    cfg = _read_config(root)
+    if test_command is None:
+        test_command = cfg.get('test_command')
+    if timeout is None:
+        timeout = cfg.get('timeout') or 600
+    exclude = [e for e in cfg.get('exclude', []) if isinstance(e, str)]
 
     lc_cmd = _resolve_lc()
     if lc_cmd is None:
@@ -244,7 +293,9 @@ def run(
             json.dumps(payload, indent=2), encoding='utf-8')
         return payload
 
-    languages = _detect_languages(root)
+    configured = cfg.get('languages')
+    languages = configured if isinstance(configured, list) and configured else _detect_languages(root)
+    languages = [lang for lang in languages if lang in set(_EXT_LANG.values())]
     if not languages:
         payload = {
             'ran': False,
@@ -263,7 +314,7 @@ def run(
         return None
 
     per_language = [
-        _run_one(lc_cmd, lang, root, out, _effective_test_command(lang), timeout)
+        _run_one(lc_cmd, lang, root, out, _effective_test_command(lang), timeout, exclude)
         for lang in languages
     ]
     total_removed = sum(
@@ -286,7 +337,7 @@ def main() -> int:
     parser.add_argument('project_dir')
     parser.add_argument('output_dir')
     parser.add_argument('--test-command', default=None)
-    parser.add_argument('--timeout', type=int, default=600)
+    parser.add_argument('--timeout', type=int, default=None)
     try:
         args = parser.parse_args()
     except SystemExit:

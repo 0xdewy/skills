@@ -1,0 +1,69 @@
+{
+  "skill_name": "frontend-qa",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run QA on my React task app at localhost:5173. Cover create, edit, complete, and delete, fix failures, and retest.",
+      "expected_output": "States scope and lens, sweeps the app with browse.mjs audit, writes one flow per workflow and runs each with browse.mjs run, applies scoped fixes, re-runs the failing flows, and writes a report with failures first.",
+      "expectations": [
+        "States scope, lens, and app URL in one line before starting",
+        "Runs scripts/browse.mjs audit into WORKSPACE/audit",
+        "Writes one flow file per workflow under WORKSPACE/flows and runs each with browse.mjs run",
+        "Re-runs failing flows after scoped fixes and reports the re-run result",
+        "Writes WORKSPACE/report.md with failures first and evidence paths",
+        "Does not add Playwright to the project's package.json"
+      ],
+      "required_regex": ["DONE:"],
+      "forbidden_regex": ["npm install -D @playwright", "npm i -D playwright"]
+    },
+    {
+      "id": 2,
+      "prompt": "Check the mobile checkout flow at localhost:5173/checkout. Focus on multi-step state, validation, and broken navigation.",
+      "expected_output": "Scopes routes and flows to checkout, runs flows at the mobile viewport, applies form and navigation attacks, and does not touch unrelated UI.",
+      "expectations": [
+        "Scopes routes and flows to checkout",
+        "Runs flows with --viewport mobile",
+        "Applies empty-submit, back-mid-form, and double-submit attacks from references/attacks.md",
+        "Does not edit UI outside checkout"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review and fix the design of my app at http://localhost:3000.",
+      "expected_output": "Sweeps every linked route at mobile and desktop, judges screenshots and tokens against the visual checklist, applies scoped CSS fixes within the existing design system, and re-sweeps to verify.",
+      "expectations": [
+        "Runs the audit sweep with mobile and desktop screenshots",
+        "Cites screenshot paths or token values for each finding, per references/visual-checklist.md",
+        "Applies scoped CSS fixes using the app's existing scale",
+        "Re-sweeps changed routes and confirms overflow and overlap are gone"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Report only: critique http://localhost:3000/dashboard but do not change source files.",
+      "expected_output": "Audits only the dashboard route, writes the report with recommended fixes marked as not applied, and edits no source.",
+      "expectations": [
+        "Passes --routes /dashboard to the audit",
+        "Writes report.md with recommended fixes marked unapplied",
+        "Modifies no CSS or component files"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt_type": "anti_trigger",
+      "prompt": "Run my pytest suite and show me which unit tests fail.",
+      "expected_output": "Runs pytest directly without starting a server or a browser.",
+      "expectations": [
+        "Does not start a frontend server or a browser",
+        "Runs pytest directly or explains the direct command"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt_type": "anti_trigger",
+      "prompt": "How do I center a div?",
+      "expected_output": "Answers the CSS question directly without launching an audit.",
+      "expectations": ["Does not run browse.mjs", "Answers directly"]
+    }
+  ]
+}

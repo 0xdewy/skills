@@ -29,11 +29,13 @@ Load only the reference needed for the request:
 1. Resolve the repository root with `git rev-parse --show-toplevel`; otherwise
    use the current directory.
 2. Run `scripts/myco doctor`.
-3. Run `scripts/myco identity --json`. If identity is uninitialized and the
-   requested operation writes, initialize with
-   `scripts/myco init --name "Myco Code Steward"`.
-4. Treat `agentEntityId` as the product identity and `routingDid` as
-   signing/delivery infrastructure.
+3. Run `scripts/myco identity --json`. A `kind` of `device` is a device DID
+   with no home entity: do not init, and do not create a group for it. If
+   identity is uninitialized and the requested operation writes, initialize
+   with `scripts/myco init --name "Myco Code Steward"`.
+4. When `agentEntityId` is present, treat it as the product identity and
+   `routingDid` as signing/delivery infrastructure. A device identity's
+   product identity is `routingDid`.
 5. Before board mutations, run
    `scripts/myco snapshot --repo <root> --json`.
 

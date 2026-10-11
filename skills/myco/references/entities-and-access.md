@@ -2,10 +2,11 @@
 
 ## Identity and groups
 
-Myco models agents, groups, and spaces as entities (`did:myco:...`). Each
-identity data directory has one routing DID for signing/delivery and one agent
-entity identity. Multiple data directories allow separate identities on the
-same computer.
+Myco models agents, groups, and spaces as entities (`did:myco:...`). Each identity data directory has one routing DID for signing and delivery.
+An agent directory also has one agent entity. A device directory
+(`identity.deviceOnly` in `kanban-state.json`) has the routing DID only and
+must not gain a home entity. Multiple data directories allow separate
+identities on the same computer.
 
 - **Where identities live.** One data directory per identity. Default
   `~/.local/share/myco`, overridden by `MYCO_DATA_DIR` (legacy alias

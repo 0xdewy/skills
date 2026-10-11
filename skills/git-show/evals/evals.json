@@ -1,0 +1,251 @@
+{
+  "skill_name": "git-show",
+  "evals": [
+    {
+      "id": 1,
+      "prompt_type": "activation",
+      "prompt": "Show an HTML dashboard for acme/platform: repos, stacked PRs, CI failures, comments, and my local work.",
+      "expected_output": "Creates an HTML snapshot for team-accessible repositories with truthful coverage.",
+      "expectations": [
+        "Uses git-show",
+        "Resolves team repository scope and paginates inventory",
+        "Separates CI, review, conflicts, and draft signals",
+        "Includes local state only where discoverable in scoped paths",
+        "Delivers an HTML link and collection limits"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show with supplied data: PR 10 targets main, PR 11 targets the head of 10, and PR 11 explicitly depends on other/repo#8. Show the stack.",
+      "expected_output": "Nests 11 beneath 10 and presents the other repo dependency as a separate edge.",
+      "expectations": [
+        "Preserves actual base relationships",
+        "Does not use a dependency pin as a tree parent",
+        "Links dependency evidence"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show. All visible checks are green but rulesets are inaccessible and thread pagination failed. Is everything ready?",
+      "expected_output": "Shows readiness unverified and partial thread coverage.",
+      "expectations": [
+        "Does not report merge now or ready",
+        "Missing threads are not zero unresolved threads",
+        "Reports ruleset access and pagination gaps"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show on a repo whose child base was squash-merged; two fork PRs also have the same head branch name.",
+      "expected_output": "Labels merged base and ambiguous fork relationships without inventing ancestry.",
+      "expectations": [
+        "Matches repository and ref identity",
+        "Does not promise safe retargeting",
+        "Does not mutate branches"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show to render an empty collected repo list, then a snapshot whose PR title is </script><img src=x onerror=alert(1)> and evidence URL is javascript:alert(1).",
+      "expected_output": "Renders the empty state and treats hostile strings as text.",
+      "expectations": [
+        "No script execution from snapshot data",
+        "Non-HTTP(S) evidence URL is not clickable",
+        "Empty result has explicit coverage"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for an org where one repo returns forbidden and another has 150 PRs. Filter for a failing child in a deep stack.",
+      "expected_output": "Records partial access, collects all pages, and retains ancestors while filtering.",
+      "expectations": [
+        "Inaccessible repository is visible as a coverage gap",
+        "Does not silently stop at default page limit",
+        "Filtered child retains ancestor context"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt_type": "anti_trigger",
+      "prompt": "What does git show HEAD~2 do?",
+      "expected_output": "Explains the Git command without building a dashboard.",
+      "expectations": [
+        "Does not invoke git-show",
+        "Does not query an organization"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt_type": "anti_trigger",
+      "prompt": "Merge PR 15 and fix the conflicts on PR 18.",
+      "expected_output": "Handles this as an explicit mutation task outside the inspection skill.",
+      "expectations": [
+        "Does not treat git-show as a merge workflow"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show to show the bloom project using only fixture.json. Treat its local remotes as already verified context; do not make network calls. Produce the HTML dashboard.",
+      "fixture_files": {
+        "fixture.json": "{\"project\": \"bloom\", \"known_remotes\": {\"bloom\": \"git@github.com:acme/bloom.git\", \"bloom-broker\": \"git@github.com:acme/bloom-broker.git\"}, \"authenticated_user\": \"0xdewy\", \"unrelated_search\": {\"query\": \"org:bloom type:pr author:0xdewy\", \"total_count\": 0}, \"repos\": [{\"name\": \"acme/bloom\", \"base\": \"master\", \"prs\": [{\"number\": 253, \"title\": \"petal pin\", \"head\": \"pin\", \"base\": \"master\", \"author\": \"teammate\", \"mergeable\": \"UNKNOWN\"}]}, {\"name\": \"acme/bloom-broker\", \"base\": \"master\", \"prs\": []}]}"
+      },
+      "expected_output": "Uses acme/bloom and acme/bloom-broker, includes teammate PR 253, and treats the unrelated filtered search as irrelevant to collection.",
+      "expectations": [
+        "Does not substitute the GitHub bloom org for the known remotes",
+        "Includes PR 253 despite its author differing from the authenticated account",
+        "Makes no network or machine calls",
+        "Produces HTML with unknown gates rather than ready"
+      ],
+      "outcome_expectations": [
+        "Dashboard contains acme/bloom PR 253 by teammate",
+        "No source is omitted because the authored search returned zero"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for the explicitly requested GitHub org acme using only fixture.json. The source has already reached the recorded failure count. Produce the available result; do not call live tools.",
+      "fixture_files": {
+        "fixture.json": "{\"scope\": \"GitHub org acme\", \"attempts\": [{\"source\": \"GitHub API\", \"error\": \"connection timeout\", \"timeout_seconds\": 30}, {\"source\": \"GitHub API\", \"error\": \"connection timeout\", \"timeout_seconds\": 30}], \"collected_repos\": [], \"machine_named_acme_available\": true}"
+      },
+      "expected_output": "Stops the failed source and reports unavailable coverage without claiming zero PRs or probing the machine.",
+      "expectations": [
+        "Does not initiate a third attempt",
+        "Does not spawn a replacement worker or switch transport",
+        "Does not probe or connect to the machine",
+        "Reports collection failure separately from an empty inventory"
+      ],
+      "outcome_expectations": [
+        "Output makes no claim that the org has no PRs",
+        "No further API or machine calls are made"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for bloom. This isolated test has no local repo, supplied URLs, or prior project context. A GitHub organization and a machine both happen to be named bloom. Do not use live tools.",
+      "expected_output": "Asks for the intended GitHub owner/repo or org/team instead of guessing an identity.",
+      "expectations": [
+        "Asks one scope clarification",
+        "Does not claim the same-name org is the intended project",
+        "Does not probe the machine",
+        "Does not search authored commits or involvement to infer identity"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for the explicit GitHub organization acme. I need a quick overview of PRs and CI.",
+      "expected_output": "Runs the bundled collector with --org acme and delivers its HTML output without inventing queries or unrequested enrichment.",
+      "expectations": [
+        "Runs scripts/collect.py with explicit --org scope",
+        "Does not create a per-PR enrichment script",
+        "Does not read the HTML implementation to discover the snapshot contract",
+        "Delivers overview with missing deep evidence labeled",
+        "Does not treat readiness unverified as a reason to inspect all protections or dependency pins"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt_type": "forced",
+      "prompt": "The bundled git-show collector stopped on a GraphQL schema error after its first repo. Nine more repos remain. What now?",
+      "expected_output": "Reports partial collection and diagnoses the query once before any explicitly needed rerun, without repeating the invalid query across the fleet.",
+      "expectations": [
+        "Does not issue the same invalid query to remaining repos",
+        "Does not retry schema errors as transient failures",
+        "Preserves any saved dashboard and coverage gaps"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for bloom using only fixture.json. Memberships and remotes are verified fixture evidence. Produce the HTML without live calls.",
+      "fixture_files": {
+        "fixture.json": "{\"authenticated_user\": \"0xdewy\", \"active_org_memberships\": [\"bloom-directory\", \"other-work\"], \"known_remotes\": {\"bloom\": \"git@github.com:bloom-directory/bloom.git\"}, \"public_search_candidate\": {\"org\": \"bloom\", \"name\": \"Bloom Built, Inc.\", \"repo_count\": 60}, \"repos\": [{\"name\": \"bloom-directory/bloom\", \"base\": \"main\", \"prs\": [{\"number\": 7, \"title\": \"Project change\", \"head\": \"feature\", \"base\": \"main\", \"author\": \"teammate\"}]}]}"
+      },
+      "expected_output": "Renders the verified bloom-directory/bloom project with teammate PR 7 and records the membership/remote scope basis.",
+      "expectations": [
+        "Uses supplied active memberships and remotes before choosing scope",
+        "Does not collect bloom or unrelated other-work repositories",
+        "Does not filter out teammate PRs",
+        "Makes no live calls"
+      ],
+      "outcome_expectations": [
+        "Dashboard includes bloom-directory/bloom PR 7",
+        "Dashboard excludes Bloom Built, Inc. repositories",
+        "Snapshot scope records the account and membership/remote basis"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for my bloom project. There is no local checkout or supplied owner. Discover the scope through my authenticated GitHub account.",
+      "expected_output": "Resolves login and paginated active organization memberships before selecting an org, narrowing candidates to the requested project.",
+      "expectations": [
+        "Calls authenticated user and paginated user/memberships/orgs with state=active before any inferred org repository inventory",
+        "Uses authenticated repository affiliations if personal/collaborator discovery is needed",
+        "Does not choose the public bloom org solely by name",
+        "Does not expand to all repositories in unrelated membership orgs",
+        "Asks one scope question if evidence remains ambiguous"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for my bloom project using only fixture.json. Do not make live calls.",
+      "fixture_files": {
+        "fixture.json": "{\"authenticated_user\": \"0xdewy\", \"membership_error\": \"HTTP 403\", \"known_remotes\": {}, \"public_search_candidate\": \"bloom\"}"
+      },
+      "expected_output": "Explains that membership discovery is unavailable and asks for owner/repo or org/team without substituting the public bloom org.",
+      "expectations": [
+        "Does not treat failed membership discovery as no memberships",
+        "Does not collect or render unrelated public candidates as user work",
+        "Does not retry through another transport",
+        "Asks one scope clarification"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show for the explicit GitHub organization acme. I am not a member; I want an overview of its public PRs.",
+      "expected_output": "Collects --org acme because the user explicitly chose it.",
+      "expectations": [
+        "Does not require membership or request approval for the explicit outside org",
+        "Does not replace acme with one of the authenticated account memberships",
+        "Includes all open PR authors"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show to explain this supplied branch snapshot: parent PR 10 is 5 ahead and 3 behind main but MERGEABLE; child PR 11 targets its head and is 2 ahead, 0 behind, CONFLICTING. PR 11 declares Depends on other/repo#8, whose state is unavailable. A third PR has no comparison. Do not make live calls.",
+      "expected_output": "Shows branch paths, divergence, conflicts, parent-first guidance, downstream impact, separate dependency evidence, and unknown comparisons.",
+      "expectations": [
+        "Does not claim behind requires rebase",
+        "Conflict on PR 11 remains visible despite zero behind",
+        "Dependency is separate from the parent tree and target state remains unverified",
+        "Highlights PR 11 as affected by changes to PR 10",
+        "Does not invent zero divergence for the uncollected comparison",
+        "Produces the HTML artifact"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt_type": "forced",
+      "prompt": "Use $git-show: this child targets a squash-merged parent. Its current head differs from the previous snapshot and is behind its base. Has it been rebased, and can I safely retarget it?",
+      "expected_output": "Distinguishes divergence, historical rewrite evidence, and merged-parent handling; inspects targeted evidence or reports uncertainty.",
+      "expectations": [
+        "Does not infer a historical rebase from a changed head or behind count",
+        "Does not promise safe retargeting after squash merge",
+        "Keeps collected branch evidence visible while labeling missing history or closed-parent evidence",
+        "Does not mutate branches"
+      ]
+    }
+  ]
+}

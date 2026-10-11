@@ -15,8 +15,14 @@
         "Writes PR_REVIEW.md with findings first and a DONE line",
         "Does not edit, commit, or post comments"
       ],
-      "required_regex": ["DONE:", "PR_REVIEW.md"],
-      "forbidden_regex": ["git commit", "git reset --hard"]
+      "required_regex": [
+        "DONE:",
+        "PR_REVIEW.md"
+      ],
+      "forbidden_regex": [
+        "git commit",
+        "git reset --hard"
+      ]
     },
     {
       "id": 2,
@@ -25,19 +31,23 @@
       "expectations": [
         "States mode: lite with zero agents",
         "Does not spawn reviewers",
+        "Applies Pareto first inline while still checking parser correctness",
         "Inspects changed hunks and necessary parser tests",
         "Does not broaden into repository cleanup",
         "Writes PR_REVIEW.md"
       ],
-      "required_regex": ["mode:", "DONE:"]
+      "required_regex": [
+        "mode:",
+        "DONE:"
+      ]
     },
     {
       "id": 3,
       "prompt": "Run pr-smellz --thorough on this authentication and database migration PR.",
-      "expected_output": "Uses all three lenses once, validates high-risk boundary and rollback findings against changed lines, and runs targeted auth/migration checks.",
+      "expected_output": "Uses all four lenses once, prioritizing Pareto, validates high-risk boundary and rollback findings against changed lines, and runs targeted auth/migration checks.",
       "expectations": [
         "Selects thorough mode because auth and migrations are high risk",
-        "Dispatches correctness, security, and API/design/tests lenses in one wave",
+        "Allocates Pareto first, then correctness, security, and API/design/tests lenses in one wave; runs any lens beyond available concurrency inline",
         "Each reviewer owns a separate valid JSON file",
         "Checks authorization boundaries and migration rollback behavior",
         "Deduplicates findings and preserves concrete evidence"
@@ -54,21 +64,31 @@
         "Does not commit or post review comments",
         "Reports fixes and residual risk"
       ],
-      "forbidden_regex": ["git commit", "git reset --hard"]
+      "forbidden_regex": [
+        "git commit",
+        "git reset --hard"
+      ]
     },
     {
       "id": 5,
       "prompt_type": "anti_trigger",
       "prompt": "Run a broad code-smellz cleanup across this whole repository and apply safe fixes.",
       "expected_output": "Does not invoke pr-smellz because there is no PR/diff review scope; routes to code-smellz.",
-      "expectations": ["Does not require a merge base", "Uses code-smellz rather than pr-smellz"]
+      "expectations": [
+        "Does not require a merge base",
+        "Uses code-smellz rather than pr-smellz"
+      ]
     },
     {
       "id": 6,
       "prompt_type": "anti_trigger",
       "prompt": "Address the three review comments already left on my PR and push the fixes.",
       "expected_output": "Does not rerun pr-smellz; addresses the supplied comments directly and does not push without explicit authorization.",
-      "expectations": ["Does not launch a fresh PR audit", "Works from the supplied review comments", "Does not push without authorization"]
+      "expectations": [
+        "Does not launch a fresh PR audit",
+        "Works from the supplied review comments",
+        "Does not push without authorization"
+      ]
     },
     {
       "id": 7,
@@ -81,6 +101,31 @@
         "Asks before fetching missing objects for deeper context",
         "Does not run gh pr checkout or switch the current branch",
         "Produces the same changed-line evidence contract as a local review"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Run pr-smellz --standard on this PR: a one-provider export endpoint now has a provider registry, three wrappers around the same serializer, and separate copies of the format defaults. The PR goal is to add CSV export alongside JSON.",
+      "expected_output": "Selects Pareto plus the most relevant risk lens and verifies concrete opportunities to remove or collapse unnecessary machinery while preserving CSV and JSON export.",
+      "expectations": [
+        "Allocates the first reviewer slot to Pareto within the two-agent budget",
+        "Checks callers and contracts before claiming wrappers or defaults are redundant",
+        "Names concrete deletion or reuse proposals and their maintenance or behavior impact",
+        "Shows how the smaller solution preserves the stated export goal",
+        "Anchors every finding to a changed line and rejects speculative complexity complaints",
+        "Orders findings by severity with Pareto first among equally severe findings"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Run pr-smellz --fix on this PR. Its description explicitly requires a second export backend for an existing customer. The diff also introduces a duplicate serializer and accidentally removes an authorization check. Prefer subtraction.",
+      "expected_output": "Uses Pareto to propose verified simplifications without treating its priority as permission to drop explicit requirements or downgrade a security regression.",
+      "expectations": [
+        "Treats the authorization regression according to its impact even if Pareto findings have lower severity",
+        "Checks whether serializer reuse preserves backend-specific behavior before consolidating",
+        "Does not remove the required backend without user agreement; any challenge states the lost benefit",
+        "Preserves or restores required security safeguards",
+        "Applies only verified scoped fixes and reruns affected checks"
       ]
     }
   ]

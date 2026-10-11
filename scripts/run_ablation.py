@@ -115,7 +115,7 @@ def main() -> int:
     ap.add_argument("--backend", default="auto", choices=["auto", "claude", "codex", "opencode"])
     ap.add_argument("--model", default=run_evals.DEFAULT_MODEL)
     ap.add_argument("--grader-model", default=run_evals.DEFAULT_GRADER_MODEL)
-    ap.add_argument("--results", default="/tmp/skill-ablation")
+    ap.add_argument("--results", default=str(run_evals.ROOT / "reports" / "ablation"))
     ap.add_argument("--timeout", type=int, default=300)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()

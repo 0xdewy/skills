@@ -9,8 +9,9 @@
       "expectations": [
         "Invokes pr-describe rather than answering ad hoc",
         "Runs scripts/pr_context.sh before writing anything",
-        "The first sentence of the new body states problem, change, and effect on its own",
-        "Names behavior rather than file names in the summary",
+        "The opening paragraph is two or three plain sentences that state problem, change, and effect with no file names, identifiers, or unexplained acronyms",
+        "Proposes a new title that names the outcome in about 65 characters or fewer, with no file or function names",
+        "No bullet or section restates the title or the opening paragraph",
         "Saves the previous body before applying with gh pr edit",
         "Ends with a DONE: line"
       ]
@@ -24,7 +25,9 @@
         "Reads diff.patch, commits.txt, issues.md, and template.md before writing",
         "Every claim in the body is traceable to the diff, a commit, an issue, or the template",
         "Includes a verification section that says what was not run",
-        "Writes previous-body.md to the workspace before gh pr edit",
+        "No empty, N/A, or 'Risk: none' sections; length is proportionate to the diff",
+        "Writes previous-title.txt and previous-body.md to the workspace before gh pr edit",
+        "Reports the old and new title",
         "Prints a restore command"
       ]
     },

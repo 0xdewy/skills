@@ -5,11 +5,9 @@ Default to the cheapest path that can satisfy the request.
 
 ## Economy Gate
 
-Before choosing a tier, ask whether no change, deletion, reuse, configuration,
-or one direct action satisfies the request. Set task-shaped ceilings for files,
-net-new code, dependencies, agents, waves, and iterations; start at zero and
-raise only with evidence. Reapply this gate after each phase. Stop when remaining
-work cannot affect acceptance criteria; treat a no-op as success.
+Apply `../pareto/SKILL.md` before choosing a tier and again after each phase:
+no change, deletion, or one direct action first; budgets start at zero; a
+no-op is success.
 
 ## Tiers
 

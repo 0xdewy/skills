@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Show"
+  short_description: "Visualize repo fleets, PR stacks, and local work"
+  default_prompt: "Use $git-show to build an HTML dashboard of my team's repositories, PR stacks, blockers, and local work."

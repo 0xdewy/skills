@@ -7,13 +7,14 @@ future heavyweight skill). Lives in skills/common/scripts/.
 Usage: measure_loc.py <project_dir> [extra_skip,extra_skip,...]
 Output: JSON {total, by_language, top_files}
 
-The optional second argument is a comma-separated list of extra directory names
-to skip (e.g. a skill's own output dir). Known skill output dirs are skipped by
-default so re-runs never count their own scratch artifacts.
+In a git repo only tracked and untracked-but-not-ignored files count, so
+ignored build output and generated code stay out of the total. The optional
+second argument is a comma-separated list of extra directory names to skip.
 """
 
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 _EXTENSIONS = {
@@ -28,14 +29,12 @@ _EXTENSIONS = {
     '.ex': 'Elixir', '.exs': 'Elixir',
 }
 
-# Skipped always. Includes known skill output dirs so a skill never counts its
-# own scratch workspace on re-runs.
+# Skipped always, along with any `.<skill>-workspace` dir (the execution
+# contract's project-local fallback) so a skill never counts its own scratch.
 _SKIP_DIRS = {
     '.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env',
     'dist', 'build', 'target', '.next', 'out', 'coverage',
     '.pytest_cache', '.mypy_cache', 'vendor', '.cache',
-    'stinky-output', 'shrinkray-output', 'resume-output', 'one-shot-output',
-    'project-manager-output',
 }
 
 _LINE_COMMENT = {
@@ -59,6 +58,16 @@ def _count_file(path: Path, lang: str) -> int:
     )
 
 
+def _list_files(root: Path) -> list[Path]:
+    """Files git would show as tracked or untracked; a plain walk outside git."""
+    cmd = ['git', '-C', str(root), 'ls-files', '-z', '--cached', '--others', '--exclude-standard']
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
+        return [root / p for p in out.split('\0') if p]
+    except (OSError, subprocess.CalledProcessError):
+        return list(root.rglob('*'))
+
+
 def measure(project_dir: str, extra_skip: str = '') -> dict:
     root = Path(project_dir)
     skip = set(_SKIP_DIRS)
@@ -67,8 +76,9 @@ def measure(project_dir: str, extra_skip: str = '') -> dict:
     by_file: dict[str, int] = {}
     by_lang: dict[str, int] = {}
 
-    for path in root.rglob('*'):
-        if any(part in skip for part in path.parts) or not path.is_file():
+    for path in _list_files(root):
+        parts = path.relative_to(root).parts
+        if any(p in skip or p.endswith('-workspace') for p in parts) or path.is_symlink() or not path.is_file():
             continue
         lang = _EXTENSIONS.get(path.suffix.lower())
         if not lang:

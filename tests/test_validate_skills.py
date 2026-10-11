@@ -23,8 +23,6 @@ def write_repo(root, *, description=INTENT, hidden=False, prompt_types=("activat
     skills = root / "skills"
     skill = skills / "demo"
     (skill / "evals").mkdir(parents=True)
-    (skills / "common").mkdir()
-    (skills / "common" / "ROUTING.md").write_text("routing\n")
     flag = "disable-model-invocation: true\n" if hidden else ""
     (skill / "SKILL.md").write_text(
         f"---\nname: demo\ndescription: {description}\n{flag}---\n\n# Demo\n"
