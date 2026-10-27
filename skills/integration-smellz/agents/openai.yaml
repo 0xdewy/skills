@@ -1,0 +1,6 @@
+interface:
+  display_name: "Integration Smellz"
+  short_description: "Deep-review every PR in a PM integration"
+  default_prompt: "Use $integration-smellz to deep-review every PR in this PM integration."
+policy:
+  allow_implicit_invocation: false
