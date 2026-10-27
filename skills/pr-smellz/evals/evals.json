@@ -8,8 +8,10 @@
       "expectations": [
         "States the mode line before review",
         "Runs scripts/changed_scope.py with the resolved base and head",
+        "Writes one neutral evidence pack with requirements, the full diff, and revision-pinned excerpts",
+        "Runs Pareto and Correctness from that pack",
         "Reads repository guidance and only necessary dependency context",
-        "Every finding is anchored to an added or modified line",
+        "Every finding is anchored to an added, modified, or removed line",
         "Drops pre-existing, speculative, and style-only issues",
         "Runs targeted checks or records why they are unavailable",
         "Writes PR_REVIEW.md with findings first and a DONE line",
@@ -27,11 +29,12 @@
     {
       "id": 2,
       "prompt": "pr-smellz --quick: review this 35-line parser diff against main.",
-      "expected_output": "Uses quick mode with no agents, verifies the small diff directly, and reports only introduced actionable findings.",
+      "expected_output": "Uses quick mode with no spawned passes. Pareto, Correctness, and any triggered Product or Security check run inline from the shared pack.",
       "expectations": [
-        "States mode: lite with zero agents",
+        "States a quick mode line with Pareto, Correctness, triggered Product or Security checks, and independent: no",
         "Does not spawn reviewers",
-        "Applies Pareto first inline while still checking parser correctness",
+        "Runs a triggered Product or Security check inline instead of dropping it",
+        "Applies Pareto inline and checks parser correctness from the shared pack",
         "Inspects changed hunks and necessary parser tests",
         "Does not broaden into repository cleanup",
         "Writes PR_REVIEW.md"
@@ -44,12 +47,13 @@
     {
       "id": 3,
       "prompt": "Run pr-smellz --thorough on this authentication and database migration PR.",
-      "expected_output": "Uses all four lenses once, prioritizing Pareto, validates high-risk boundary and rollback findings against changed lines, and runs targeted auth/migration checks.",
+      "expected_output": "Uses all five lenses once on one evidence pack, prioritizing Pareto. Product checks migration rollback, Security checks authorization, and findings are validated with a trace or focused check.",
       "expectations": [
-        "Selects thorough mode because auth and migrations are high risk",
-        "Allocates Pareto first, then correctness, security, and API/design/tests lenses in one wave; runs any lens beyond available concurrency inline",
-        "Each reviewer owns a separate valid JSON file",
-        "Checks authorization boundaries and migration rollback behavior",
+        "Selects thorough mode and runs Pareto, Correctness, Product, Maintainability, and Security",
+        "Lenses read only the shared pack and return JSON; the parent writes each findings file",
+        "A lens past available concurrency runs inline and the mode line sets independent: no",
+        "Product checks migration and rollback; Security checks removed or weakened authorization",
+        "Supplies a requested excerpt and reruns only that lens; a leftover request stays a coverage gap",
         "Deduplicates findings and preserves concrete evidence"
       ]
     },
@@ -106,13 +110,15 @@
     {
       "id": 8,
       "prompt": "Run pr-smellz --standard on this PR: a one-provider export endpoint now has a provider registry, three wrappers around the same serializer, and separate copies of the format defaults. The PR goal is to add CSV export alongside JSON.",
-      "expected_output": "Selects Pareto plus the most relevant risk lens and verifies concrete opportunities to remove or collapse unnecessary machinery while preserving CSV and JSON export.",
+      "expected_output": "Runs Pareto and Correctness, plus Product and Maintainability, over one evidence pack. Verifies concrete ways to remove unnecessary machinery while preserving CSV and JSON export.",
       "expectations": [
-        "Allocates the first reviewer slot to Pareto within the two-agent budget",
-        "Checks callers and contracts before claiming wrappers or defaults are redundant",
+        "Runs Pareto and Correctness, Product for the caller-visible export, and Maintainability for the registry, wrappers, and copied defaults",
+        "Runs Security unless the pack shows no trust boundary, removed safeguard, dependency, configuration, or reachable input",
+        "Lenses read only the shared pack; the parent writes their JSON",
+        "Checks callers and contracts, via the pack or one evidence-request rerun, before claiming wrappers or defaults are redundant",
         "Names concrete deletion or reuse proposals and their maintenance or behavior impact",
         "Shows how the smaller solution preserves the stated export goal",
-        "Anchors every finding to a changed line and rejects speculative complexity complaints",
+        "Anchors every finding to an added, modified, or removed line and rejects speculative complexity complaints",
         "Orders findings by severity with Pareto first among equally severe findings"
       ]
     },

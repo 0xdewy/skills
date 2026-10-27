@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Describe the changed files and added-line ranges in a merge-base diff."""
+"""Describe the changed files and both sides of each hunk in a merge-base diff."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 
-HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+HUNK_RE = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
 def git(*args: str) -> str:
@@ -88,25 +88,89 @@ def parse_numstat(text: str) -> dict[str, dict[str, int | None]]:
     return stats
 
 
+def _count(value: str | None) -> int:
+    return 1 if value is None else int(value)
+
+
+def git_unquote(token: str) -> str:
+    """Decode a Git C-quoted path token, including its surrounding quotes."""
+    if len(token) < 2 or not token.startswith('"') or not token.endswith('"'):
+        return token
+    body = token[1:-1]
+    out = bytearray()
+    index = 0
+    simple = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11, "f": 12, "r": 13, "\\": 92, '"': 34}
+    while index < len(body):
+        char = body[index]
+        if char != "\\":
+            out += char.encode("utf-8")
+            index += 1
+            continue
+        index += 1
+        if index >= len(body):
+            break
+        esc = body[index]
+        if esc in simple:
+            out.append(simple[esc])
+            index += 1
+            continue
+        if "0" <= esc <= "7":
+            digits = esc
+            index += 1
+            while index < len(body) and len(digits) < 3 and "0" <= body[index] <= "7":
+                digits += body[index]
+                index += 1
+            out.append(int(digits, 8))
+            continue
+        out += esc.encode("utf-8")
+        index += 1
+    return out.decode("utf-8", "surrogateescape")
+
+
+def header_path(line: str) -> str | None:
+    """Return the repo path from a --- or +++ header. /dev/null has no path."""
+    body = line[4:]
+    if body.startswith('"'):
+        end = 1
+        while end < len(body):
+            if body[end] == "\\":
+                end += 2
+                continue
+            if body[end] == '"':
+                end += 1
+                break
+            end += 1
+        body = git_unquote(body[:end])
+    else:
+        body = body.split("\t", 1)[0]
+    if body == "/dev/null" or not body.startswith(("a/", "b/")):
+        return None
+    return body[2:]
+
+
 def parse_hunks(patch: str) -> dict[str, list[dict[str, int]]]:
+    """Key hunks by the surviving path, or the old path when the file was deleted."""
     hunks: dict[str, list[dict[str, int]]] = {}
-    current = None
+    old_path = None
+    new_path = None
     for line in patch.splitlines():
-        if line.startswith("+++ b/"):
-            current = line[6:]
-            hunks.setdefault(current, [])
-            continue
-        if line == "+++ /dev/null":
-            current = None
-            continue
-        match = HUNK_RE.match(line)
-        if current and match:
-            start = int(match.group(1))
-            count = int(match.group(2) or "1")
-            hunks[current].append({
-                "start": start,
-                "end": start + max(count, 1) - 1,
-                "added_lines": count,
+        if line.startswith("diff --git "):
+            old_path = None
+            new_path = None
+        elif line.startswith("--- "):
+            old_path = header_path(line)
+        elif line.startswith("+++ "):
+            new_path = header_path(line)
+        else:
+            match = HUNK_RE.match(line)
+            path = new_path if new_path is not None else old_path
+            if not match or path is None:
+                continue
+            hunks.setdefault(path, []).append({
+                "old_start": int(match.group(1)),
+                "old_count": _count(match.group(2)),
+                "new_start": int(match.group(3)),
+                "new_count": _count(match.group(4)),
             })
     return hunks
 
