@@ -71,6 +71,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 | [red-team](skills/red-team/SKILL.md) | Adversarial findings report for an existing deliverable |
 | [code-smellz](skills/code-smellz/SKILL.md) | Correctness, security, architecture, and maintainability cleanup |
 | [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped PR review with changed-line findings and targeted checks |
+| [integration-smellz](skills/integration-smellz/SKILL.md) | Multi-repo PM integration review, dependency order, and revision-matched release gates |
 | [shrinkray](skills/shrinkray/SKILL.md) | Size/dead-code/duplication reduction while preserving behavior |
 
 **Quality** — skills that demand excellence through adversarial refinement:
