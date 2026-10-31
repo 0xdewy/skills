@@ -62,56 +62,41 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 ## The Skills
 
-**Orchestration** — skills that spawn and coordinate multiple sub-agents:
+**Review** — find defects before they land:
 
 | Skill | What it does |
 |---|---|
-| [goal](skills/goal/SKILL.md) | Iterates toward fixed criteria, executable checks, or explicit review gates |
-| [project-manager](skills/project-manager/SKILL.md) | Runs resumable multi-slice builds, integration, and optional competing candidates |
-| [red-team](skills/red-team/SKILL.md) | Adversarial findings report for an existing deliverable |
-| [code-smellz](skills/code-smellz/SKILL.md) | Correctness, security, architecture, and maintainability cleanup |
 | [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped PR review with changed-line findings and targeted checks |
-| [integration-smellz](skills/integration-smellz/SKILL.md) | Multi-repo PM integration review, dependency order, and revision-matched release gates |
-| [shrinkray](skills/shrinkray/SKILL.md) | Size/dead-code/duplication reduction while preserving behavior |
-
-**Quality** — skills that demand excellence through adversarial refinement:
-
-| Skill | What it does |
-|---|---|
-| [student-counsel](skills/student-counsel/SKILL.md) | The Student works, Socrates examines by elenchus, revise until the work answers for itself |
-| [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
-| [pr-describe](skills/pr-describe/SKILL.md) | Rewrites a PR title and body for a reader with no context: why, what changed, how to verify |
-| [git-show](skills/git-show/SKILL.md) | HTML dashboards and text trees of org/team repos, PR stacks, blockers, dependencies, and local work |
-
-**Frontend & Testing** — browser-based QA and design auditing:
-
-| Skill | What it does |
-|---|---|
+| [integration-smellz](skills/integration-smellz/SKILL.md) | Reviews every PR in a multi-repo integration for defects, cross-PR contract breaks, and cuts |
+| [red-team](skills/red-team/SKILL.md) | Adversarial findings report for an existing deliverable |
 | [frontend-qa](skills/frontend-qa/SKILL.md) | Headless-browser QA: functional flows, visual audit, scoped fixes proven by re-run |
+| [audit-debian-server](skills/audit-debian-server/SKILL.md) | Read-first security audit, hardening, and monitoring for Debian/Ubuntu servers |
 
-**Contract Analysis** — discovers behavioral properties and cross-artifact drift:
+**Improve** — make existing work better:
 
 | Skill | What it does |
 |---|---|
+| [student-counsel](skills/student-counsel/SKILL.md) | The Student builds toward the ideal Form; Socrates, possibly another model, questions it until it is true, good, and beautiful |
+| [pareto](skills/pareto/SKILL.md) | Subtraction-first restraint with explicit change budgets |
+| [shrinkray](skills/shrinkray/SKILL.md) | Behavior-preserving cleanup: size and dead code by default, correctness or security on request |
+| [goal](skills/goal/SKILL.md) | Iterates toward fixed criteria, executable checks, or explicit review gates |
 | [invariant-miner](skills/invariant-miner/SKILL.md) | Mines implied behavioral properties and tries to falsify them with generative tests |
-| [spec-reconciler](skills/spec-reconciler/SKILL.md) | Reconciles source-anchored claims using repository-declared authority |
 
-**Knowledge & Integration** — skills that bring deep domain expertise or
-operate a named system:
+**Communicate** — make work legible to others:
+
+| Skill | What it does |
+|---|---|
+| [pr-describe](skills/pr-describe/SKILL.md) | Rewrites a PR title and body for a reader with no context: why, what changed, how to verify |
+| [git-show](skills/git-show/SKILL.md) | HTML dashboards and text trees of org/team repos, PR stacks, blockers, and dependencies |
+| [vfs-docs](skills/vfs-docs/SKILL.md) | Self-describing docs/ trees: names carry the meaning, depth is zoom, `tree docs/` is the index |
+
+**Reference** — domain facts loaded on request:
 
 | Skill | What it does |
 |---|---|
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
-| [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, authentication, SDKs, models, and provider-specific constraints |
-| [web-scraping](skills/web-scraping/SKILL.md) | Compliant Playwright/httpx scraping, pagination, structured extraction |
-
-**Meta** — skills that create, curate, and constrain other skills:
-
-| Skill | What it does |
-|---|---|
+| [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, auth headers, env vars, SDKs, and where to find current models |
 | [skill-lab](skills/skill-lab/SKILL.md) | Create, refine, evaluate, and publish skills |
-| [agentify](skills/agentify/SKILL.md) | Live read-only repo map for lazy code navigation |
-| [vfs-docs](skills/vfs-docs/SKILL.md) | Self-describing docs/ trees: names carry the meaning, depth is zoom, `tree docs/` is the index |
 
 ---
 

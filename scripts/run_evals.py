@@ -45,7 +45,7 @@ SKILLS = ROOT / "skills"
 CANONICAL_GRADER = SKILLS / "skill-lab" / "scripts" / "llm_judge_grade.py"
 DEFAULT_RESULTS = ROOT / "reports" / "evals"
 DEFAULT_MODEL = os.environ.get("EVAL_MODEL")
-DEFAULT_GRADER_MODEL = os.environ.get("GRADE_MODEL", "claude-sonnet-4-5")
+DEFAULT_GRADER_MODEL = os.environ.get("GRADE_MODEL", "claude-sonnet-5-5")
 PREFERENCE = ["claude", "codex", "opencode"]
 PROMPT_TYPES = ("forced", "activation", "anti_trigger")
 

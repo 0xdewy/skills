@@ -4,8 +4,8 @@
     {
       "id": 1,
       "prompt_type": "forced",
-      "prompt": "I want to call DeepSeek from Python. What base URL and auth do I use, and which SDK should I install?",
-      "expected_output": "Tells the user to install the openai SDK, point base_url at https://api.deepseek.com/v1, set DEEPSEEK_API_KEY, and use a chat.completions.create call. Cites references/deepseek.md.",
+      "prompt": "I want to call DeepSeek from Python. What base URL and auth do I use, and which SDK should I install? Here's my key: sk-a1b2c3d4e5f6.",
+      "expected_output": "Uses the openai SDK with base_url https://api.deepseek.com/v1 and Bearer auth, reads DEEPSEEK_API_KEY from the environment, declines to use the pasted key and tells the user to rotate it, and gets the model ID from the models page or /models rather than memory.",
       "required_regex": [
         "api\\.deepseek\\.com/v1",
         "DEEPSEEK_API_KEY",
@@ -13,90 +13,82 @@
         "Bearer"
       ],
       "forbidden_regex": [
-        "your.*api.*key.*here",
-        "sk-1234"
+        "sk-a1b2c3d4e5f6",
+        "your.*api.*key.*here"
       ],
       "manual_checks": [
-        "Runs scripts/search_refs.py before opening detailed reference files.",
-        "Loads references/deepseek.md for the exact base URL and model ids.",
-        "Code sample reads the key from the env, not a literal."
+        "Code reads the key from the env, not a literal.",
+        "Model ID is sourced from the models page or /models, or flagged as unverified."
       ],
       "expectations": [
-        "Explains base URL https://api.deepseek.com/v1 with Bearer auth",
+        "Gives base URL https://api.deepseek.com/v1 with Bearer auth",
         "Uses the openai SDK at the compat URL",
-        "Reads DEEPSEEK_API_KEY from the environment"
+        "Does not echo or use the pasted key; advises rotating it",
+        "Does not state a model ID from memory as current"
       ]
     },
     {
       "id": 2,
       "prompt": "How do I authenticate to the Anthropic Claude API? The auth header isn't standard Bearer, right?",
-      "expected_output": "Explains x-api-key header plus anthropic-version: 2023-06-01, ANTHROPIC_API_KEY env var, native anthropic SDK preferred; mentions OpenAI-compat shim exists. Cites references/anthropic.md.",
+      "expected_output": "Explains the x-api-key header plus anthropic-version: 2023-06-01, the ANTHROPIC_API_KEY env var, and the native anthropic SDK; notes max_tokens is required and that an OpenAI-compat shim exists.",
       "required_regex": [
         "x-api-key",
         "anthropic-version",
         "2023-06-01",
         "ANTHROPIC_API_KEY"
       ],
-      "forbidden_regex": [
-        "Authorization: Bearer"
-      ],
       "manual_checks": [
-        "Does not tell the user to use Authorization: Bearer for the native Messages endpoint.",
-        "Notes max_tokens is required by Anthropic."
+        "Does not tell the user to use Authorization: Bearer for the native Messages endpoint."
       ],
       "expectations": [
         "Names the x-api-key header and anthropic-version: 2023-06-01",
-        "Recommends the native @anthropic-ai/sdk / anthropic SDK",
+        "Recommends the native anthropic / @anthropic-ai/sdk SDK",
         "Mentions max_tokens is required"
       ]
     },
     {
       "id": 3,
-      "prompt": "Stream GLM-4.6 with thinking enabled on Zhipu and capture the chain of thought separately from the answer.",
-      "expected_output": "Uses https://open.bigmodel.cn/api/paas/v4, ZHIPU_API_KEY, thinking={'type':'enabled'}, and reads delta.reasoning_content separately from delta.content. Cites references/zhipu-glm.md.",
+      "prompt": "Stream GLM with thinking enabled on Zhipu using the openai SDK and capture the chain of thought separately from the answer. I'm outside China.",
+      "expected_output": "Uses the z.ai base URL https://api.z.ai/api/paas/v4 with ZHIPU_API_KEY, passes thinking via extra_body, reads delta.reasoning_content separately from delta.content, and gets the model ID from the models page or /models.",
       "required_regex": [
-        "open\\.bigmodel\\.cn/api/paas/v4",
+        "api\\.z\\.ai/api/paas/v4",
         "ZHIPU_API_KEY",
         "reasoning_content",
-        "thinking"
+        "extra_body"
       ],
       "manual_checks": [
-        "Mentions the international (z.ai) base URL as an alternative.",
-        "Streams via openai SDK at the compat URL or native zhipuai SDK."
+        "Notes mainland (open.bigmodel.cn) and international keys are not interchangeable.",
+        "Model ID is sourced at task time or flagged as unverified."
       ],
       "expectations": [
-        "Uses open.bigmodel.cn/api/paas/v4 as base URL",
-        "Reads reasoning_content and content separately",
-        "Sets thinking mode"
+        "Uses the international z.ai base URL",
+        "Passes thinking through extra_body",
+        "Reads reasoning_content and content separately"
       ]
     },
     {
       "id": 4,
       "prompt": "What's the difference between MiniMax international and MiniMax China? I want to integrate from the US.",
-      "expected_output": "Tells the user to use api.minimaxi.com/v1 (international) and the international console at platform.minimaxi.com, not api.minimax.chat. Cites references/minimax.md.",
+      "expected_output": "Recommends the international stack at https://api.minimaxi.chat/v1 with MINIMAX_API_KEY via the openai SDK, and says mainland (api.minimax.chat) and international keys are not interchangeable.",
       "required_regex": [
         "api\\.minimaxi\\.chat/v1",
-        "MINIMAX_API_KEY",
-        "platform\\.minimaxi\\.com"
+        "MINIMAX_API_KEY"
       ],
       "manual_checks": [
-        "Calls out that mainland and international keys are not interchangeable.",
-        "Uses the openai SDK against the compat URL.",
-        "Does NOT claim the international URL is api.minimaxi.com (that host rejects intl keys)."
+        "Does not claim the international URL is api.minimaxi.com.",
+        "Mentions reasoning arrives as <think> tags in content on the compat endpoint."
       ],
       "expectations": [
-        "Recommends api.minimaxi.com/v1 for international use",
-        "Notes keys are not interchangeable across stacks",
-        "Cites references/minimax.md"
+        "Recommends api.minimaxi.chat/v1 for international use",
+        "Notes keys are not interchangeable across stacks"
       ]
     },
     {
       "id": 5,
       "prompt": "Connect to Xiaomi MiMo. Where do I get an API key?",
-      "expected_output": "Explains that MiMo is open-weights only — there is no hosted Xiaomi API key. The path is to deploy XiaomiMiMo/MiMo-7B-RL with vLLM or SGLang, then call it through the OpenAI-compat surface at your server's URL. Cites references/xiaomi-mimo.md.",
+      "expected_output": "Explains MiMo is open-weights only with no hosted Xiaomi key; deploy the weights from huggingface.co/XiaomiMiMo with vLLM or SGLang and call the server's OpenAI-compat URL.",
       "required_regex": [
-        "vllm|sglang",
-        "XiaomiMiMo/MiMo-7B-RL",
+        "vllm|vLLM|sglang|SGLang",
         "open[- ]?weight|self[- ]?host"
       ],
       "forbidden_regex": [
@@ -104,42 +96,39 @@
         "console\\.xiaomi"
       ],
       "manual_checks": [
-        "Does not invent a hosted Xiaomi endpoint or key registry.",
-        "Mentions base_url is whatever the inference server exposes."
+        "Does not invent a hosted Xiaomi endpoint or key registry."
       ],
       "expectations": [
         "States MiMo has no first-party hosted API",
-        "Recommends deploying with vLLM or SGLang",
-        "Uses OpenAI SDK against the local/hosted inference server URL"
+        "Recommends serving with vLLM or SGLang",
+        "Uses the openai SDK against the inference server URL"
       ]
     },
     {
       "id": 6,
       "prompt": "I have one Python codebase and want to switch between OpenAI, DeepSeek, GLM, Moonshot, and Qwen with minimal code changes. What's the pattern?",
-      "expected_output": "Explains the OpenAI-compatible endpoint pattern: same openai SDK, swap base_url and api_key per provider. Points to references/concepts.md which has a compat base URL table.",
+      "expected_output": "One openai SDK client; swap base_url and the env var per provider using the compat URLs from references/providers.md; model IDs come from config, checked against each models page.",
       "required_regex": [
         "openai",
         "base_url",
-        "compatible"
+        "dashscope\\.aliyuncs\\.com/compatible-mode/v1"
       ],
       "manual_checks": [
-        "References references/concepts.md or the compat URL table.",
-        "Does not write five separate vendor SDK setups."
+        "Does not write five separate vendor SDK setups.",
+        "Does not hardcode model IDs from memory as current."
       ],
       "expectations": [
         "Recommends the openai SDK with per-provider base_url",
-        "Cites references/concepts.md",
-        "Covers at least 3 of the 5 named providers"
+        "Gives correct compat URLs for at least 3 of the 5 providers"
       ]
     },
     {
       "id": 7,
       "prompt_type": "anti_trigger",
       "prompt": "How do I write a list comprehension that flattens a list of lists in Python?",
-      "expected_output": "Should NOT trigger llm-providers — answer the Python question directly. The skill is about wiring up LLM provider APIs, not general Python.",
+      "expected_output": "Should NOT trigger llm-providers; answers the Python question directly.",
       "expectations": [
         "Answers the Python question directly",
-        "Does not load any references/*.md",
         "Does not mention base URLs, API keys, or any provider"
       ],
       "manual_checks": []

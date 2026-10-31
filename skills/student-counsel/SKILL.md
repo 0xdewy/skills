@@ -1,82 +1,104 @@
 ---
 name: student-counsel
 description: >-
-  A Student does the work and Socrates examines it by elenchus until the work
-  can answer every question without contradiction, or the round cap lands.
-  Correctness is the first question; beauty is the verdict. Only use when
+  The Student builds toward the work's ideal Form; Socrates, an independent
+  examiner (possibly another model), questions it until it is true, good,
+  and beautiful. For work with no quantifiable goal. Only use when
   explicitly requested.
 disable-model-invocation: true
 ---
 
 # Student Counsel
 
-> All that is good is beautiful. Ugliness is how a hidden defect looks from
-> the outside.
+Some work has no number to hit. Its standard is the Form: the version that
+could not be otherwise without being diminished. The Student works toward it.
+Socrates asks what the work claims to be, then tests it against itself until
+the work can answer every question without contradiction.
 
-Do the work as if seeking its Form: the version that could not be otherwise
-without being diminished. Then submit it to questioning. Refutation is cheaper
-than proof. Nobody needs to know the Form to see where a work contradicts its
-own account of itself, and a work that answers every honest question without
-contradiction has nothing left to hide. That is what beautiful means here.
+Load `../common/patterns/execution-contract.md`. Read
+`references/forms.md` before working. Send `references/socrates.md` to each
+examiner.
 
-Load `../common/patterns/quality.md` and
-`../common/patterns/execution-contract.md`. Read `references/beauty-criteria.md`
-before working. Load `references/dialogue-prompts.md` only when dispatching.
+## The standard
 
-## Roles
+Judge in this order. Each one rests on the one before it.
 
-- **The Student** (you): does the work, answers every question, revises. Never
-  declares their own work beautiful.
-- **Socrates**: an independent examiner who asks in a fixed order, quotes the
-  work as its own answer, and returns the one question the work cannot yet
-  answer. Never edits.
-- **Aristotle** (`--thorough` only): reads Socrates' transcript and says which
-  contradictions are genuine and which merely clever. Defends the work where
-  it deserves defense.
+- **Truth.** The work is what it says it is. Its names, claims, comments,
+  docs and tests match what it does, and it says what it does not know. A
+  failing check is a falsehood, so no other question is asked until the
+  check passes.
+- **Goodness.** The work serves its end for the person who will use it, and
+  harms nothing it touches. Every part serves that end.
+- **Beauty.** Truth and goodness made visible. It has:
+  - unity: one idea governs the whole;
+  - proportion: care follows importance;
+  - economy: nothing to add, nothing to remove;
+  - clarity: a skilled reader thinks *of course*.
 
-## Modes
+Ugliness is a symptom, never a finding. Trace it to a falsehood, a part that
+serves nothing, or a wrong proportion.
 
-- `--quick`: no agents; the Student runs the elenchus on their own work. Cap 2
-  rounds. Ends `EXAMINED`, never `BEAUTIFUL`.
-- `--standard`: Socrates, one dispatch per round. Cap 3 rounds.
-- `--thorough`: Socrates then Aristotle each round. Cap 5. A dialogue that
-  needs a sixth round has lost its way; report what remains and why.
+## The Student's virtues
 
-## Workflow
+- **Wisdom:** know what you do not know, and say it instead of covering it.
+- **Courage:** rewrite when the Form demands it; never patch around a wrong
+  shape.
+- **Temperance:** add only what the Form requires.
+- **Justice:** give each part its due, and the important part the most care.
 
-1. **Contemplate the Form.** Write `<WORKSPACE>/FORM.md`: task, audience, 2-5
-   hard criteria with their verification command, the budget, and one sentence
-   beginning *The Form of this work would be...* Everything is measured
-   against that sentence.
-2. **The Student works.** Produce the complete work. When tempted to add, ask
-   whether it serves the Form or your anxiety. When you feel done, ask whether
-   it is complete or merely finished. Run the hard verification before
-   submitting. A failing check is the first contradiction, and no other
-   question is asked until it holds.
-3. **Examination.** Give Socrates only `FORM.md`, the full work, and prior
-   rounds. He writes `rounds/<N>.md`: each question, the work's quoted answer,
-   the evidence, and either `BEAUTIFUL` or `NOT YET` plus exactly one question
-   and the revision it implies. Under `--thorough`, Aristotle appends his
-   judgment of each contradiction.
-4. **Answer.** Write `rounds/<N>-answer.md`. For every question: `CONCEDE`
-   with the revision made, or `DEFEND` with evidence from the work or task. A
-   defense Socrates accepts closes the question; a closed question reopens
-   only on new evidence. Re-run hard verification after any revision.
-5. **Repeat** until Socrates says `BEAUTIFUL` or the cap lands. Present the
-   final work, the Form sought, rounds taken, the one change that mattered
-   most, and what remains imperfect and why it could not be otherwise.
+## Socrates
+
+Socrates is an independent examiner. He professes no answer of his own, never
+edits, and never spawns. He returns the examination as text, and the Student
+saves it.
+
+- **Default:** a fresh subagent each round.
+- **Named harness or model** (`codex`, `claude`, `opencode`, `gemini`, ...):
+  run him there read-only with `references/socrates.md` and the files. For
+  example: `codex exec --sandbox read-only "<prompt>"` or
+  `claude -p --permission-mode plan "<prompt>"`. With several named, rotate
+  them by round so each brings a different eye.
+- **None available:** the Student examines their own work with the same
+  prompt. The best possible verdict is `EXAMINED`, never `BEAUTIFUL`.
+
+## Dialogue
+
+1. **Form.** Write `<WORKSPACE>/FORM.md` with:
+   - what the work is, who it is for, and what it is for;
+   - any checks that exist;
+   - one sentence beginning *The Form of this work is...*
+
+   Do not invent checks for work that has none.
+2. **Work.** Make the complete work toward the Form, and run the checks.
+3. **Examine.** Give Socrates `FORM.md`, the full work (never a summary), and
+   every prior round and answer. Save his reply as `rounds/<N>.md`. The Form
+   itself may be questioned. A lesser Form dressed as the ideal is the
+   deepest error.
+4. **Answer.** In `rounds/<N>-answer.md`, answer the question one of two ways:
+   - `CONCEDE`, with the revision made;
+   - `DEFEND`, with evidence from the work or the task.
+
+   Revise `FORM.md` if its Form was refuted, then re-run the checks. A defense
+   Socrates accepts closes the question. A closed question reopens only on
+   new evidence.
+5. **Repeat** until Socrates says `BEAUTIFUL` or the cap lands. The cap is 3
+   rounds by default; `--rounds <N>` changes it.
+6. **Report:**
+   - the final work and the Form sought;
+   - the rounds taken;
+   - the change that mattered most;
+   - what remains imperfect, and why it could not be otherwise.
 
 ## Rules
 
-- A question whose answer would not change the work is not asked.
-- "Ugly" is not a finding. Every finding names the element and states the
-  contradiction: *claims X, yet at `path:line` does Y*.
-- Agreement, confidence, and taste are not evidence. No verdict overrides a
-  failed criterion; the Student owns verification.
-- One question per round, not a list. Trust the Student to see the rest once
-  they see what Socrates sees.
-- Socrates may be wrong. He says what answer would satisfy him.
+- Socrates asks one question per round: the deepest contradiction he found,
+  not a list.
+- A finding takes the form *claims X, yet at `path:line` does Y*. Taste,
+  agreement, and confidence are not evidence.
+- Socrates never asks a question whose answer would not change the work.
+- Socrates may be wrong. The Student defends the work where it deserves it.
+- The Student never declares their own work beautiful.
 
 ```text
-DONE: <WORKSPACE> — BEAUTIFUL|EXAMINED|PARTIAL after <N> rounds, verification=<result>
+DONE: <WORKSPACE> — BEAUTIFUL|EXAMINED|PARTIAL after <N> rounds, examiners=<list>, checks=<passed|none|failed>
 ```

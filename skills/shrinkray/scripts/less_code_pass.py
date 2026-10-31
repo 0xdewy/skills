@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Deterministic, test-gated pre-pass for shrinkray, via `less-code` (`lc`).
 
-Runs BEFORE any agent is dispatched (Phase 0.4) and applies real changes
+Runs BEFORE any agent is dispatched and applies real changes
 directly, not findings for an agent to review: every rewrite is gated by
 `lc`'s own frozen test suite / public-API / doc-preservation checks, and a
 failing layer reverts itself internally, so there is nothing here for the
-orchestrator's patch/revert machinery to do. This is the same "spend tokens
+orchestrator's per-change revert to do. This is the same "spend tokens
 verifying and implementing rather than discovering" argument the other two
 pre-pass scripts make, taken one step further: for Python, JavaScript,
 TypeScript, and Rust, `lc` does not just find candidates for an agent to fix,
@@ -47,8 +47,8 @@ Finding `lc`:
   the same one-line setup hint printed here.
 
 --test-command overrides the project's OWN detected test command (typically
-the same value `detect_runner.py` found in Phase 0) instead of `lc`'s
-built-in per-language default, so this pass and the loop's Phase 4 verify
+the same value `detect_runner.py` found at setup) instead of `lc`'s
+built-in per-language default, so this pass and the loop's verify step
 run the identical suite. Needed for a project with its own venv or a
 monorepo package whose tests must be scoped (e.g.
 `.venv/bin/python -m pytest -x -q`, or `npm --prefix js test --silent`).
@@ -91,7 +91,7 @@ _SKIP_DIRS = {
     '.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env',
     'dist', 'build', 'target', '.next', 'out', 'coverage',
     '.pytest_cache', '.mypy_cache', '.ruff_cache', 'vendor', '.cache',
-    'shrinkray-output', 'stinky-output',
+    'shrinkray-output',
 }
 
 _SETUP_HINT = (

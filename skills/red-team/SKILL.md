@@ -17,8 +17,8 @@ when spawning.
 
 ## Activation
 
-Find issues in an existing deliverable. Building or fixing is `goal` or
-`project-manager`; a diff-scoped review is `pr-smellz`. This skill writes
+Find issues in an existing deliverable. Building or fixing is `goal`; a
+diff-scoped review is `pr-smellz`. This skill writes
 reports only; it never edits the target.
 
 ## Modes

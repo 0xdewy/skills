@@ -20,8 +20,8 @@ Load `../common/patterns/execution-contract.md` and
 
 From a PM issue, board view, or PR URLs, refresh every PR and record repo,
 number, base, head SHA, and stack parent. Add merged PRs the open ones build
-on and repos that consume what they change (e.g. Petals reading a VFS path).
-Do not expand to the whole org. Host scratch policy decides WORKSPACE's
+on and repos that consume what they change (e.g. a service reading a path
+another repo writes). Do not expand to the whole org. Host scratch policy decides WORKSPACE's
 location. Work in full clones under WORKSPACE
 (`git clone --shared`, unshallow, fetch `pull/<n>/head`); never fetch into,
 check out, or build in a shared checkout. Access failures are coverage gaps.

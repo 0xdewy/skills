@@ -21,7 +21,7 @@ Load `../common/patterns/execution-contract.md` and
 ## Activation
 
 The target is a PR or branch diff. Use
-`code-smellz` for whole-repo cleanup and `red-team` for a broad read-only review
+`shrinkray` for whole-repo cleanup and `red-team` for a broad read-only review
 of a non-PR deliverable. Address already-supplied review comments directly.
 
 ## Inputs

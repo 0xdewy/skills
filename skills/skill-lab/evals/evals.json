@@ -28,7 +28,7 @@
     },
     {
       "id": 3,
-      "prompt": "run evals on the code-smellz skill",
+      "prompt": "run evals on the shrinkray skill",
       "expected_output": "Reads the skill's evals/evals.json, dispatches evals, measures pass rate, reports failures with specific expectations that weren't met.",
       "expectations": [
         "Reads evals/evals.json from the target skill's directory",

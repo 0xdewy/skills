@@ -3,7 +3,7 @@
 
 Runs the best available dead-code tool for the project's language(s), then
 runs the type checker with strict unused-symbol flags when available. Emits
-a unified JSON the Dead Code Hunter agent verifies and applies.
+a unified JSON the Dead Code Hunter agent verifies before the orchestrator applies it.
 
 Why this exists: LLMs are bad at *discovering* dead code by reading. SmellBench
 (arXiv:2606.05574) reports the best agent at ~50% smell elimination, with the
@@ -54,7 +54,7 @@ _SKIP_DIRS = {
     '.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env',
     'dist', 'build', 'target', '.next', 'out', 'coverage',
     '.pytest_cache', '.mypy_cache', '.ruff_cache', 'vendor', '.cache',
-    'shrinkray-output', 'stinky-output',
+    'shrinkray-output',
 }
 
 # Per-tool stdout size cap to keep JSON manageable.

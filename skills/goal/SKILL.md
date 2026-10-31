@@ -13,8 +13,7 @@ Iterate against fixed gates until they pass, progress stalls, or the cap is
 reached.
 
 Load `../common/patterns/execution-contract.md` and
-`../common/patterns/scaling.md`. Independent workstreams belong to
-`project-manager`; one direct action needs no skill. Load
+`../common/patterns/scaling.md`. One direct action needs no skill. Load
 `../common/patterns/worker-slice.md` only when
 dispatching an independent implementation slice. Validate state with
 `../common/scripts/validate_state.py`.

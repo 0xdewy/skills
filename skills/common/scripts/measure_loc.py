@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Count non-blank, non-comment source lines in a project.
 
-Shared by skills that measure codebase size (code-smellz, shrinkray, and any
+Shared by skills that measure codebase size (shrinkray and any
 future heavyweight skill). Lives in skills/common/scripts/.
 
 Usage: measure_loc.py <project_dir> [extra_skip,extra_skip,...]
