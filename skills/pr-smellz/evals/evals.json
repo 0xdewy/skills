@@ -76,11 +76,11 @@
     {
       "id": 5,
       "prompt_type": "anti_trigger",
-      "prompt": "Run a broad code-smellz cleanup across this whole repository and apply safe fixes.",
-      "expected_output": "Does not invoke pr-smellz because there is no PR/diff review scope; routes to code-smellz.",
+      "prompt": "Run a broad shrinkray --focus all cleanup across this whole repository and apply safe fixes.",
+      "expected_output": "Does not invoke pr-smellz because there is no PR/diff review scope; routes to shrinkray.",
       "expectations": [
         "Does not require a merge base",
-        "Uses code-smellz rather than pr-smellz"
+        "Uses shrinkray rather than pr-smellz"
       ]
     },
     {

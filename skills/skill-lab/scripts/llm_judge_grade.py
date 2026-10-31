@@ -4,7 +4,7 @@ LLM-as-judge grader template for skills whose output is free-form text or
 workflow behavior, where deterministic substring checks are too weak.
 
 Usage:
-    python3 llm_judge_grade.py --results /tmp/<skill>-run [--evals evals/evals.json] [--model claude-sonnet-4-5]
+    python3 llm_judge_grade.py --results /tmp/<skill>-run [--evals evals/evals.json] [--model claude-sonnet-5-5]
 
 For each eval case, the grader gathers the recorded run artifacts under
 <results>/eval-<id>/ (or <results>/ if flat), sends them to an LLM judge with a
@@ -226,7 +226,7 @@ def main():
     ap = argparse.ArgumentParser(description="LLM-as-judge grader for skill evals.")
     ap.add_argument("--results", required=True, help="Run artifacts root dir.")
     ap.add_argument("--evals", default="evals/evals.json", help="Path to evals.json.")
-    ap.add_argument("--model", default=os.environ.get("GRADE_MODEL", "claude-sonnet-4-5"))
+    ap.add_argument("--model", default=os.environ.get("GRADE_MODEL", "claude-sonnet-5-5"))
     args = ap.parse_args()
 
     results_dir = Path(args.results)

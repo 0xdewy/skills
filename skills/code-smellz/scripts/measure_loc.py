@@ -1,1 +1,0 @@
-../../common/scripts/measure_loc.py

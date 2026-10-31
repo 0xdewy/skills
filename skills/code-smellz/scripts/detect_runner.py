@@ -1,1 +1,0 @@
-../../common/scripts/detect_runner.py

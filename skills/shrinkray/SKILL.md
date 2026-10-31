@@ -1,86 +1,74 @@
 ---
 name: shrinkray
 description: >-
-  Shrinks repositories while preserving behavior by removing dead code,
-  duplication, and verbosity with measured verification. Only use when
-  explicitly requested.
+  Cleans a repository while preserving behavior: removes dead code,
+  duplication, and verbosity, or fixes correctness and security defects with
+  --focus, verifying every change. Only use when explicitly requested.
 disable-model-invocation: true
 ---
 
 # Shrinkray
 
-Reduce repository size while preserving behavior. Prefer direct edits for a
-small target; use agents only when evidence identifies independent bloat
-categories that benefit from parallel work.
+Clean a repository without changing intended behavior. Never commit.
 
-Size and dead-code work only; bug, security, and architecture cleanup is
-`code-smellz`, and build minification is not this skill. Load
-`../common/patterns/execution-contract.md`,
-`../common/patterns/quarantine-loop.md`, and
-`../common/patterns/scaling.md`. Use `references/subagent-prompts.md` only when
-dispatching a role.
+Load `../common/patterns/execution-contract.md` and
+`../common/patterns/scaling.md`. Load `references/subagent-prompts.md` only
+when dispatching a role.
 
-## Modes
+## Focus
 
-- `--quick`: deterministic pass, then directly apply clear dead-code and
-  verbosity findings. No agent budget.
-- `--standard`: dispatch the 2-3 primary roles justified by evidence once.
-  Budget: 3.
-- `--thorough`: add structural roles, use propose-then-implement, and repeat
-  the shared loop to convergence. Budget cap: 5.
+- `--focus size` (default): dead code, unreferenced files, duplication,
+  verbosity.
+- `--focus correctness`: real defects, plus localized structural fixes with a
+  measurable gain.
+- `--focus security`: reachable vulnerabilities and high or critical reachable
+  dependency advisories (`npm audit`, `pip-audit`, `cargo audit`,
+  `govulncheck` when installed).
+- `--focus all`: all three.
 
-Default non-interactive runs to `--standard`; use `--quick` for an obviously
-small target.
+Not this skill: build minification, a findings-only review (`red-team`), a
+PR or diff review (`pr-smellz`), or one obvious fix (just make it).
 
-## Evidence passes
+Work directly by default. Dispatch the focus's roles only when the target is
+too large for one context: `--standard` 1-3 roles chosen from the evidence,
+`--thorough` adds the size structural roles. Cap 5 iterations.
 
-After Phase 0 captures baseline LOC and tests, run these before dispatch:
+## Loop
 
-1. **Phase 0.4:** run
-   `scripts/less_code_pass.py <WORKSPACE> <WORKSPACE>`. For Python,
-   JavaScript, TypeScript, and Rust it invokes `less-code` (`lc`), which applies
-   and verifies transformations with its own frozen-suite/API/doc gates and
-   reverts a failing layer. Pass `--test-command` when runner detection has
-   high confidence so it uses the Phase 4 suite. The tool and supported
-   language are optional; record a skip reason and continue when `ran` is
-   false. Record `total_loc_removed` and per-language `tests_ok` from
-   `less_code_pass.json`. Do not send its already-applied changes through agent
-   triage or `git apply`.
-2. **Phase 0.5:** run `scripts/deadcode_scan.py` and
-   `scripts/dependency_index.py` on the resulting tree. The first combines
-   language dead-code tools and type checking. The second records caller and
-   importer counts, including single-caller symbols, single-importer files,
-   and single-implementor interfaces.
+1. **Setup.** Resolve `WORKSPACE` and read the project goal from its README
+   or manifest. Run `git status --short`; outside git,
+   warn and snapshot files before editing. Detect the runner with
+   `scripts/detect_runner.py`, measure LOC with `scripts/measure_loc.py`, and
+   run the tests once as the baseline. Record all of it in `session.json`.
+2. **Evidence.** Run `scripts/less_code_pass.py <repo> <WORKSPACE>`
+   (add `--test-command` when the runner is certain). `lc` applies and
+   verifies its own changes; record `total_loc_removed`, or the skip reason
+   when `ran` is false. Then run `scripts/deadcode_scan.py` and
+   `scripts/dependency_index.py` with the same arguments. A missing tool is
+   recorded, not fatal. Every focus uses these as leads.
+3. **Find.** Review directly or dispatch roles. Findings are JSON:
+   `{id, category, file, lines, description, evidence, confidence, source_tool}`.
+   Rank tool-certified findings above model-only ones.
+4. **Triage.** Drop low confidence. Where findings overlap, keep the larger
+   gain. Flag public-API changes for human review instead of applying. Write
+   `STAGED_CHANGES.md` before any edit. Nothing left: go to the report.
+5. **Apply.** Order: correctness, security, unreferenced files, dead code,
+   consolidation, verbosity. For each change, edit, save that change's diff
+   to `WORKSPACE/changes/<id>.patch`, run the cheapest check (type checker,
+   `py_compile`, `node --check`), and reverse the patch if it adds errors.
+6. **Verify.** Run the full suite and available type-check and lint gates.
+   On failure, reverse this iteration's patches newest first until green. If
+   a reverse fails, stop and report the touched files and failed command.
+7. **Repeat** from step 2 until a rescan finds no high or medium findings,
+   fewer than 2 changes survive an iteration, or 5 iterations ran. Flag the
+   run unstable when most of an iteration's changes were reverted.
 
-Use `../common/scripts/detect_runner.py` and `measure_loc.py` for runner and
-measurement support. The deterministic pass runs in every mode because it
-spends no agent budget.
+## Report
 
-## Roles and application
-
-Primary roles verify and apply evidence-backed candidates: Dead Code Hunter,
-Ghost File Hunter, Verbosity Reducer, and Code Consolidator. Thorough mode may
-also use structural roles for standard-library replacement, indirection
-inlining, table-driven conversion, shipped-flag removal, and module merging.
-Structural roles first propose candidates from the dependency index; the
-orchestrator selects proposals before implementation.
-
-Each agent is read-only and writes one findings JSON file; structural roles
-also write one proposal JSON. Findings use:
-
-```text
-{id, category, file, lines, description, estimated_loc_saved, confidence, source_tool, patch}
-```
-
-Use `lines: "all"` for ghost files and categories `dead_code`, `ghost_file`,
-`consolidate`, or `verbosity`. Apply ghost files, dead code, consolidation,
-then verbosity. Weight tool-certified findings above model-only findings.
-Phase 0.4 output is exempt because `lc` applies and verifies its own changes.
-
-Run the shared type-check and test gates after edits. For the second minimizer
-pass, re-run `scripts/deadcode_scan.py` on each changed file and feed new
-findings into the same iteration's triage. Finish with:
+LOC and test results before and after, changes kept and reverted per
+category, and items left for human review. Tell the user to review
+`git diff` and commit themselves. End with:
 
 ```text
-DONE: <WORKSPACE> — <lines> lines removed across <iterations> iterations (-<pct>% LOC)
+DONE: <WORKSPACE> — <kept> changes across <iterations> iterations, -<lines> LOC (-<pct>%), verification <passed|partial|blocked>
 ```

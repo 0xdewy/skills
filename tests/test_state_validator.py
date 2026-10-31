@@ -3,7 +3,6 @@ import importlib.util
 import json
 import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -39,52 +38,20 @@ class GoalStateTests(unittest.TestCase):
         self.assertTrue(any("duplicates" in error for error in errors))
 
 
-class ProjectStateTests(unittest.TestCase):
-    def test_template_is_valid(self):
-        self.assertEqual(MODULE.validate_project(copy.deepcopy(MODULE.PM_TEMPLATE)), [])
+    def test_quick_mode_is_valid(self):
+        state = copy.deepcopy(MODULE.GOAL_TEMPLATE)
+        state["mode"] = "quick"
+        self.assertEqual(MODULE.validate_goal(state), [])
 
-    def test_ready_requires_accepted_dependencies(self):
-        state = copy.deepcopy(MODULE.PM_TEMPLATE)
-        state["slices"][0]["state"] = "review"
-        errors = MODULE.validate_project(state)
-        self.assertTrue(any("before dependencies" in error for error in errors))
-
-    def test_cycle_is_rejected(self):
-        state = copy.deepcopy(MODULE.PM_TEMPLATE)
-        state["slices"][0]["dependencies"] = ["cli"]
-        errors = MODULE.validate_project(state)
-        self.assertTrue(any("cycle" in error for error in errors))
-
-    def test_pass_requires_all_slices(self):
-        state = copy.deepcopy(MODULE.PM_TEMPLATE)
-        state.update({"state": "passed", "next_action": None})
-        errors = MODULE.validate_project(state)
-        self.assertTrue(any("every slice" in error for error in errors))
-
-    def test_root_checks_accepted_artifact(self):
-        state = copy.deepcopy(MODULE.PM_TEMPLATE)
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            errors = MODULE.validate_project(state, root)
-            self.assertTrue(any("does not exist" in error for error in errors))
-            artifact = root / state["slices"][0]["artifact"]
-            artifact.parent.mkdir(parents=True)
-            artifact.write_text("DONE")
-            self.assertEqual(MODULE.validate_project(state, root), [])
-
-    def test_cli_prints_valid_templates(self):
-        for kind, validator in (
-            ("goal", MODULE.validate_goal),
-            ("project-manager", MODULE.validate_project),
-        ):
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), kind, "--print-template"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            self.assertEqual(result.returncode, 0)
-            self.assertEqual(validator(json.loads(result.stdout)), [])
+    def test_cli_prints_valid_template(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "goal", "--print-template"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(MODULE.validate_goal(json.loads(result.stdout)), [])
 
 
 if __name__ == "__main__":

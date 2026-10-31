@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Detect the test runner for a project.
 
-Shared by skills that need to run a project's test suite (code-smellz, shrinkray,
+Shared by skills that need to run a project's test suite (shrinkray
 and any future heavyweight skill). Lives in skills/common/scripts/.
 
 Usage: detect_runner.py <project_dir>

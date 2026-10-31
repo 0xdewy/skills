@@ -69,7 +69,7 @@ _SKIP_DIRS = {
     '.git', 'node_modules', '__pycache__', '.venv', 'venv', 'env',
     'dist', 'build', 'target', '.next', 'out', 'coverage',
     '.pytest_cache', '.mypy_cache', '.ruff_cache', 'vendor', '.cache',
-    'shrinkray-output', 'stinky-output',
+    'shrinkray-output',
 }
 
 _PY_EXT = {'.py'}

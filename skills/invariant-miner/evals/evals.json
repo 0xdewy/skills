@@ -111,10 +111,10 @@
     {
       "id": 7,
       "prompt_type": "anti_trigger",
-      "prompt": "Run code-smellz across the repository and fix broad correctness, security, and maintainability problems.",
-      "expected_output": "Routes to code-smellz instead of invariant-miner because the task is broad cleanup rather than falsifying general properties.",
+      "prompt": "Run shrinkray --focus all across the repository and fix broad correctness, security, and maintainability problems.",
+      "expected_output": "Routes to shrinkray instead of invariant-miner because the task is broad cleanup rather than falsifying general properties.",
       "expectations": [
-        "Uses code-smellz rather than invariant-miner",
+        "Uses shrinkray rather than invariant-miner",
         "Does not force every finding into a property-test workflow"
       ]
     }

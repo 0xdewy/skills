@@ -21,7 +21,7 @@ completion.
 
 Use this for *general properties over an input or state space*. Add one known
 example test directly without this skill. Route broad bug/quality cleanup to
-`code-smellz` and diff-scoped review to `pr-smellz`.
+`shrinkray` and diff-scoped review to `pr-smellz`.
 
 Edit authority follows the request:
 
