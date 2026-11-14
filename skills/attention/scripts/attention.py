@@ -75,8 +75,11 @@ def report(data):
             draft = " [draft]" if pr.get("isDraft") else ""
             lines.append(f"  {pr['url']}{draft}  {pr['title']}")
         lines.append("")
-    needing = {pr["url"] for prs in groups.values() for pr in prs}
-    lines.append(f"{len(needing)} need you; {len(mine)} of your PRs are open.")
+    own = {pr["url"] for key, prs in groups.items() if key != "review" for pr in prs}
+    lines.append(
+        f"{len(own)} of your {len(mine)} open PRs need you; "
+        f"{len(groups['review'])} from others wait for your review."
+    )
     unknown = sum(1 for pr in mine if pr.get("mergeable") == "UNKNOWN")
     if unknown:
         lines.append(f"GitHub has not computed conflicts for {unknown} yet; run again in a minute.")

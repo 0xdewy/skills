@@ -10,7 +10,7 @@
       },
       "expected_output": "Runs the script on the saved response and reports the five PRs that need action, grouped by what to do, with full URLs, and leaves out the clean one.",
       "expectations": [
-        "Runs scripts/attention.py with --input github.json",
+        "States that 4 of the user's 5 open PRs need them and 1 PR from someone else waits for review",
         "Lists acme/lib pull 9 as a review requested from the user",
         "Lists pull 2 as conflicting, pull 3 as failing checks, pull 4 as ready to merge, and pull 5 as having an unresolved thread",
         "Does not list pull 1",

@@ -27,7 +27,7 @@ class AttentionTests(unittest.TestCase):
         self.assertIn("Approved and ready to merge (1)", out)
         self.assertIn("pull/5 [draft]", out)
         self.assertNotIn("pull/1 ", out)
-        self.assertIn("5 need you; 5 of your PRs are open.", out)
+        self.assertIn("4 of your 5 open PRs need you; 1 from others wait for your review.", out)
 
 
 if __name__ == "__main__":
