@@ -169,7 +169,7 @@
         "Writes one PR_REVIEW.md per PR in its own subdirectory",
         "Reports as a cross-PR finding that web#45 reads `data.total` while api#140 renames `total` to `count`, anchored to a changed line in one PR and naming the other",
         "Notes the api#140 rename as a caller-visible breaking change in its own review",
-        "Finds nothing wrong with tools#12 and leaves it out of the cross-PR pass",
+        "Reports no medium-or-higher cross-PR finding for tools#12 and leaves it out of the cross-PR pass",
         "Does not merge or build the PRs together and never recommends splitting a PR",
         "Writes SUMMARY.md with one line per PR and ends with the multi-PR DONE line"
       ],
