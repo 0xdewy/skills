@@ -86,6 +86,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
+| [implement](skills/implement/SKILL.md) | Carries out a written plan exactly, investigating every uncertain step and adding nothing extra |
 | [pr-describe](skills/pr-describe/SKILL.md) | Rewrites a PR title and body for a reader with no context: why, what changed, how to verify |
 | [git-show](skills/git-show/SKILL.md) | HTML dashboards and text trees of org/team repos, PR stacks, blockers, and dependencies |
 | [vfs-docs](skills/vfs-docs/SKILL.md) | Self-describing docs/ trees: names carry the meaning, depth is zoom, `tree docs/` is the index |

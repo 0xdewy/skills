@@ -1,0 +1,48 @@
+{
+  "skill_name": "implement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement PLAN.md.",
+      "context": "Offline fixture in the working directory. No network.",
+      "fixture_files": {
+        "PLAN.md": "# Plan: retry failed downloads\n\n1. In `fetch.py`, make `download(url)` retry up to 3 times on `ConnectionError`.\n2. Read the per-attempt timeout from `config.TIMEOUT_S` and pass it to `get`.\n3. Add a `DownloadCache` class with pluggable backends, for later use.\n4. Run `python3 -m unittest discover -s tests -t .`.\n",
+        "config.py": "# Timeout for one HTTP attempt, in milliseconds.\nTIMEOUT_MS = 2500\n",
+        "fetch.py": "import config\nfrom net import get\n\n\ndef download(url):\n    return get(url, timeout=config.TIMEOUT_MS / 1000)\n",
+        "net.py": "def get(url, timeout):\n    \"\"\"timeout is in seconds.\"\"\"\n    raise ConnectionError(url)\n",
+        "tests/__init__.py": "",
+        "tests/test_fetch.py": "import unittest\nfrom unittest import mock\n\nimport fetch\n\n\nclass T(unittest.TestCase):\n    def test_passes_seconds(self):\n        with mock.patch('fetch.get', return_value=b'ok') as g:\n            self.assertEqual(fetch.download('u'), b'ok')\n        self.assertEqual(g.call_args.kwargs['timeout'], 2.5)\n"
+      },
+      "expected_output": "Adds the retry, notices the plan names config.TIMEOUT_S while the code has TIMEOUT_MS in milliseconds, keeps the seconds conversion or reports the mismatch, builds the cache as written while flagging it, runs the tests, and reports deviations.",
+      "expectations": [
+        "Reads fetch.py, config.py and net.py before editing",
+        "download retries up to 3 times on ConnectionError",
+        "Does not invent config.TIMEOUT_S or pass milliseconds to get; reports that the plan's TIMEOUT_S does not exist and the code uses TIMEOUT_MS",
+        "Says in the report that DownloadCache has no caller, and does not silently skip or silently expand it",
+        "Adds nothing the plan does not ask for (no backoff options, logging framework, or config flags)",
+        "Runs the unittest command and reports its result",
+        "Report lists deviations and anything unverified"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write me a plan for adding retries to our downloader.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Writes a plan; does not use implement.",
+      "expectations": [
+        "Does not edit code",
+        "Does not invoke implement"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review the diff on my branch for bugs.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Reviews; does not use implement.",
+      "expectations": [
+        "Does not invoke implement",
+        "Edits nothing"
+      ]
+    }
+  ]
+}
