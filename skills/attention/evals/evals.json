@@ -1,0 +1,40 @@
+{
+  "skill_name": "attention",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "What needs my attention on GitHub? Use github.json; there is no network.",
+      "context": "Offline fixture. `github.json` is a saved response; pass it with --input.",
+      "fixture_files": {
+        "github.json": "{\n \"data\": {\n  \"mine\": {\n   \"issueCount\": 5,\n   \"nodes\": [\n    {\n     \"url\": \"https://github.com/acme/app/pull/1\",\n     \"title\": \"Clean and waiting\",\n     \"isDraft\": false,\n     \"mergeable\": \"MERGEABLE\",\n     \"mergeStateStatus\": \"CLEAN\",\n     \"reviewDecision\": null,\n     \"commits\": {\n      \"nodes\": [\n       {\n        \"commit\": {\n         \"statusCheckRollup\": {\n          \"state\": \"SUCCESS\"\n         }\n        }\n       }\n      ]\n     },\n     \"reviewThreads\": {\n      \"nodes\": []\n     }\n    },\n    {\n     \"url\": \"https://github.com/acme/app/pull/2\",\n     \"title\": \"Conflicting\",\n     \"isDraft\": false,\n     \"mergeable\": \"CONFLICTING\",\n     \"mergeStateStatus\": \"DIRTY\",\n     \"reviewDecision\": null,\n     \"commits\": {\n      \"nodes\": [\n       {\n        \"commit\": {\n         \"statusCheckRollup\": {\n          \"state\": \"SUCCESS\"\n         }\n        }\n       }\n      ]\n     },\n     \"reviewThreads\": {\n      \"nodes\": []\n     }\n    },\n    {\n     \"url\": \"https://github.com/acme/app/pull/3\",\n     \"title\": \"Red checks\",\n     \"isDraft\": false,\n     \"mergeable\": \"MERGEABLE\",\n     \"mergeStateStatus\": \"CLEAN\",\n     \"reviewDecision\": null,\n     \"commits\": {\n      \"nodes\": [\n       {\n        \"commit\": {\n         \"statusCheckRollup\": {\n          \"state\": \"FAILURE\"\n         }\n        }\n       }\n      ]\n     },\n     \"reviewThreads\": {\n      \"nodes\": []\n     }\n    },\n    {\n     \"url\": \"https://github.com/acme/app/pull/4\",\n     \"title\": \"Approved\",\n     \"isDraft\": false,\n     \"mergeable\": \"MERGEABLE\",\n     \"mergeStateStatus\": \"CLEAN\",\n     \"reviewDecision\": \"APPROVED\",\n     \"commits\": {\n      \"nodes\": [\n       {\n        \"commit\": {\n         \"statusCheckRollup\": {\n          \"state\": \"SUCCESS\"\n         }\n        }\n       }\n      ]\n     },\n     \"reviewThreads\": {\n      \"nodes\": []\n     }\n    },\n    {\n     \"url\": \"https://github.com/acme/app/pull/5\",\n     \"title\": \"Has a thread\",\n     \"isDraft\": true,\n     \"mergeable\": \"MERGEABLE\",\n     \"mergeStateStatus\": \"CLEAN\",\n     \"reviewDecision\": null,\n     \"commits\": {\n      \"nodes\": [\n       {\n        \"commit\": {\n         \"statusCheckRollup\": {\n          \"state\": \"SUCCESS\"\n         }\n        }\n       }\n      ]\n     },\n     \"reviewThreads\": {\n      \"nodes\": [\n       {\n        \"isResolved\": false\n       },\n       {\n        \"isResolved\": true\n       }\n      ]\n     }\n    }\n   ]\n  },\n  \"asked\": {\n   \"issueCount\": 1,\n   \"nodes\": [\n    {\n     \"url\": \"https://github.com/acme/lib/pull/9\",\n     \"title\": \"Please review\"\n    }\n   ]\n  }\n }\n}"
+      },
+      "expected_output": "Runs the script on the saved response and reports the five PRs that need action, grouped by what to do, with full URLs, and leaves out the clean one.",
+      "expectations": [
+        "Runs scripts/attention.py with --input github.json",
+        "Lists acme/lib pull 9 as a review requested from the user",
+        "Lists pull 2 as conflicting, pull 3 as failing checks, pull 4 as ready to merge, and pull 5 as having an unresolved thread",
+        "Does not list pull 1",
+        "Gives every PR as a full URL with a few words on what it is",
+        "Changes nothing: no merge, rebase, comment, or push"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Rebase my branch onto main and fix the conflicts.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Does the rebase; does not use attention.",
+      "expectations": [
+        "Does not invoke attention"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review this PR for bugs.",
+      "prompt_type": "anti_trigger",
+      "expected_output": "Reviews; does not use attention.",
+      "expectations": [
+        "Does not invoke attention"
+      ]
+    }
+  ]
+}
