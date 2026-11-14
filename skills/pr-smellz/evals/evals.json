@@ -165,13 +165,13 @@
       "prompt": "Run pr-smellz on the three PRs under prs/: api#140, web#45, and tools#12.",
       "expected_output": "Reviews each PR alone, finds that web#45 reads a field api#140 renames, leaves tools#12 out of the cross-PR pass, and writes one SUMMARY.md.",
       "expectations": [
-        "Loads references/several-prs.md and records how the PRs relate",
+        "Records how the PRs relate (which share an interface, which is unrelated)",
         "Writes one PR_REVIEW.md per PR in its own subdirectory",
         "Reports as a cross-PR finding that web#45 reads `data.total` while api#140 renames `total` to `count`, anchored to a changed line in one PR and naming the other",
         "Notes the api#140 rename as a caller-visible breaking change in its own review",
         "Reports no medium-or-higher cross-PR finding for tools#12 and leaves it out of the cross-PR pass",
         "Does not merge or build the PRs together and never recommends splitting a PR",
-        "Writes SUMMARY.md with one line per PR and ends with the multi-PR DONE line"
+        "Writes SUMMARY.md covering every PR; the reply (not the file) ends with the multi-PR DONE line"
       ],
       "required_regex": [
         "SUMMARY.md",
