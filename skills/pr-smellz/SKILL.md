@@ -47,7 +47,10 @@ uncertain. Skip one only when the diff cannot meet its trigger.
   newly reachable input.
 - `--quick`: Pareto, Correctness, and every triggered Product, Maintainability,
   or Security check, inline. Spawned passes: 0. `independent: no`.
-- `--standard`: those two plus every triggered conditional lens. One wave.
+- `--standard`: those two plus every triggered conditional lens. One wave of
+  spawned agents, one per lens, however small the diff: a lens with its own
+  context finds what a shared pass misses. This overrides the spawn gate in
+  `scaling.md`.
 - `--thorough`: all 5 lenses, including weak triggers. One wave. A lens past
   available concurrency runs inline.
 
@@ -80,7 +83,8 @@ security safeguards.
 4. Give each lens the pack path and its prompt. It may read only that pack. It
    returns the JSON object and does not write files or search the repo. The
    parent writes `findings-<lens>.json`. Spawned lenses get a fresh context.
-   Inline passes use the same prompts and set `independent: no`.
+   Run a lens inline only at `--quick` or when no agent tool exists; inline
+   passes use the same prompts and set `independent: no`.
 5. For an evidence request, append the SHA-pinned excerpt and rerun only that
    lens once. Requests that remain are coverage gaps.
 6. Validate every finding: the diff introduced or worsened it; `path`, `line`,
