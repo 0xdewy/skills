@@ -167,9 +167,9 @@
       "prompt_type": "forced",
       "prompt": "Use $git-show for bloom using only fixture.json. Memberships and remotes are verified fixture evidence. Produce the HTML without live calls.",
       "fixture_files": {
-        "fixture.json": "{\"authenticated_user\": \"0xdewy\", \"active_org_memberships\": [\"bloom-directory\", \"other-work\"], \"known_remotes\": {\"bloom\": \"git@github.com:bloom-directory/bloom.git\"}, \"public_search_candidate\": {\"org\": \"bloom\", \"name\": \"Bloom Built, Inc.\", \"repo_count\": 60}, \"repos\": [{\"name\": \"bloom-directory/bloom\", \"base\": \"main\", \"prs\": [{\"number\": 7, \"title\": \"Project change\", \"head\": \"feature\", \"base\": \"main\", \"author\": \"teammate\"}]}]}"
+        "fixture.json": "{\"authenticated_user\": \"0xdewy\", \"active_org_memberships\": [\"bloom-labs\", \"other-work\"], \"known_remotes\": {\"bloom\": \"git@github.com:bloom-labs/bloom.git\"}, \"public_search_candidate\": {\"org\": \"bloom\", \"name\": \"Bloom Built, Inc.\", \"repo_count\": 60}, \"repos\": [{\"name\": \"bloom-labs/bloom\", \"base\": \"main\", \"prs\": [{\"number\": 7, \"title\": \"Project change\", \"head\": \"feature\", \"base\": \"main\", \"author\": \"teammate\"}]}]}"
       },
-      "expected_output": "Renders the verified bloom-directory/bloom project with teammate PR 7 and records the membership/remote scope basis.",
+      "expected_output": "Renders the verified bloom-labs/bloom project with teammate PR 7 and records the membership/remote scope basis.",
       "expectations": [
         "Uses supplied active memberships and remotes before choosing scope",
         "Does not collect bloom or unrelated other-work repositories",
@@ -177,7 +177,7 @@
         "Makes no live calls"
       ],
       "outcome_expectations": [
-        "Dashboard includes bloom-directory/bloom PR 7",
+        "Dashboard includes bloom-labs/bloom PR 7",
         "Dashboard excludes Bloom Built, Inc. repositories",
         "Snapshot scope records the account and membership/remote basis"
       ]
