@@ -1,9 +1,9 @@
 ---
 name: pr-smellz
 description: >-
-  Reviews PR diffs for introduced risks, anchoring findings to changed
-  lines; read-only unless --fix is explicit. Only use when explicitly
-  requested.
+  Reviews one or several PR diffs for introduced risks, anchoring findings
+  to changed lines; read-only unless --fix is explicit. Only use when
+  explicitly requested.
 disable-model-invocation: true
 ---
 
@@ -20,19 +20,22 @@ Load `../common/patterns/execution-contract.md` and
 
 ## Activation
 
-The target is a PR or branch diff. Use
+The target is one or more PRs or a branch diff. Use `integration-smellz`
+when a set of PRs must land together and be composed and built,
 `shrinkray` for whole-repo cleanup and `red-team` for a broad read-only review
 of a non-PR deliverable. Address already-supplied review comments directly.
 
 ## Inputs
 
-- PR URL/number or local `HEAD`.
+- PR URL/number or local `HEAD`. For more than one PR, also load
+  `references/several-prs.md`.
 - Base ref/SHA when it cannot be inferred; never guess an ambiguous base.
 - Optional `--fix`; without it, do not edit.
 
 ## Modes
 
-Unflagged default is `--standard`. Pareto and Correctness always run. Product,
+Unflagged default is `--standard`; never drop to `--quick` on your own,
+however small or awkward the diff. Pareto and Correctness always run. Product,
 Maintainability, and Security run when the trigger matches or relevance is
 uncertain. Skip one only when the diff cannot meet its trigger.
 
@@ -58,7 +61,8 @@ security safeguards.
    `independent: no` means the passes shared a context. For a PR number/URL,
    use `gh pr view --json
    title,body,baseRefName,baseRefOid,headRefName,headRefOid,files`; otherwise
-   use local git and the provided base.
+   use local git and the provided base. Review the head as it is now; a
+   finding from an earlier review or run is a lead until re-read there.
 2. When base/head objects exist locally, run `scripts/changed_scope.py --base
    <ref> --head <ref>`. Otherwise use `gh pr diff <pr> --patch`. Fetch missing
    objects only with permission. Never check out a PR over a dirty worktree.
@@ -67,7 +71,9 @@ security safeguards.
 3. Read repository guidance and only the callers, contracts, schemas, and tests
    needed. Write `<WORKSPACE>/evidence-pack.md` once: documented goal,
    requirements, and motivation, separate from parent assumptions; the three
-   SHAs; the scope summary; every hunk of the full diff; numbered excerpts
+   SHAs; the scope summary; every hunk of the full diff, except that a generated, lock, or bulk data
+   file goes in as its path, size, and what produces it, and is checked by
+   regenerating or recomputing it; numbered excerpts
    `E<n> <sha> <path>:<start>-<end>`. Size excerpts by the callers, contracts,
    schemas, and tests the change needs, not by the diff. The pack is neutral
    and omits lens findings. Do not drop a hunk.
@@ -80,7 +86,10 @@ security safeguards.
 6. Validate every finding: the diff introduced or worsened it; `path`, `line`,
    and `side` name an added, modified, or removed line; evidence supports
    impact; and a trace or focused check can reproduce it. An unavailable check
-   does not make a high-impact concern false. Drop style and speculative findings.
+   does not make a high-impact concern false. Drop style and speculative
+   findings. Never recommend splitting the PR or moving a change to its own
+   PR; a hunk outside the goal is a finding only when the hunk itself is
+   defective or should be deleted.
 7. Run targeted tests or static checks when available. Record skips and residual risk.
 8. Deduplicate and write `<WORKSPACE>/PR_REVIEW.md`. Findings first, by severity,
    Pareto first within a severity, then coverage gaps, questions, verification,

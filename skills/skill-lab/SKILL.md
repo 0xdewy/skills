@@ -24,7 +24,7 @@ skills, also follow the local system `skill-creator` instructions if available.
    `disable-model-invocation: true` and say they run only when explicitly
    requested. Then define inputs, workflow, safety, output, and verification.
 3. Keep `SKILL.md` small. Put long prompts, examples, templates, and data in
-   lazy-loaded files.
+   lazy-loaded files. For a first skill, read `references/example-skill.md`.
 4. Add scripts/templates only when they reduce repeated work.
 5. Add or update evals when triggers, output contracts, safety, or behavior
    change.

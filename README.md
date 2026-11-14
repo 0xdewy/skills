@@ -66,7 +66,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 
 | Skill | What it does |
 |---|---|
-| [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped PR review with changed-line findings and targeted checks |
+| [pr-smellz](skills/pr-smellz/SKILL.md) | Diff-scoped review of one or several PRs with changed-line findings and targeted checks |
 | [integration-smellz](skills/integration-smellz/SKILL.md) | Reviews every PR in a multi-repo integration for defects, cross-PR contract breaks, and cuts |
 | [red-team](skills/red-team/SKILL.md) | Adversarial findings report for an existing deliverable |
 | [frontend-qa](skills/frontend-qa/SKILL.md) | Headless-browser QA: functional flows, visual audit, scoped fixes proven by re-run |

@@ -80,8 +80,8 @@ Write `INTEGRATION_REVIEW.md`:
 
 1. **Findings** by severity: PR(s), `repo:path:line` at the SHA, what breaks
    for whom, evidence, fix. None? First line says "No defects found".
-2. **Cuts**: what to delete or simplify, saved cost, lost benefit. A fix
-   riding inside an unrelated PR is a cut.
+2. **Cuts**: what to delete or simplify, saved cost, lost benefit. Moving
+   a change to another PR is not a cut.
 3. **Coverage**: per PR, SHA, composed or not, finding count, what was not
    read (fully reviewed = every changed hunk read); the seam tally.
 4. **Questions**: open points that could hide a defect.

@@ -39,7 +39,8 @@ whose coordination or maintenance cost exceeds the value of the changed behavior
 
 For each finding, name what to delete, collapse, or reuse; show the concrete cost
 it introduces and why the smaller solution still satisfies the goal. Verify
-callers and contracts before declaring code redundant. Fewer lines alone are not
+callers and contracts before declaring code redundant. Never propose splitting the PR; how changes
+are packaged is the author's call. Fewer lines alone are not
 evidence: reject cosmetic preferences and simplifications that merely hide or
 move complexity. Use empty findings when the added complexity is justified.
 

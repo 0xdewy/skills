@@ -6,7 +6,7 @@ Every reviewer applies all five. Pareto first; severity still wins.
 
 | Lens | Question |
 |---|---|
-| Pareto | Does the goal need this PR, file, protocol, or coordination at all? Name what to delete or collapse, the cost avoided, and the benefit lost. Look for duplicate sources of truth across PRs, work optimizing something that should be deleted, and fixes riding inside unrelated feature PRs. |
+| Pareto | Does the goal need this PR, file, protocol, or coordination at all? Name what to delete or collapse, the cost avoided, and the benefit lost. Look for duplicate sources of truth across PRs, work optimizing something that should be deleted Never propose splitting a PR. |
 | Correctness | Do invariants, edge cases, error paths, ordering, and retries hold in the composed code, not only the PR's own? |
 | Product | Can the user, caller, or operator complete the promised journey, understand failures, upgrade, and recover? |
 | Maintainability | Does required code add duplication, wrappers, or coupling that makes a named next change harder? |
@@ -57,9 +57,8 @@ their seam rows touch.
 12. **Dev and release paths both work.** Behavior behind dev features, debug
     timing, or hardcoded release defaults; state that deployed installs already
     hold.
-13. **Description matches diff.** The PR says what it changes, carries no
-    unrelated commits, and keeps scope widenings (approvals, permissions) in
-    their own PR.
+13. **Description matches diff.** The PR says what it changes, including
+    any scope widening (approvals, permissions) it carries.
 
 ## Recurring single-PR defects
 

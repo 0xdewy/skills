@@ -3,21 +3,35 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Review this pull request against main with pr-smellz. Focus on introduced regressions and missing tests; do not edit anything.",
-      "expected_output": "Resolves the merge base, scopes review to changed lines plus minimal dependencies, validates findings, runs targeted checks, and writes a findings-first PR_REVIEW.md without edits.",
+      "context": "Offline fixture, no network. `pr.json` is the saved `gh pr view --json` output, `pr.diff` is the saved `gh pr diff --patch` output, and `repo/` is the checkout at the PR head. There are no git objects, so skip `changed_scope.py` and use the patch. Do not call GitHub. Write artifacts in the current directory.",
+      "fixture_files": {
+        "pr.json": "{\n  \"number\": 31,\n  \"title\": \"Orders export: JSON format for Northwind\",\n  \"body\": \"## Why\\nCustomer Northwind signed for JSON export of orders this quarter (contract item 4.2). Finance keeps using CSV.\\n\\n## What\\n- `export_orders` takes `fmt` (`csv` default, `json` new).\\n- JSON backend.\\n- Backend registry so formats can be added later.\\n- Bump `requests` to 2.32.4.\\n\\n## Verify\\n`python3 -m unittest discover -s tests -t .`\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"f8cb66c3e3c4d4b188237f385c8debe012456185\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"0187ae21cc8006b55d70d7b3a93c40fb41819460\",\n  \"files\": [\n    {\n      \"path\": \"export/api.py\"\n    },\n    {\n      \"path\": \"export/json_backend.py\"\n    },\n    {\n      \"path\": \"export/registry.py\"\n    },\n    {\n      \"path\": \"requirements.txt\"\n    },\n    {\n      \"path\": \"tests/test_export.py\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": [\n    {\n      \"author\": {\n        \"login\": \"rkim\"\n      },\n      \"body\": \"Why is the requests bump in this PR? It is not related to export.\"\n    },\n    {\n      \"author\": {\n        \"login\": \"author\"\n      },\n      \"body\": \"The required `pip-audit` check fails on 2.31.0 (CVE-2024-35195). Nothing merges until it is bumped, so it is here.\"\n    }\n  ]\n}\n",
+        "pr.diff": "diff --git a/export/api.py b/export/api.py\nindex 0fd22f0..5e5a9f4 100644\n--- a/export/api.py\n+++ b/export/api.py\n@@ -1,10 +1,9 @@\n-from export.auth import require_role\n-from export.csv_backend import to_csv\n+from export.registry import registry\n \n PAGE = 100\n \n \n-def export_orders(user, orders, page=1):\n-    require_role(user, \"finance\")\n-    start = (page - 1) * PAGE\n-    return to_csv(orders[start:start + PAGE])\n+def export_orders(user, orders, fmt=\"csv\", page=1):\n+    backend = registry.get(fmt)\n+    start = page * PAGE\n+    return backend(orders[start:start + PAGE])\ndiff --git a/export/json_backend.py b/export/json_backend.py\nnew file mode 100644\nindex 0000000..61c2f68\n--- /dev/null\n+++ b/export/json_backend.py\n@@ -0,0 +1,10 @@\n+import json\n+\n+\n+def _row(order):\n+    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n+\n+\n+def to_json(orders):\n+    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n+    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\ndiff --git a/export/registry.py b/export/registry.py\nnew file mode 100644\nindex 0000000..abc07df\n--- /dev/null\n+++ b/export/registry.py\n@@ -0,0 +1,35 @@\n+\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\n+from importlib import metadata\n+\n+from export.csv_backend import to_csv\n+from export.json_backend import to_json\n+\n+\n+class BackendRegistry:\n+    def __init__(self):\n+        self._backends = {}\n+        self._aliases = {}\n+        self._priorities = {}\n+\n+    def register(self, name, backend, priority=0, aliases=()):\n+        self._backends[name] = backend\n+        self._priorities[name] = priority\n+        for alias in aliases:\n+            self._aliases[alias] = name\n+\n+    def discover(self, group=\"export.backends\"):\n+        for entry in metadata.entry_points().select(group=group):\n+            self.register(entry.name, entry.load())\n+\n+    def get(self, name):\n+        name = self._aliases.get(name, name)\n+        return self._backends[name]\n+\n+    def by_priority(self):\n+        return sorted(self._backends, key=lambda n: -self._priorities[n])\n+\n+\n+registry = BackendRegistry()\n+registry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\n+registry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\n+registry.discover()\ndiff --git a/requirements.txt b/requirements.txt\nindex 2c24336..bd6f234 100644\n--- a/requirements.txt\n+++ b/requirements.txt\n@@ -1 +1 @@\n-requests==2.31.0\n+requests==2.32.4\ndiff --git a/tests/test_export.py b/tests/test_export.py\nindex 28d4ce1..681a1a2 100644\n--- a/tests/test_export.py\n+++ b/tests/test_export.py\n@@ -1,3 +1,4 @@\n+import json\n import unittest\n \n from export.api import export_orders\n@@ -14,9 +15,9 @@ class ExportTest(unittest.TestCase):\n         out = export_orders(FINANCE, orders(250))\n         self.assertEqual(len(out.splitlines()), 101)\n \n-    def test_other_roles_are_refused(self):\n-        with self.assertRaises(Exception):\n-            export_orders({\"roles\": [\"support\"]}, orders(1))\n+    def test_json_export(self):\n+        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n+        self.assertEqual(len(out), 100)\n \n \n if __name__ == \"__main__\":\n",
+        "repo/export/__init__.py": "",
+        "repo/tests/__init__.py": "",
+        "repo/export/auth.py": "class Forbidden(Exception):\n    pass\n\n\ndef require_role(user, role):\n    if role not in user.get(\"roles\", ()):\n        raise Forbidden(role)\n",
+        "repo/export/csv_backend.py": "def _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,amount,currency\"]\n    for order in orders:\n        lines.append(\",\".join(str(v) for v in _row(order)))\n    return \"\\n\".join(lines)\n",
+        "repo/export/api.py": "from export.registry import registry\n\nPAGE = 100\n\n\ndef export_orders(user, orders, fmt=\"csv\", page=1):\n    backend = registry.get(fmt)\n    start = page * PAGE\n    return backend(orders[start:start + PAGE])\n",
+        "repo/tests/test_export.py": "import json\nimport unittest\n\nfrom export.api import export_orders\n\nFINANCE = {\"roles\": [\"finance\"]}\n\n\ndef orders(n):\n    return [{\"id\": i, \"customer\": \"c%d\" % i, \"amount\": 1.5, \"currency\": \"EUR\"} for i in range(n)]\n\n\nclass ExportTest(unittest.TestCase):\n    def test_first_page_has_100_rows(self):\n        out = export_orders(FINANCE, orders(250))\n        self.assertEqual(len(out.splitlines()), 101)\n\n    def test_json_export(self):\n        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n        self.assertEqual(len(out), 100)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+        "repo/requirements.txt": "requests==2.32.4\n",
+        "repo/README.md": "# orders-export\n\nRun tests: `python3 -m unittest discover -s tests -t .`\n",
+        "repo/export/json_backend.py": "import json\n\n\ndef _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_json(orders):\n    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\n",
+        "repo/export/registry.py": "\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\nfrom importlib import metadata\n\nfrom export.csv_backend import to_csv\nfrom export.json_backend import to_json\n\n\nclass BackendRegistry:\n    def __init__(self):\n        self._backends = {}\n        self._aliases = {}\n        self._priorities = {}\n\n    def register(self, name, backend, priority=0, aliases=()):\n        self._backends[name] = backend\n        self._priorities[name] = priority\n        for alias in aliases:\n            self._aliases[alias] = name\n\n    def discover(self, group=\"export.backends\"):\n        for entry in metadata.entry_points().select(group=group):\n            self.register(entry.name, entry.load())\n\n    def get(self, name):\n        name = self._aliases.get(name, name)\n        return self._backends[name]\n\n    def by_priority(self):\n        return sorted(self._backends, key=lambda n: -self._priorities[n])\n\n\nregistry = BackendRegistry()\nregistry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\nregistry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\nregistry.discover()\n"
+      },
+      "prompt": "Run pr-smellz on PR #31. Do not edit anything.",
+      "expected_output": "Reports the removed authorization check and the off-by-one page offset, proposes collapsing the registry while keeping the required JSON format, and writes a findings-first PR_REVIEW.md without edits.",
       "expectations": [
-        "States the mode line before review",
-        "Runs scripts/changed_scope.py with the resolved base and head",
-        "Writes one neutral evidence pack with requirements, the full diff, and revision-pinned excerpts",
-        "Runs Pareto and Correctness from that pack",
-        "Reads repository guidance and only necessary dependency context",
-        "Every finding is anchored to an added, modified, or removed line",
-        "Drops pre-existing, speculative, and style-only issues",
-        "Runs targeted checks or records why they are unavailable",
-        "Writes PR_REVIEW.md with findings first and a DONE line",
-        "Does not edit, commit, or post comments"
+        "States the mode line with standard mode and independent yes or no",
+        "Reports the removed `require_role(user, \"finance\")` call as a high or critical finding anchored to the removed line in export/api.py (side old)",
+        "Reports that `start = page * PAGE` skips the first 100 orders on page 1, anchored to export/api.py, and notes the tests still pass",
+        "Proposes replacing BackendRegistry (plugin discovery, priorities, aliases) with a direct mapping of the two formats, and states why it is safe to cut",
+        "Keeps the JSON format: the PR body records it as a customer requirement",
+        "Never recommends splitting the PR or moving a change to its own PR",
+        "Orders findings by severity and writes PR_REVIEW.md ending the reply with the DONE line",
+        "Edits nothing under repo/"
       ],
       "required_regex": [
+        "mode:",
         "DONE:",
         "PR_REVIEW.md"
       ],
@@ -28,15 +42,20 @@
     },
     {
       "id": 2,
-      "prompt": "pr-smellz --quick: review this 35-line parser diff against main.",
-      "expected_output": "Uses quick mode with no spawned passes. Pareto, Correctness, and any triggered Product or Security check run inline from the shared pack.",
+      "context": "Offline fixture, no network. `pr.json` is the saved `gh pr view --json` output, `pr.diff` is the saved `gh pr diff --patch` output, and `repo/` is the checkout at the PR head. There are no git objects, so skip `changed_scope.py` and use the patch. Do not call GitHub. Write artifacts in the current directory.",
+      "fixture_files": {
+        "pr.json": "{\n  \"number\": 7,\n  \"title\": \"Durations: accept days and weeks\",\n  \"body\": \"Retention settings need `7d` and `2w`. Adds the two units.\\n\\nVerify: `python3 -m unittest test_durations`\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"982133fa50a11ad51208845a3017a2a441576fd1\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"4d7e09656bb3509437067177a3bf81b9164aff6d\",\n  \"files\": [\n    {\n      \"path\": \"durations.py\"\n    },\n    {\n      \"path\": \"test_durations.py\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": []\n}\n",
+        "pr.diff": "diff --git a/durations.py b/durations.py\nindex dc37b7f..3195be7 100644\n--- a/durations.py\n+++ b/durations.py\n@@ -1,21 +1,13 @@\n import re\n \n-UNITS = {\"s\": 1, \"m\": 60, \"h\": 3600}\n+UNITS = {\"s\": 1, \"m\": 60, \"h\": 3600, \"d\": 86400, \"w\": 604800}\n TOKEN = re.compile(r\"(\\d+)([a-z])\")\n \n \n def parse_duration(text):\n-    \"\"\"Return seconds for strings like 1h30m.\"\"\"\n+    \"\"\"Return seconds for strings like 2d1h30m.\"\"\"\n     total = 0\n-    pos = 0\n-    for match in TOKEN.finditer(text):\n-        if match.start() != pos:\n-            raise ValueError(\"unexpected text at %d\" % pos)\n+    for match in TOKEN.finditer(text.strip().lower()):\n         number, unit = match.groups()\n-        if unit not in UNITS:\n-            raise ValueError(\"unknown unit %r\" % unit)\n-        total += int(number) * UNITS[unit]\n-        pos = match.end()\n-    if pos != len(text) or not text:\n-        raise ValueError(\"unexpected text at %d\" % pos)\n+        total += int(number) * UNITS.get(unit, 0)\n     return total\ndiff --git a/test_durations.py b/test_durations.py\nindex a406a11..969eab3 100644\n--- a/test_durations.py\n+++ b/test_durations.py\n@@ -7,6 +7,9 @@ class ParseTest(unittest.TestCase):\n     def test_hours_and_minutes(self):\n         self.assertEqual(parse_duration(\"1h30m\"), 5400)\n \n+    def test_days_and_weeks(self):\n+        self.assertEqual(parse_duration(\"1w2d\"), 777600)\n+\n \n if __name__ == \"__main__\":\n     unittest.main()\n",
+        "repo/durations.py": "import re\n\nUNITS = {\"s\": 1, \"m\": 60, \"h\": 3600, \"d\": 86400, \"w\": 604800}\nTOKEN = re.compile(r\"(\\d+)([a-z])\")\n\n\ndef parse_duration(text):\n    \"\"\"Return seconds for strings like 2d1h30m.\"\"\"\n    total = 0\n    for match in TOKEN.finditer(text.strip().lower()):\n        number, unit = match.groups()\n        total += int(number) * UNITS.get(unit, 0)\n    return total\n",
+        "repo/test_durations.py": "import unittest\n\nfrom durations import parse_duration\n\n\nclass ParseTest(unittest.TestCase):\n    def test_hours_and_minutes(self):\n        self.assertEqual(parse_duration(\"1h30m\"), 5400)\n\n    def test_days_and_weeks(self):\n        self.assertEqual(parse_duration(\"1w2d\"), 777600)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n"
+      },
+      "prompt": "pr-smellz --quick on PR #7.",
+      "expected_output": "Uses quick mode with no agents and reports that the rewrite stopped rejecting invalid input.",
       "expectations": [
-        "States a quick mode line with Pareto, Correctness, triggered Product or Security checks, and independent: no",
-        "Does not spawn reviewers",
-        "Runs a triggered Product or Security check inline instead of dropping it",
-        "Applies Pareto inline and checks parser correctness from the shared pack",
-        "Inspects changed hunks and necessary parser tests",
-        "Does not broaden into repository cleanup",
+        "States a quick mode line with independent: no and spawns no agents",
+        "Reports that unknown units and stray text no longer raise ValueError and now count as 0 seconds, anchored to a removed line in durations.py (side old) or the new `UNITS.get(unit, 0)` line",
+        "Notes that an empty or unparseable string now returns 0 instead of raising",
+        "Does not broaden into repository cleanup or style comments",
         "Writes PR_REVIEW.md"
       ],
       "required_regex": [
@@ -46,27 +65,65 @@
     },
     {
       "id": 3,
-      "prompt": "Run pr-smellz --thorough on this authentication and database migration PR.",
-      "expected_output": "Uses all five lenses once on one evidence pack, prioritizing Pareto. Product checks migration rollback, Security checks authorization, and findings are validated with a trace or focused check.",
+      "context": "Offline fixture, no network. `pr.json` is the saved `gh pr view --json` output, `pr.diff` is the saved `gh pr diff --patch` output, and `repo/` is the checkout at the PR head. There are no git objects, so skip `changed_scope.py` and use the patch. Do not call GitHub. Write artifacts in the current directory.",
+      "fixture_files": {
+        "pr.json": "{\n  \"number\": 31,\n  \"title\": \"Orders export: JSON format for Northwind\",\n  \"body\": \"## Why\\nCustomer Northwind signed for JSON export of orders this quarter (contract item 4.2). Finance keeps using CSV.\\n\\n## What\\n- `export_orders` takes `fmt` (`csv` default, `json` new).\\n- JSON backend.\\n- Backend registry so formats can be added later.\\n- Bump `requests` to 2.32.4.\\n\\n## Verify\\n`python3 -m unittest discover -s tests -t .`\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"f8cb66c3e3c4d4b188237f385c8debe012456185\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"0187ae21cc8006b55d70d7b3a93c40fb41819460\",\n  \"files\": [\n    {\n      \"path\": \"export/api.py\"\n    },\n    {\n      \"path\": \"export/json_backend.py\"\n    },\n    {\n      \"path\": \"export/registry.py\"\n    },\n    {\n      \"path\": \"requirements.txt\"\n    },\n    {\n      \"path\": \"tests/test_export.py\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": [\n    {\n      \"author\": {\n        \"login\": \"rkim\"\n      },\n      \"body\": \"Why is the requests bump in this PR? It is not related to export.\"\n    },\n    {\n      \"author\": {\n        \"login\": \"author\"\n      },\n      \"body\": \"The required `pip-audit` check fails on 2.31.0 (CVE-2024-35195). Nothing merges until it is bumped, so it is here.\"\n    },\n    {\n      \"author\": {\n        \"login\": \"author\"\n      },\n      \"body\": \"Pushed a fix for the missing currency in the JSON export.\"\n    }\n  ]\n}\n",
+        "pr.diff": "diff --git a/export/api.py b/export/api.py\nindex 0fd22f0..5e5a9f4 100644\n--- a/export/api.py\n+++ b/export/api.py\n@@ -1,10 +1,9 @@\n-from export.auth import require_role\n-from export.csv_backend import to_csv\n+from export.registry import registry\n \n PAGE = 100\n \n \n-def export_orders(user, orders, page=1):\n-    require_role(user, \"finance\")\n-    start = (page - 1) * PAGE\n-    return to_csv(orders[start:start + PAGE])\n+def export_orders(user, orders, fmt=\"csv\", page=1):\n+    backend = registry.get(fmt)\n+    start = page * PAGE\n+    return backend(orders[start:start + PAGE])\ndiff --git a/export/json_backend.py b/export/json_backend.py\nnew file mode 100644\nindex 0000000..61c2f68\n--- /dev/null\n+++ b/export/json_backend.py\n@@ -0,0 +1,10 @@\n+import json\n+\n+\n+def _row(order):\n+    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n+\n+\n+def to_json(orders):\n+    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n+    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\ndiff --git a/export/registry.py b/export/registry.py\nnew file mode 100644\nindex 0000000..abc07df\n--- /dev/null\n+++ b/export/registry.py\n@@ -0,0 +1,35 @@\n+\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\n+from importlib import metadata\n+\n+from export.csv_backend import to_csv\n+from export.json_backend import to_json\n+\n+\n+class BackendRegistry:\n+    def __init__(self):\n+        self._backends = {}\n+        self._aliases = {}\n+        self._priorities = {}\n+\n+    def register(self, name, backend, priority=0, aliases=()):\n+        self._backends[name] = backend\n+        self._priorities[name] = priority\n+        for alias in aliases:\n+            self._aliases[alias] = name\n+\n+    def discover(self, group=\"export.backends\"):\n+        for entry in metadata.entry_points().select(group=group):\n+            self.register(entry.name, entry.load())\n+\n+    def get(self, name):\n+        name = self._aliases.get(name, name)\n+        return self._backends[name]\n+\n+    def by_priority(self):\n+        return sorted(self._backends, key=lambda n: -self._priorities[n])\n+\n+\n+registry = BackendRegistry()\n+registry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\n+registry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\n+registry.discover()\ndiff --git a/requirements.txt b/requirements.txt\nindex 2c24336..bd6f234 100644\n--- a/requirements.txt\n+++ b/requirements.txt\n@@ -1 +1 @@\n-requests==2.31.0\n+requests==2.32.4\ndiff --git a/tests/test_export.py b/tests/test_export.py\nindex 28d4ce1..681a1a2 100644\n--- a/tests/test_export.py\n+++ b/tests/test_export.py\n@@ -1,3 +1,4 @@\n+import json\n import unittest\n \n from export.api import export_orders\n@@ -14,9 +15,9 @@ class ExportTest(unittest.TestCase):\n         out = export_orders(FINANCE, orders(250))\n         self.assertEqual(len(out.splitlines()), 101)\n \n-    def test_other_roles_are_refused(self):\n-        with self.assertRaises(Exception):\n-            export_orders({\"roles\": [\"support\"]}, orders(1))\n+    def test_json_export(self):\n+        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n+        self.assertEqual(len(out), 100)\n \n \n if __name__ == \"__main__\":\n",
+        "repo/export/__init__.py": "",
+        "repo/tests/__init__.py": "",
+        "repo/export/auth.py": "class Forbidden(Exception):\n    pass\n\n\ndef require_role(user, role):\n    if role not in user.get(\"roles\", ()):\n        raise Forbidden(role)\n",
+        "repo/export/csv_backend.py": "def _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,amount,currency\"]\n    for order in orders:\n        lines.append(\",\".join(str(v) for v in _row(order)))\n    return \"\\n\".join(lines)\n",
+        "repo/export/api.py": "from export.registry import registry\n\nPAGE = 100\n\n\ndef export_orders(user, orders, fmt=\"csv\", page=1):\n    backend = registry.get(fmt)\n    start = page * PAGE\n    return backend(orders[start:start + PAGE])\n",
+        "repo/tests/test_export.py": "import json\nimport unittest\n\nfrom export.api import export_orders\n\nFINANCE = {\"roles\": [\"finance\"]}\n\n\ndef orders(n):\n    return [{\"id\": i, \"customer\": \"c%d\" % i, \"amount\": 1.5, \"currency\": \"EUR\"} for i in range(n)]\n\n\nclass ExportTest(unittest.TestCase):\n    def test_first_page_has_100_rows(self):\n        out = export_orders(FINANCE, orders(250))\n        self.assertEqual(len(out.splitlines()), 101)\n\n    def test_json_export(self):\n        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n        self.assertEqual(len(out), 100)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+        "repo/requirements.txt": "requests==2.32.4\n",
+        "repo/README.md": "# orders-export\n\nRun tests: `python3 -m unittest discover -s tests -t .`\n",
+        "repo/export/json_backend.py": "import json\n\n\ndef _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_json(orders):\n    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\n",
+        "repo/export/registry.py": "\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\nfrom importlib import metadata\n\nfrom export.csv_backend import to_csv\nfrom export.json_backend import to_json\n\n\nclass BackendRegistry:\n    def __init__(self):\n        self._backends = {}\n        self._aliases = {}\n        self._priorities = {}\n\n    def register(self, name, backend, priority=0, aliases=()):\n        self._backends[name] = backend\n        self._priorities[name] = priority\n        for alias in aliases:\n            self._aliases[alias] = name\n\n    def discover(self, group=\"export.backends\"):\n        for entry in metadata.entry_points().select(group=group):\n            self.register(entry.name, entry.load())\n\n    def get(self, name):\n        name = self._aliases.get(name, name)\n        return self._backends[name]\n\n    def by_priority(self):\n        return sorted(self._backends, key=lambda n: -self._priorities[n])\n\n\nregistry = BackendRegistry()\nregistry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\nregistry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\nregistry.discover()\n",
+        "previous/PR_REVIEW.md": "# PR review: orders-export #31 (earlier run)\n\nReviewed head `0000000000000000000000000000000000000abc`.\n\n## Findings\n\n### 1. HIGH (high confidence) — JSON export drops the currency\n`export/json_backend.py:9` (new). `to_json` builds each object from `[\"id\", \"customer\", \"amount\"]`, so `currency` is missing from every exported order. Northwind reconciles by currency.\nFix: add `currency` to the keys.\n\nDONE: PR_REVIEW.md — 1 findings (0/1), checks=partial\n"
+      },
+      "prompt": "Run pr-smellz on PR #31 again. The earlier run's report is in previous/PR_REVIEW.md; the author has pushed since.",
+      "expected_output": "Reviews the head recorded in pr.json, re-reads the earlier HIGH there and does not repeat it, and still reports the defects present at the head.",
       "expectations": [
-        "Selects thorough mode and runs Pareto, Correctness, Product, Maintainability, and Security",
-        "Lenses read only the shared pack and return JSON; the parent writes each findings file",
-        "A lens past available concurrency runs inline and the mode line sets independent: no",
-        "Product checks migration and rollback; Security checks removed or weakened authorization",
-        "Supplies a requested excerpt and reruns only that lens; a leftover request stays a coverage gap",
-        "Deduplicates findings and preserves concrete evidence"
+        "Reviews the headRefOid in pr.json, not the commit named in previous/PR_REVIEW.md",
+        "Treats the earlier currency finding as a lead, re-reads export/json_backend.py at the head, and does not report it as a current finding",
+        "Still reports the removed authorization check and the page offset defect",
+        "Never recommends splitting the PR",
+        "Writes a new PR_REVIEW.md without editing previous/PR_REVIEW.md"
+      ],
+      "required_regex": [
+        "mode:",
+        "DONE:"
       ]
     },
     {
       "id": 4,
-      "prompt": "Review this PR with pr-smellz --fix, apply accepted minimal fixes, and rerun the affected tests.",
-      "expected_output": "Reviews first, then uses the explicit fix permission for minimal scoped edits and targeted verification without committing or posting comments.",
+      "context": "Offline fixture, no network. `pr.json` is the saved `gh pr view --json` output, `pr.diff` is the saved `gh pr diff --patch` output, and `repo/` is the checkout at the PR head. There are no git objects, so skip `changed_scope.py` and use the patch. Do not call GitHub. Write artifacts in the current directory.",
+      "fixture_files": {
+        "pr.json": "{\n  \"number\": 31,\n  \"title\": \"Orders export: JSON format for Northwind\",\n  \"body\": \"## Why\\nCustomer Northwind signed for JSON export of orders this quarter (contract item 4.2). Finance keeps using CSV.\\n\\n## What\\n- `export_orders` takes `fmt` (`csv` default, `json` new).\\n- JSON backend.\\n- Backend registry so formats can be added later.\\n- Bump `requests` to 2.32.4.\\n\\n## Verify\\n`python3 -m unittest discover -s tests -t .`\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"f8cb66c3e3c4d4b188237f385c8debe012456185\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"0187ae21cc8006b55d70d7b3a93c40fb41819460\",\n  \"files\": [\n    {\n      \"path\": \"export/api.py\"\n    },\n    {\n      \"path\": \"export/json_backend.py\"\n    },\n    {\n      \"path\": \"export/registry.py\"\n    },\n    {\n      \"path\": \"requirements.txt\"\n    },\n    {\n      \"path\": \"tests/test_export.py\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": [\n    {\n      \"author\": {\n        \"login\": \"rkim\"\n      },\n      \"body\": \"Why is the requests bump in this PR? It is not related to export.\"\n    },\n    {\n      \"author\": {\n        \"login\": \"author\"\n      },\n      \"body\": \"The required `pip-audit` check fails on 2.31.0 (CVE-2024-35195). Nothing merges until it is bumped, so it is here.\"\n    }\n  ]\n}\n",
+        "pr.diff": "diff --git a/export/api.py b/export/api.py\nindex 0fd22f0..5e5a9f4 100644\n--- a/export/api.py\n+++ b/export/api.py\n@@ -1,10 +1,9 @@\n-from export.auth import require_role\n-from export.csv_backend import to_csv\n+from export.registry import registry\n \n PAGE = 100\n \n \n-def export_orders(user, orders, page=1):\n-    require_role(user, \"finance\")\n-    start = (page - 1) * PAGE\n-    return to_csv(orders[start:start + PAGE])\n+def export_orders(user, orders, fmt=\"csv\", page=1):\n+    backend = registry.get(fmt)\n+    start = page * PAGE\n+    return backend(orders[start:start + PAGE])\ndiff --git a/export/json_backend.py b/export/json_backend.py\nnew file mode 100644\nindex 0000000..61c2f68\n--- /dev/null\n+++ b/export/json_backend.py\n@@ -0,0 +1,10 @@\n+import json\n+\n+\n+def _row(order):\n+    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n+\n+\n+def to_json(orders):\n+    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n+    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\ndiff --git a/export/registry.py b/export/registry.py\nnew file mode 100644\nindex 0000000..abc07df\n--- /dev/null\n+++ b/export/registry.py\n@@ -0,0 +1,35 @@\n+\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\n+from importlib import metadata\n+\n+from export.csv_backend import to_csv\n+from export.json_backend import to_json\n+\n+\n+class BackendRegistry:\n+    def __init__(self):\n+        self._backends = {}\n+        self._aliases = {}\n+        self._priorities = {}\n+\n+    def register(self, name, backend, priority=0, aliases=()):\n+        self._backends[name] = backend\n+        self._priorities[name] = priority\n+        for alias in aliases:\n+            self._aliases[alias] = name\n+\n+    def discover(self, group=\"export.backends\"):\n+        for entry in metadata.entry_points().select(group=group):\n+            self.register(entry.name, entry.load())\n+\n+    def get(self, name):\n+        name = self._aliases.get(name, name)\n+        return self._backends[name]\n+\n+    def by_priority(self):\n+        return sorted(self._backends, key=lambda n: -self._priorities[n])\n+\n+\n+registry = BackendRegistry()\n+registry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\n+registry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\n+registry.discover()\ndiff --git a/requirements.txt b/requirements.txt\nindex 2c24336..bd6f234 100644\n--- a/requirements.txt\n+++ b/requirements.txt\n@@ -1 +1 @@\n-requests==2.31.0\n+requests==2.32.4\ndiff --git a/tests/test_export.py b/tests/test_export.py\nindex 28d4ce1..681a1a2 100644\n--- a/tests/test_export.py\n+++ b/tests/test_export.py\n@@ -1,3 +1,4 @@\n+import json\n import unittest\n \n from export.api import export_orders\n@@ -14,9 +15,9 @@ class ExportTest(unittest.TestCase):\n         out = export_orders(FINANCE, orders(250))\n         self.assertEqual(len(out.splitlines()), 101)\n \n-    def test_other_roles_are_refused(self):\n-        with self.assertRaises(Exception):\n-            export_orders({\"roles\": [\"support\"]}, orders(1))\n+    def test_json_export(self):\n+        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n+        self.assertEqual(len(out), 100)\n \n \n if __name__ == \"__main__\":\n",
+        "repo/export/__init__.py": "",
+        "repo/tests/__init__.py": "",
+        "repo/export/auth.py": "class Forbidden(Exception):\n    pass\n\n\ndef require_role(user, role):\n    if role not in user.get(\"roles\", ()):\n        raise Forbidden(role)\n",
+        "repo/export/csv_backend.py": "def _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_csv(orders):\n    lines = [\"id,customer,amount,currency\"]\n    for order in orders:\n        lines.append(\",\".join(str(v) for v in _row(order)))\n    return \"\\n\".join(lines)\n",
+        "repo/export/api.py": "from export.registry import registry\n\nPAGE = 100\n\n\ndef export_orders(user, orders, fmt=\"csv\", page=1):\n    backend = registry.get(fmt)\n    start = page * PAGE\n    return backend(orders[start:start + PAGE])\n",
+        "repo/tests/test_export.py": "import json\nimport unittest\n\nfrom export.api import export_orders\n\nFINANCE = {\"roles\": [\"finance\"]}\n\n\ndef orders(n):\n    return [{\"id\": i, \"customer\": \"c%d\" % i, \"amount\": 1.5, \"currency\": \"EUR\"} for i in range(n)]\n\n\nclass ExportTest(unittest.TestCase):\n    def test_first_page_has_100_rows(self):\n        out = export_orders(FINANCE, orders(250))\n        self.assertEqual(len(out.splitlines()), 101)\n\n    def test_json_export(self):\n        out = json.loads(export_orders(FINANCE, orders(250), fmt=\"json\"))\n        self.assertEqual(len(out), 100)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+        "repo/requirements.txt": "requests==2.32.4\n",
+        "repo/README.md": "# orders-export\n\nRun tests: `python3 -m unittest discover -s tests -t .`\n",
+        "repo/export/json_backend.py": "import json\n\n\ndef _row(order):\n    return [order[\"id\"], order[\"customer\"], \"%.2f\" % order[\"amount\"], order[\"currency\"]]\n\n\ndef to_json(orders):\n    keys = [\"id\", \"customer\", \"amount\", \"currency\"]\n    return json.dumps([dict(zip(keys, _row(order))) for order in orders])\n",
+        "repo/export/registry.py": "\"\"\"Backend registry with plugin discovery, priorities, and aliases.\"\"\"\nfrom importlib import metadata\n\nfrom export.csv_backend import to_csv\nfrom export.json_backend import to_json\n\n\nclass BackendRegistry:\n    def __init__(self):\n        self._backends = {}\n        self._aliases = {}\n        self._priorities = {}\n\n    def register(self, name, backend, priority=0, aliases=()):\n        self._backends[name] = backend\n        self._priorities[name] = priority\n        for alias in aliases:\n            self._aliases[alias] = name\n\n    def discover(self, group=\"export.backends\"):\n        for entry in metadata.entry_points().select(group=group):\n            self.register(entry.name, entry.load())\n\n    def get(self, name):\n        name = self._aliases.get(name, name)\n        return self._backends[name]\n\n    def by_priority(self):\n        return sorted(self._backends, key=lambda n: -self._priorities[n])\n\n\nregistry = BackendRegistry()\nregistry.register(\"csv\", to_csv, priority=10, aliases=(\"text/csv\",))\nregistry.register(\"json\", to_json, priority=5, aliases=(\"application/json\",))\nregistry.discover()\n"
+      },
+      "prompt": "Run pr-smellz --fix on PR #31 and rerun the tests.",
+      "expected_output": "Reviews first, then restores the authorization check and fixes the page offset with minimal edits, keeps the required JSON format, and reruns the tests without committing.",
       "expectations": [
-        "Completes and validates review findings before editing",
-        "Applies only minimal fixes for accepted findings",
-        "Reruns targeted tests after fixes",
-        "Does not commit or post review comments",
-        "Reports fixes and residual risk"
+        "Completes and verifies the review findings before editing",
+        "Restores the finance role check in repo/export/api.py",
+        "Fixes the page offset so page 1 starts at the first order",
+        "Keeps the JSON format working; any registry simplification preserves both formats",
+        "Reruns `python3 -m unittest discover -s tests -t .` in repo/ and reports the result",
+        "Does not commit or post review comments, and reports fixes and residual risk"
+      ],
+      "required_regex": [
+        "DONE:"
       ],
       "forbidden_regex": [
         "git commit",
@@ -75,8 +132,8 @@
     },
     {
       "id": 5,
-      "prompt_type": "anti_trigger",
       "prompt": "Run a broad shrinkray --focus all cleanup across this whole repository and apply safe fixes.",
+      "prompt_type": "anti_trigger",
       "expected_output": "Does not invoke pr-smellz because there is no PR/diff review scope; routes to shrinkray.",
       "expectations": [
         "Does not require a merge base",
@@ -85,8 +142,8 @@
     },
     {
       "id": 6,
-      "prompt_type": "anti_trigger",
       "prompt": "Address the three review comments already left on my PR and push the fixes.",
+      "prompt_type": "anti_trigger",
       "expected_output": "Does not rerun pr-smellz; addresses the supplied comments directly and does not push without explicit authorization.",
       "expectations": [
         "Does not launch a fresh PR audit",
@@ -96,42 +153,29 @@
     },
     {
       "id": 7,
-      "prompt": "Use pr-smellz to review PR #123 without changing my current branch or worktree.",
-      "expected_output": "Reads PR metadata and patch through gh, uses local objects when available, and never checks out or fetches over the user's work without permission.",
+      "context": "Offline fixture, no network. Each directory under `prs/` holds one PR from a different repository: `pr.json` is the saved `gh pr view --json` output and `pr.diff` the saved patch. The patches are the only source available. Do not call GitHub. Write artifacts in the current directory.",
+      "fixture_files": {
+        "prs/api-140/pr.json": "{\n  \"number\": 140,\n  \"title\": \"Orders list: return page size, rename total to count\",\n  \"body\": \"The mobile client needs the page size. Also renames `total` to `count` to match the other list endpoints.\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"7a563eda9faa41c817f1b2f3a2936fe895ceaccb\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"435e615b411aff243e1fec641296d921e31239c8\",\n  \"files\": [\n    {\n      \"path\": \"api/orders.py\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": []\n}\n",
+        "prs/api-140/pr.diff": "diff --git a/api/orders.py b/api/orders.py\nindex d137046..b92b399 100644\n--- a/api/orders.py\n+++ b/api/orders.py\n@@ -1,3 +1,3 @@\n def list_orders(db, page, size=50):\n     rows = db.orders(offset=(page - 1) * size, limit=size)\n-    return {\"items\": rows, \"total\": db.count_orders(), \"page\": page}\n+    return {\"items\": rows, \"count\": db.count_orders(), \"page\": page, \"size\": size}\n",
+        "prs/web-45/pr.json": "{\n  \"number\": 45,\n  \"title\": \"Orders table: show a pager\",\n  \"body\": \"Adds `Page N of M` under the orders table, from the orders list response.\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"e3c443c97f2848c2e03dbdaaecc39bfb7db8ff2a\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"f00e31558833c60086386319ba1b206e5b356d92\",\n  \"files\": [\n    {\n      \"path\": \"src/OrdersTable.js\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": []\n}\n",
+        "prs/web-45/pr.diff": "diff --git a/src/OrdersTable.js b/src/OrdersTable.js\nindex 1bf0373..96474c0 100644\n--- a/src/OrdersTable.js\n+++ b/src/OrdersTable.js\n@@ -1,3 +1,8 @@\n export function OrdersTable({ data }) {\n-  return renderRows(data.items);\n+  return renderRows(data.items) + renderPager(data);\n+}\n+\n+function renderPager(data) {\n+  const pages = Math.ceil(data.total / 50);\n+  return `<nav>Page ${data.page} of ${pages}</nav>`;\n }\n",
+        "prs/tools-12/pr.json": "{\n  \"number\": 12,\n  \"title\": \"run-tests: stop swallowing suite failures\",\n  \"body\": \"`|| true` made every failing suite pass. Removes it.\\n\",\n  \"baseRefName\": \"main\",\n  \"baseRefOid\": \"d44668c0b7ecedc5b0ee7b8f2b926d2e63c7f698\",\n  \"headRefName\": \"feature\",\n  \"headRefOid\": \"4900a59d9b5187cb54c32318d9b8131101f4ce0e\",\n  \"files\": [\n    {\n      \"path\": \"run-tests.sh\"\n    }\n  ],\n  \"reviews\": [],\n  \"comments\": []\n}\n",
+        "prs/tools-12/pr.diff": "diff --git a/run-tests.sh b/run-tests.sh\nindex 3c3a377..01bd712 100644\n--- a/run-tests.sh\n+++ b/run-tests.sh\n@@ -1,5 +1,5 @@\n #!/bin/sh\n set -e\n for suite in tests/test_*.py; do\n-  python3 \"$suite\" || true\n+  python3 \"$suite\"\n done\n"
+      },
+      "prompt": "Run pr-smellz on the three PRs under prs/: api#140, web#45, and tools#12.",
+      "expected_output": "Reviews each PR alone, finds that web#45 reads a field api#140 renames, leaves tools#12 out of the cross-PR pass, and writes one SUMMARY.md.",
       "expectations": [
-        "Runs gh pr view for title, body, base/head names and OIDs, and files",
-        "Uses changed_scope.py if both commit objects exist locally",
-        "Falls back to gh pr diff --patch when the commits are unavailable",
-        "Asks before fetching missing objects for deeper context",
-        "Does not run gh pr checkout or switch the current branch",
-        "Produces the same changed-line evidence contract as a local review"
-      ]
-    },
-    {
-      "id": 8,
-      "prompt": "Run pr-smellz --standard on this PR: a one-provider export endpoint now has a provider registry, three wrappers around the same serializer, and separate copies of the format defaults. The PR goal is to add CSV export alongside JSON.",
-      "expected_output": "Runs Pareto and Correctness, plus Product and Maintainability, over one evidence pack. Verifies concrete ways to remove unnecessary machinery while preserving CSV and JSON export.",
-      "expectations": [
-        "Runs Pareto and Correctness, Product for the caller-visible export, and Maintainability for the registry, wrappers, and copied defaults",
-        "Runs Security unless the pack shows no trust boundary, removed safeguard, dependency, configuration, or reachable input",
-        "Lenses read only the shared pack; the parent writes their JSON",
-        "Checks callers and contracts, via the pack or one evidence-request rerun, before claiming wrappers or defaults are redundant",
-        "Names concrete deletion or reuse proposals and their maintenance or behavior impact",
-        "Shows how the smaller solution preserves the stated export goal",
-        "Anchors every finding to an added, modified, or removed line and rejects speculative complexity complaints",
-        "Orders findings by severity with Pareto first among equally severe findings"
-      ]
-    },
-    {
-      "id": 9,
-      "prompt": "Run pr-smellz --fix on this PR. Its description explicitly requires a second export backend for an existing customer. The diff also introduces a duplicate serializer and accidentally removes an authorization check. Prefer subtraction.",
-      "expected_output": "Uses Pareto to propose verified simplifications without treating its priority as permission to drop explicit requirements or downgrade a security regression.",
-      "expectations": [
-        "Treats the authorization regression according to its impact even if Pareto findings have lower severity",
-        "Checks whether serializer reuse preserves backend-specific behavior before consolidating",
-        "Does not remove the required backend without user agreement; any challenge states the lost benefit",
-        "Preserves or restores required security safeguards",
-        "Applies only verified scoped fixes and reruns affected checks"
+        "Loads references/several-prs.md and records how the PRs relate",
+        "Writes one PR_REVIEW.md per PR in its own subdirectory",
+        "Reports as a cross-PR finding that web#45 reads `data.total` while api#140 renames `total` to `count`, anchored to a changed line in one PR and naming the other",
+        "Notes the api#140 rename as a caller-visible breaking change in its own review",
+        "Finds nothing wrong with tools#12 and leaves it out of the cross-PR pass",
+        "Does not merge or build the PRs together and never recommends splitting a PR",
+        "Writes SUMMARY.md with one line per PR and ends with the multi-PR DONE line"
+      ],
+      "required_regex": [
+        "SUMMARY.md",
+        "DONE:"
       ]
     }
   ]
