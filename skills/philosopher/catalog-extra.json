@@ -1,0 +1,266 @@
+{
+ "aristotle": {
+  "name": "Aristotle",
+  "dates": "384–322 BC",
+  "works": [
+   {
+    "id": 8438,
+    "title": "Nicomachean Ethics",
+    "translator": "D. P. Chase",
+    "start": "Every art, and every science reduced",
+    "end": "NOTES"
+   },
+   {
+    "id": 6762,
+    "title": "Politics",
+    "translator": "William Ellis",
+    "start": "As we see that every city is a society",
+    "end": "INDEX"
+   },
+   {
+    "id": 1974,
+    "title": "Poetics",
+    "translator": "S. H. Butcher",
+    "start": "I propose to treat of Poetry in itself"
+   }
+  ]
+ },
+ "epictetus": {
+  "name": "Epictetus",
+  "dates": "c. 50–135",
+  "works": [
+   {
+    "id": 10661,
+    "title": "Discourses and Encheiridion",
+    "translator": "George Long",
+    "start": "POWER.—Of all the"
+   }
+  ]
+ },
+ "marcus-aurelius": {
+  "name": "Marcus Aurelius",
+  "dates": "121–180",
+  "works": [
+   {
+    "id": 2680,
+    "title": "Meditations",
+    "translator": "Meric Casaubon",
+    "start": "I. Of my grandfather Verus",
+    "end": "APPENDIX"
+   }
+  ]
+ },
+ "confucius": {
+  "name": "Confucius",
+  "dates": "551–479 BC",
+  "note": "The Analects are sayings recorded by his followers.",
+  "works": [
+   {
+    "id": 3330,
+    "title": "Analects",
+    "translator": "James Legge",
+    "start": "CHAPTER I. 1. The Master said, 'Is it not pleasant"
+   }
+  ]
+ },
+ "laozi": {
+  "name": "Laozi",
+  "dates": "6th century BC, traditional",
+  "works": [
+   {
+    "id": 216,
+    "title": "Tao Te Ching",
+    "translator": "James Legge",
+    "start": "Ch. 1. 1. The Tao that can be trodden"
+   }
+  ]
+ },
+ "machiavelli": {
+  "name": "Niccolò Machiavelli",
+  "dates": "1469–1527",
+  "works": [
+   {
+    "id": 1232,
+    "title": "The Prince",
+    "translator": "W. K. Marriott",
+    "start": "Those who strive to obtain the good graces"
+   }
+  ]
+ },
+ "hobbes": {
+  "name": "Thomas Hobbes",
+  "dates": "1588–1679",
+  "works": [
+   {
+    "id": 3207,
+    "title": "Leviathan",
+    "start": "Nature (the art whereby God hath made"
+   }
+  ]
+ },
+ "descartes": {
+  "name": "René Descartes",
+  "dates": "1596–1650",
+  "works": [
+   {
+    "id": 59,
+    "title": "Discourse on the Method",
+    "translator": "John Veitch",
+    "start": "If this Discourse appear too long"
+   }
+  ]
+ },
+ "spinoza": {
+  "name": "Baruch Spinoza",
+  "dates": "1632–1677",
+  "works": [
+   {
+    "id": 3800,
+    "title": "Ethics",
+    "translator": "R. H. M. Elwes",
+    "start": "By that which is self--caused"
+   }
+  ]
+ },
+ "locke": {
+  "name": "John Locke",
+  "dates": "1632–1704",
+  "works": [
+   {
+    "id": 7370,
+    "title": "Second Treatise of Government",
+    "start": "Reader, thou hast here the beginning"
+   }
+  ]
+ },
+ "hume": {
+  "name": "David Hume",
+  "dates": "1711–1776",
+  "works": [
+   {
+    "id": 4705,
+    "title": "A Treatise of Human Nature",
+    "start": "My design in the present work is sufficiently"
+   },
+   {
+    "id": 9662,
+    "title": "An Enquiry Concerning Human Understanding",
+    "start": "1. Moral philosophy, or the science of human nature",
+    "end": "INDEX"
+   },
+   {
+    "id": 4320,
+    "title": "An Enquiry Concerning the Principles of Morals",
+    "start": "Most of the principles, and reasonings"
+   }
+  ]
+ },
+ "rousseau": {
+  "name": "Jean-Jacques Rousseau",
+  "dates": "1712–1778",
+  "works": [
+   {
+    "id": 46333,
+    "title": "The Social Contract and Discourses",
+    "translator": "G. D. H. Cole",
+    "start": "This little treatise is part of a longer work"
+   }
+  ]
+ },
+ "kant": {
+  "name": "Immanuel Kant",
+  "dates": "1724–1804",
+  "works": [
+   {
+    "id": 5682,
+    "title": "Fundamental Principles of the Metaphysic of Morals",
+    "translator": "T. K. Abbott",
+    "start": "Ancient Greek philosophy was divided"
+   },
+   {
+    "id": 5683,
+    "title": "Critique of Practical Reason",
+    "translator": "T. K. Abbott",
+    "start": "This work is called the Critique of Practical Reason"
+   },
+   {
+    "id": 4280,
+    "title": "Critique of Pure Reason",
+    "translator": "J. M. D. Meiklejohn",
+    "start": "Human reason, in one sphere of its cognition"
+   }
+  ]
+ },
+ "wollstonecraft": {
+  "name": "Mary Wollstonecraft",
+  "dates": "1759–1797",
+  "works": [
+   {
+    "id": 3420,
+    "title": "A Vindication of the Rights of Woman",
+    "start": "Having read with great pleasure a pamphlet"
+   }
+  ]
+ },
+ "schopenhauer": {
+  "name": "Arthur Schopenhauer",
+  "dates": "1788–1860",
+  "works": [
+   {
+    "id": 10732,
+    "title": "Studies in Pessimism",
+    "translator": "T. Bailey Saunders",
+    "start": "Unless _suffering_ is the direct"
+   },
+   {
+    "id": 38427,
+    "title": "The World as Will and Idea, vol. 1",
+    "translator": "R. B. Haldane and J. Kemp",
+    "start": "I propose to point out here how this book"
+   }
+  ]
+ },
+ "mill": {
+  "name": "John Stuart Mill",
+  "dates": "1806–1873",
+  "works": [
+   {
+    "id": 34901,
+    "title": "On Liberty",
+    "start": "The subject of this Essay is not the so-called"
+   },
+   {
+    "id": 11224,
+    "title": "Utilitarianism",
+    "start": "There are few circumstances among those"
+   },
+   {
+    "id": 27083,
+    "title": "The Subjection of Women",
+    "start": "The object of this Essay is to explain"
+   }
+  ]
+ },
+ "thoreau": {
+  "name": "Henry David Thoreau",
+  "dates": "1817–1862",
+  "works": [
+   {
+    "id": 205,
+    "title": "Walden and Civil Disobedience",
+    "start": "When I wrote the following pages"
+   }
+  ]
+ },
+ "james": {
+  "name": "William James",
+  "dates": "1842–1910",
+  "works": [
+   {
+    "id": 5116,
+    "title": "Pragmatism",
+    "start": "The lectures that follow were delivered"
+   }
+  ]
+ }
+}

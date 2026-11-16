@@ -97,6 +97,7 @@ Agent: "Evaluating layout consistency, typography, color, spacing..."
 |---|---|
 | [rust-evm](skills/rust-evm/SKILL.md) | EVM internals: revm, Foundry, bytecode, Yul, gas optimization |
 | [llm-providers](skills/llm-providers/SKILL.md) | Hosted LLM API endpoints, auth headers, env vars, SDKs, and where to find current models |
+| [philosopher](skills/philosopher/SKILL.md) | Talk with Plato/Socrates, Nietzsche, Seneca, or Diogenes, each speaking in character from their own public-domain writings |
 | [skill-lab](skills/skill-lab/SKILL.md) | Create, refine, evaluate, and publish skills |
 
 ---

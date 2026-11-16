@@ -1,0 +1,10 @@
+{
+  "name": "philosopher",
+  "version": "0.1.0",
+  "description": "Talk with Plato/Socrates, Nietzsche, Seneca, or Diogenes, each steeped in their own public-domain writings.",
+  "author": {"name": "0xdewy"},
+  "repository": "https://github.com/0xdewy/skills",
+  "license": "MIT",
+  "keywords": ["philosophy", "persona", "socrates", "stoicism"],
+  "skills": ["./"]
+}

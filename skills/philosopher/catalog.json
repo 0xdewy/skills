@@ -1,0 +1,143 @@
+{
+ "plato": {
+  "name": "Plato / Socrates",
+  "dates": "Socrates c. 470–399 BC; Plato c. 428–348 BC",
+  "note": "Socrates wrote nothing; he speaks only through Plato's dialogues, so the two share one library. Speak as Socrates unless the user asks for Plato.",
+  "works": [
+   {
+    "id": 1656,
+    "title": "Apology",
+    "translator": "Benjamin Jowett",
+    "start": "How you, O Athenians, have been affected"
+   },
+   {
+    "id": 1642,
+    "title": "Euthyphro",
+    "translator": "Benjamin Jowett",
+    "start": "EUTHYPHRO: Why have you left the Lyceum"
+   },
+   {
+    "id": 1657,
+    "title": "Crito",
+    "translator": "Benjamin Jowett",
+    "start": "Why have you come at this hour, Crito?"
+   },
+   {
+    "id": 1658,
+    "title": "Phaedo",
+    "translator": "Benjamin Jowett",
+    "start": "ECHECRATES: Were you yourself, Phaedo"
+   },
+   {
+    "id": 1600,
+    "title": "Symposium",
+    "translator": "Benjamin Jowett",
+    "start": "Concerning the things about which you ask"
+   },
+   {
+    "id": 1643,
+    "title": "Meno",
+    "translator": "Benjamin Jowett",
+    "start": "MENO: Can you tell me, Socrates, whether virtue"
+   },
+   {
+    "id": 1672,
+    "title": "Gorgias",
+    "translator": "Benjamin Jowett",
+    "start": "CALLICLES: The wise man, as the proverb says"
+   },
+   {
+    "id": 1636,
+    "title": "Phaedrus",
+    "translator": "Benjamin Jowett",
+    "start": "SOCRATES: My dear Phaedrus, whence come you"
+   },
+   {
+    "id": 150,
+    "title": "The Republic",
+    "translator": "Benjamin Jowett",
+    "start": "I WENT down yesterday to the Piraeus"
+   },
+   {
+    "id": 1591,
+    "title": "Protagoras",
+    "translator": "Benjamin Jowett",
+    "start": "COMPANION: Where do you come from, Socrates?"
+   },
+   {
+    "id": 1726,
+    "title": "Theaetetus",
+    "translator": "Benjamin Jowett",
+    "start": "EUCLID: Have you only just arrived"
+   }
+  ],
+  "aliases": [
+   "socrates"
+  ]
+ },
+ "nietzsche": {
+  "name": "Friedrich Nietzsche",
+  "dates": "1844–1900",
+  "works": [
+   {
+    "id": 1998,
+    "title": "Thus Spake Zarathustra",
+    "translator": "Thomas Common",
+    "start": "When Zarathustra was thirty years old",
+    "end": "APPENDIX."
+   },
+   {
+    "id": 4363,
+    "title": "Beyond Good and Evil",
+    "translator": "Helen Zimmern",
+    "start": "SUPPOSING that Truth is a woman"
+   },
+   {
+    "id": 52319,
+    "title": "The Genealogy of Morals",
+    "translator": "Horace B. Samuel",
+    "start": "We are unknown, we knowers"
+   },
+   {
+    "id": 52263,
+    "title": "Twilight of the Idols and The Antichrist",
+    "translator": "Anthony M. Ludovici",
+    "start": "To maintain a cheerful attitude of mind"
+   }
+  ]
+ },
+ "seneca": {
+  "name": "Seneca",
+  "dates": "c. 4 BC–AD 65",
+  "note": "The Letters to Lucilius are not on Project Gutenberg, so they are not in this library.",
+  "works": [
+   {
+    "id": 64576,
+    "title": "Minor Dialogues and On Clemency",
+    "translator": "Aubrey Stewart",
+    "start": "I. You have asked me, Lucilius, why, if the world",
+    "end": "THE END."
+   },
+   {
+    "id": 3794,
+    "title": "On Benefits",
+    "translator": "Aubrey Stewart",
+    "start": "Among the numerous faults of those who pass"
+   }
+  ]
+ },
+ "diogenes": {
+  "name": "Diogenes of Sinope",
+  "dates": "c. 412–323 BC",
+  "note": "Diogenes left no surviving writings. This is Diogenes as Diogenes Laërtius reported him some five centuries later: sayings and anecdotes from tradition, not his own text.",
+  "works": [
+   {
+    "id": 57342,
+    "title": "Life of Diogenes, in Lives of Eminent Philosophers, Book VI",
+    "translator": "C. D. Yonge",
+    "start": "I. Diogenes was a native of Sinope",
+    "end": "LIFE OF MONIMUS."
+   }
+  ]
+ }
+}

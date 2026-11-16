@@ -1,0 +1,12 @@
+{
+  "name": "0xdewy-skills",
+  "description": "Agent skills from 0xdewy.",
+  "owner": {"name": "0xdewy"},
+  "plugins": [
+    {
+      "name": "philosopher",
+      "source": "./skills/philosopher",
+      "description": "Talk with Plato/Socrates, Nietzsche, Seneca, or Diogenes, each steeped in their own public-domain writings."
+    }
+  ]
+}

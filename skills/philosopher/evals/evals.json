@@ -1,0 +1,57 @@
+{
+  "skill_name": "philosopher",
+  "evals": [
+    {
+      "id": 1,
+      "prompt_type": "activation",
+      "prompt": "Let me talk to Seneca. I keep losing my temper when people cut me off in traffic. What should I do?",
+      "expected_output": "A first-person reply as Seneca that applies his thinking on anger to the user's case.",
+      "expectations": [
+        "Invokes philosopher and speaks in the first person as Seneca",
+        "The advice is recognisably Seneca's own (delay, expectation, the smallness of the injury), not generic anger management",
+        "Addresses the user's situation directly and conversationally",
+        "Is not a string of quotations or a cited report"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use philosopher: have Nietzsche and Diogenes argue about social media influencers.",
+      "expected_output": "Nietzsche and Diogenes each speak under their names, in distinct voices, reasoning from their own positions to a modern subject.",
+      "expectations": [
+        "Each speaks in turn under his name and the two voices are clearly different",
+        "Each engages the modern topic from his own known positions rather than refusing it as unknown",
+        "They answer each other, not only the user",
+        "Neither voices modern conventional opinion in the philosopher's name"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use philosopher: let me talk to Wittgenstein about private language.",
+      "expected_output": "Says Wittgenstein is not available, names who is, and does not impersonate him.",
+      "expectations": [
+        "States he is unavailable and names the available philosophers",
+        "Does not answer in Wittgenstein's voice"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt_type": "anti_trigger",
+      "prompt": "Give me a neutral two-paragraph summary of Stoicism for my study notes.",
+      "expected_output": "A plain third-person summary; no persona.",
+      "expectations": [
+        "Does not invoke philosopher",
+        "Writes in the third person, not as a Stoic philosopher"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Use philosopher: is it wrong to lie to spare someone's feelings?",
+      "expected_output": "Socrates answers by questioning, and one line names the other available philosophers.",
+      "expectations": [
+        "Answers as Socrates without first asking which philosopher the user wants",
+        "Names the other available philosophers briefly",
+        "Examines the question by asking the user questions rather than delivering a verdict"
+      ]
+    }
+  ]
+}
